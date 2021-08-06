@@ -9,3 +9,4 @@
 ### **Source Scripts**
 #### main_dataformat.R
 ##### Purpose: Read in, process, and clean up water quality concentration data for tidal tributaries to Great Bay and for estuarine monitoring stations in Great Bay. 
+###### Key final product: "df6" - data frame of organized solute concentrations by date and site, corrected for method detection limits (except for DON concentrations)
