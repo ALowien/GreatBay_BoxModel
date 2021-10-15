@@ -12,6 +12,12 @@
 
   #EMD data files include metadata on each water body of interest, sampling date and time, measured concentrations of nutrients, carbon, total suspended solids, 
     #tidal stage, and physio-chemical parameters. Physio-chemical parameters include snapshot measures of a dissolved oxygen, pH, temperature, and specific conductivity
+  
+  #Sites
+    #05-LMP: LAmprey River (LMP)
+    #09-EXT: Squamscott River (SQR)
+    #09-EXT-DAMMED: Squamscott River pre dam removal in 2016
+    #02-WNC: Winnicut River WNC)
 
 #Load required packages.
 library(readxl)
@@ -40,11 +46,6 @@ AP$START_DATE <- as.Date(AP$START_DATE)
 SQR$START_DATE <- as.Date(SQR$START_DATE)
 WNC$START_DATE <- as.Date(WNC$START_DATE)
 
-#Sites of Interest 
-#Lamprey River (LMP): 05-LMP
-#Adams Point: GRBAP
-#Squamscott River (SQR): 09-EXT (post dam removal) and 09-EXT-DAMMED (pre dam removal)
-#Winnicut River (WNC): 02-WNC
 
 sapply(AP,class) #Method Detection Limit Column is empty for this spreadsheet; returns logical as class by default
 sapply(LMP, class)
