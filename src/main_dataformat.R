@@ -8,7 +8,7 @@
 
 #Data was sourced from the NH Department of Environmental Services, Environmental Monitoring Database (EMD). Data was pulled based on assigned water body IDs.
 
-#Data Dictionary
+#Data Dictionary!
 
   #EMD data files include metadata on each water body of interest, sampling date and time, measured concentrations of nutrients, carbon, total suspended solids, 
     #tidal stage, and physio-chemical parameters. Physio-chemical parameters include snapshot measures of a dissolved oxygen, pH, temperature, and specific conductivity
