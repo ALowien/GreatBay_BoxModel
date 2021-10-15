@@ -121,11 +121,7 @@ unique(df$STATION_ID) #check for 05-LMP, 02-WNC, 09-EXT, and GRBAPH and GRBAPL
 colnames(df)
 
 df <- df %>%
-  select(STATION_ID, WATERBODY_ID, RIVER_NAME, ACTIVITY_TYPE,
-    
-    -LATITUDE_DECIMAL_DEGREE, -LONGITUDE_DECIMAL_DEGREE, - REPLICATE_NUMBER_REFERENCE,
-         -DATA_STATUS, -UPPER_DEPTH, -LOWER_DEPTH, -DEPTH_RANGE_UNITS, - LAB_QUALIFIER,
-         -STATISTIC_TYPE, -SAMPLE_SIZE, -RIVER_NAME, -MEDIUM, -DEPTH_ZONE, -RAIN_PRIOR_3_DAYS)
+  select(STATION_ID, WATERBODY_ID, RIVER_NAME, ACTIVITY_TYPE, START_DATE:FRACTION_TYPE)
 
 colnames(df)
 
@@ -134,173 +130,163 @@ unique(df$RESULT_VALID)
 df %>% count(RESULT_VALID)
 
 #Delete the 119 occurrences where results are not valid 
-df2 <- df %>%
+df <- df %>%
   filter(RESULT_VALID == "Y" | is.na(RESULT_VALID))
 
-#Remove result valid column and filter out unncessary parameters
-df2 <- df2 %>%
+
+#Remove result valid column and filter out unnecessary parameters
+df <- df %>%
   select(-RESULT_VALID) %>%
-  filter(PARAMETER != "CLOSTRIDIUM PERFRINGENS") %>%
-  filter(PARAMETER != "ENTEROCOCCUS") %>%
-  filter(PARAMETER != "ESCHERICHIA COLI") %>%
-  filter(PARAMETER != "TOTAL FECAL COLIFORM") %>%
-  filter(PARAMETER != "WIND DIRECTION") %>%
-  filter(PARAMETER != "WIND VELOCITY") %>%
-  filter(PARAMETER != "SECCHI DISK TRANSPARENCY") %>%
-  filter(PARAMETER != "COLORED DISSOLVED ORGANIC MATTER (CDOM)") %>%
-  filter(PARAMETER != "TURBIDITY") %>%
-  filter(PARAMETER != "DEPTH")
+  filter(PARAMETER_ANALYTE != "CLOSTRIDIUM PERFRINGENS" & PARAMETER_ANALYTE != "ENTEROCOCCUS") %>%
+  filter(PARAMETER_ANALYTE != "ESCHERICHIA COLI" & PARAMETER_ANALYTE != "TOTAL FECAL COLIFORM") %>%
+  filter(PARAMETER_ANALYTE != "WIND DIRECTION" & PARAMETER_ANALYTE  != "WIND VELOCITY" & PARAMETER_ANALYTE != "SECCHI DISK TRANSPARENCY") %>%
+  filter(PARAMETER_ANALYTE != "COLORED DISSOLVED ORGANIC MATTER (CDOM)" & 
+           PARAMETER_ANALYTE != "TURBIDITY" & 
+           PARAMETER_ANALYTE != "DEPTH") %>%
+  filter(PARAMETER_ANALYTE != "TIDE STAGE")
 
-df3 <- df2 
 
-unique(df3$PARAMETER)
+unique(df$PARAMETER_ANALYTE)
 
-df3 %>% count(PARAMETER)
+df %>% count(PARAMETER_ANALYTE)
+
+df <- df %>%
+  select(STATION_ID:ACTIVITY_COMMENTS, PARAMETER = PARAMETER_ANALYTE, QUALIFIER_AND_RESULTS:FRACTION_TYPE)
 
 #Fix the issue where NH DES starting putting NA instead of 1/2 of MDL
-sum(is.na(df3$QUALIFIER_AND_RESULTS)) #22 NAs that should be 1/2 of the MDL
+sum(is.na(df$QUALIFIER_AND_RESULTS)) #22 NAs that should be 1/2 of the MDL
 
-df3$QUALIFIER_AND_RESULTS <- ifelse(is.na(df3$QUALIFIER_AND_RESULTS), df3$RDL/2, df3$QUALIFIER_AND_RESULTS)
+df$QUALIFIER_AND_RESULTS <- ifelse(is.na(df$QUALIFIER_AND_RESULTS), df$RDL/2, df$QUALIFIER_AND_RESULTS)
+
+sum(is.na(df$QUALIFIER_AND_RESULTS)) 
 
 #Figure out Parameter Methods and Rename to clarify
 
 #PHOSPHORUS AS P, fraction type is "Total"; which means PHOSPHORUS samples are TOTAL PHOSPHORUS ("TP")
 
-df3$PARAMETER <- ifelse(df3$PARAMETER == "PHOSPHORUS AS P", "TP", df3$PARAMETER)
+df$PARAMETER <- ifelse(df$PARAMETER == "PHOSPHORUS AS P", "TP", df$PARAMETER)
 
 #PHOSPHORUS, ORTHOPHOSPHATE AS P is PO4 molecule
-df3$PARAMETER <- ifelse(df3$PARAMETER == "PHOSPHORUS, ORTHOPHOSPHATE AS P", "PO4", df3$PARAMETER)
+df$PARAMETER <- ifelse(df$PARAMETER == "PHOSPHORUS, ORTHOPHOSPHATE AS P", "PO4", df$PARAMETER)
 
 #NITROGEN Method is for TOTAL NITROGEN
-df3$PARAMETER <- ifelse(df3$PARAMETER == "NITROGEN", "TN", df3$PARAMETER)
+df$PARAMETER <- ifelse(df$PARAMETER == "NITROGEN", "TN", df$PARAMETER)
 
 #NITROGEN, DISSOLVED is "TOTAL DISSOLVED NITROGEN" (TDN)
-df3$PARAMETER <- ifelse(df3$PARAMETER == "NITROGEN, DISSOLVED", "TDN", df3$PARAMETER)
+df$PARAMETER <- ifelse(df$PARAMETER == "NITROGEN, DISSOLVED", "TDN", df$PARAMETER)
 
 #NITROGEN, AMMONIA as N - is technically ammonium (the method measures ammonia, but there isn't ammonia in streams really)
 #Per conversation with Jody over Slack July 2020
-df3$PARAMETER <- ifelse(df3$PARAMETER == "NITROGEN, AMMONIA AS N", "NH4", df3$PARAMETER)
+df$PARAMETER <- ifelse(df$PARAMETER == "NITROGEN, AMMONIA AS N", "NH4", df$PARAMETER)
 
 #NITROGEN, INORGANIC (AMMONIA, NITRATE AND NITRITE) is Dissolved Inorganic Nitrogen (DIN)
-df3$PARAMETER <- ifelse(df3$PARAMETER == "NITROGEN, INORGANIC (AMMONIA, NITRATE AND NITRITE)", "DIN", df3$PARAMETER)
+df$PARAMETER <- ifelse(df$PARAMETER == "NITROGEN, INORGANIC (AMMONIA, NITRATE AND NITRITE)", "DIN", df$PARAMETER)
 
 #"NITROGEN, NITRITE (NO2) + NITRATE (NO3) AS N"  is NO3+NO2
-df3$PARAMETER <- ifelse(df3$PARAMETER == "NITROGEN, NITRITE (NO2) + NITRATE (NO3) AS N", "NO3_NO2", df3$PARAMETER)
+df$PARAMETER <- ifelse(df$PARAMETER == "NITROGEN, NITRITE (NO2) + NITRATE (NO3) AS N", "NO3_NO2", df$PARAMETER)
 
 #"NITROGEN, NITRITE (NO2) AS N" is really nitrate
-df3$PARAMETER <- ifelse(df3$PARAMETER == "NITROGEN, NITRITE (NO2) AS N", "NO3", df3$PARAMETER)
+df$PARAMETER <- ifelse(df$PARAMETER == "NITROGEN, NITRITE (NO2) AS N", "NO3", df$PARAMETER)
 
 #"NITROGEN, ORGANIC" is DON, calculated as TDN-DIN
-df3$PARAMETER <- ifelse(df3$PARAMETER == "NITROGEN, ORGANIC", "DON", df3$PARAMETER)
+df$PARAMETER <- ifelse(df$PARAMETER == "NITROGEN, ORGANIC", "DON", df$PARAMETER)
 
 #NITROGEN, SUSPENDED is Particulate N
-df3$PARAMETER <- ifelse(df3$PARAMETER == "NITROGEN, SUSPENDED", "PN", df3$PARAMETER)
+df$PARAMETER <- ifelse(df$PARAMETER == "NITROGEN, SUSPENDED", "PN", df$PARAMETER)
 
 #Carbon, SUSPENDED is Particulate Carbon
-df3$PARAMETER <- ifelse(df3$PARAMETER == "CARBON, SUSPENDED", "PC", df3$PARAMETER)
+df$PARAMETER <- ifelse(df$PARAMETER == "CARBON, SUSPENDED", "PC", df$PARAMETER)
 
 #CARBON, ORGANIC is Dissolved Organic Carbon
-df3$PARAMETER <- ifelse(df3$PARAMETER == "CARBON, ORGANIC", "DOC", df3$PARAMETER)
+df$PARAMETER <- ifelse(df$PARAMETER == "CARBON, ORGANIC", "DOC", df$PARAMETER)
 
 #Misc. condensing of Parameter Names to eliminate spaces
-df3$PARAMETER <- ifelse(df3$PARAMETER == "LIGHT ATTENUATION COEFFICIENT", "Light_Atten_Coeff", 
-                               ifelse(df3$PARAMETER == "DISSOLVED OXYGEN SATURATION", "DO_sat", 
-                                      ifelse(df3$PARAMETER == "TEMPERATURE WATER", "Temp_Water", df3$PARAMETER)))
+df$PARAMETER <- ifelse(df$PARAMETER == "LIGHT ATTENUATION COEFFICIENT", "Light_Atten_Coeff", 
+                               ifelse(df$PARAMETER == "DISSOLVED OXYGEN SATURATION", "DO_sat", 
+                                      ifelse(df$PARAMETER == "TEMPERATURE WATER", "Temp_Water", df$PARAMETER)))
 
-df3$PARAMETER <- ifelse(df3$PARAMETER == "SPECIFIC CONDUCTANCE", "SPC", 
-                        ifelse(df3$PARAMETER == "DISSOLVED OXYGEN", "DO", 
-                               ifelse(df3$PARAMETER == "SOLIDS, SUSPENDED", "TSS", 
-                                      ifelse(df3$PARAMETER == "TIDE STAGE", "Tide_Stage", df3$PARAMETER))))
+df$PARAMETER <- ifelse(df$PARAMETER == "SPECIFIC CONDUCTANCE", "SPC", 
+                        ifelse(df$PARAMETER == "DISSOLVED OXYGEN", "DO", 
+                               ifelse(df$PARAMETER == "SOLIDS, SUSPENDED", "TSS", 
+                                      ifelse(df$PARAMETER == "TIDE STAGE", "Tide_Stage", df$PARAMETER))))
 
-df3$PARAMETER <- ifelse(df3$PARAMETER == "CHLOROPHYLL A, CORRECTED FOR PHEOPHYTIN", "CHLA_corrected_pheophytin",
-                        ifelse(df3$PARAMETER == "SILICA AS SIO2", "SIO2", df3$PARAMETER))
+df$PARAMETER <- ifelse(df$PARAMETER == "CHLOROPHYLL A, CORRECTED FOR PHEOPHYTIN", "CHLA_corrected_pheophytin",
+                        ifelse(df$PARAMETER == "SILICA AS SIO2", "SIO2", df$PARAMETER))
                       
-unique(df3$PARAMETER)
+unique(df$PARAMETER)
 
 #Look at fraction types measured
-unique(df3$FRACTION_TYPE)
+unique(df$FRACTION_TYPE)
 
-df3 %>% count(FRACTION_TYPE)
+df %>% count(FRACTION_TYPE)
 
 #6 samples measured for Volatile Solids at 09-EXT-DAMMED; not needed
-df3 <- df3 %>%
+df <- df %>%
   filter(FRACTION_TYPE == "DISSOLVED" | FRACTION_TYPE == "SUSPENDED" | FRACTION_TYPE == "TOTAL" | is.na(FRACTION_TYPE))
 
-
-#Not going to worry too much about FRACTION, and instead go off of method and parameter to check solutes
-
-#Combine columns so that it becomes easier to convert dataframe from "long" to "wide"
-df3 %>% count(DEPTH_UNITS) # only meters (M) or NA, so can combine depth and depth units into one column
-
-names(df3)[names(df3)=="DEPTH"] <- "Depth_m"
-#Remove DEPTH UNITS Column
-
-df3 <- df3 %>%
-  select(-DEPTH_UNITS)
-
 #Combine Analytical Method and Source Method ID columns
-df3 <- df3 %>%
+df <- df %>%
   unite("Analytical_Method", ANALYTICAL_METHOD_SOURCE_ID:ANALYTICAL_METHOD, sep = "_")
 
 #Combine detection limit and comments columns
-df3 %>% count(DETECTION_LIMIT_COMMENTS)
-df3 <- df3 %>%
+df %>% count(DETECTION_LIMIT_COMMENTS)
+df <- df %>%
   unite("Result_DL", RDL:DETECTION_LIMIT_COMMENTS, na.rm=TRUE, sep = "_")
 
-df3 %>% count(Result_DL)
+df %>% count(Result_DL)
 
 ### END RESOLVE VARIABLE AND COLUMN HEADER NAMES ###
 #### Tidy Results (saved intermediate step)####
 
 #Remove additional columns, now that we've filtered down to desired project and sites
-df4 <- df3 %>%
+df <- df %>%
   select(-WATERBODY_ID, -SAMPLE_COLLECTION_METHOD_ID)
 
 #Activity Comments Review and Assessment
-unique(df4$ACTIVITY_COMMENTS) #Activity Comments are mostly UNH IDs and weather at GRBAP - removal of column for purposes of solute analysis is OK
+unique(df$ACTIVITY_COMMENTS) #Activity Comments are mostly UNH IDs and weather at GRBAP - removal of column for purposes of solute analysis is OK
 
-unique(df4$ACTIVITY_TYPE) # Removing duplicates to see if that fixes spread issue)
+unique(df$ACTIVITY_TYPE) # Removing duplicates to see if that fixes spread issue)
 
-df4 <- df4 %>%
+df <- df %>%
   select(-ACTIVITY_COMMENTS, - FRACTION_TYPE) %>%
   filter(ACTIVITY_TYPE == "SAMPLE - ROUTINE")
 
 #How many instances of each parameter being measured?
-df4_count <- df4%>% count(df4$PARAMETER)
+df_count <- df%>% count(df$PARAMETER)
 
 #Get ride of "<" from the QUALIFIER AND RESULTS Column
-df4$RESULTS_clean <- stringr::str_replace(df4$QUALIFIER_AND_RESULTS, '\\<', '')
+df$RESULTS_clean <- stringr::str_replace(df$QUALIFIER_AND_RESULTS, '\\<', '')
 
 #ID those 226 rows that had an "<" so that we know the value is less than the detection limit
-df4 <- df4 %>% 
+df <- df %>% 
   mutate(DETECTION_LIMIT = if_else(str_starts(QUALIFIER_AND_RESULTS, "<"), "BELOW", "NA")) #Below == "<"
 
-df4 %>% count(df4$DETECTION_LIMIT) #226 occurrences where measurement is recorded as being less than/equal to instrument detection limit
+df %>% count(df$DETECTION_LIMIT) #226 occurrences where measurement is recorded as being less than/equal to instrument detection limit
 
-df4$RESULTS_clean <- as.numeric(df4$RESULTS_clean) # this converts everything to numbers
+df$RESULTS_clean <- as.numeric(df$RESULTS_clean) # this converts everything to numbers
 
 #If result is below detection limit, set to 1/2 of detection limit
 #226 results that are below detection limit
 
-df4$RESULT <- ifelse(df4$DETECTION_LIMIT == "BELOW", df4$RESULTS_clean / 2, df4$RESULTS_clean)
+df$RESULT <- ifelse(df$DETECTION_LIMIT == "BELOW", df$RESULTS_clean / 2, df$RESULTS_clean)
 
 #Compare results to results_clean
-df4$Results_Comp <- df4$RESULTS_clean - df4$RESULT
+df$Results_Comp <- df$RESULTS_clean - df$RESULT
 
-#saving df4 as an intermediate step; 
+#saving df as an intermediate step; 
 #at this point dataframe character issues are resolved and results below MDL are set to 1/2 the MDL
-write.csv(df4, "results/main_dataformat/df4.csv")
+write.csv(df, "results/main_dataformat/df.csv")
 ### END TIDY RESULTS ###
 #_____________________________________________________________________________________________________________
 
 #### Convert Dataframe from Long to Wide ####
-df4 <- read.csv("results/main_dataformat/df4.csv")
+df <- read.csv("results/main_dataformat/df.csv")
 
-df4 <- df4 %>%
+df <- df %>%
   select(-X)
 
 #Thin out to columns necessary for converting from long to wide
-df5 <- df4 %>%
+df5 <- df %>%
   select(STATION_ID, START_DATE, PARAMETER, UNITS, RESULT) %>%
   unite("PARAMETER", PARAMETER:UNITS, sep= "_")
 
