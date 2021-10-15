@@ -96,6 +96,12 @@ df$STATION_ID <- ifelse(!is.na(df$STATION_ID.y), df$STATION_ID.y, df$STATION_ID.
 df <- df %>%
   select(-STATION_ID.x, -STATION_ID.y)
 
+#Couple of missing High and Low Tide IDS
+df$STATION_ID <- ifelse(df$START_DATE == "2008-06-11" & df$START_TIME == "09:35", "GRBAPH",
+                            ifelse(df$START_DATE == "2009-06-29" & df$START_TIME == "08:31", "GRBAPL", 
+                                   ifelse(df$START_DATE == "2009-07-13" & df$START_TIME == "14:17", "GRBAPH",
+                                          ifelse(df$START_DATE == "2011-08-22" & df$START_TIME == "07:10", "GRBAPH", df$STATION_ID))))
+
 colnames(df)
 
 ### END Import DES Data ###
