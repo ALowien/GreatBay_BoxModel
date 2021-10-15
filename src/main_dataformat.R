@@ -1,12 +1,14 @@
 # main_dataformat.R
+# Biogeochemical Stressors and Ecological Response in Great Bay Estuary
 
 # Author: Anna Lowien, University of New Hampshire
-# Last Updated: 8/6/2021
+# Last Updated: 10/15/2021
 
 # Purpose: Read and process raw solute concentration data for the three tidal tributaries (head-of-tide monitoring stations) that flow into Great Bay.
-  # Also, processes raw solute concentrations from the estuary, at Adams Point (high and low tide).
+  # Also processes raw solute concentrations from the estuary, at Adams Point (high and low tide).
 
-#Data was sourced from the NH Department of Environmental Services, Environmental Monitoring Database (EMD). Data was pulled based on assigned water body IDs.
+# Data was sourced from the NH Department of Environmental Services, Environmental Monitoring Database (EMD). 
+# Data was pulled for grab samples and physical chemistry based on assigned water body IDs.
 
 #Data Dictionary
 
@@ -14,10 +16,11 @@
     #tidal stage, and physio-chemical parameters. Physio-chemical parameters include snapshot measures of a dissolved oxygen, pH, temperature, and specific conductivity
   
   #Sites
-    #05-LMP: LAmprey River (LMP)
+    #05-LMP: Lamprey River (LMP)
     #09-EXT: Squamscott River (SQR)
     #09-EXT-DAMMED: Squamscott River pre dam removal in 2016
     #02-WNC: Winnicut River WNC)
+    #GRBAP: Great Bay Adams Point (Estuarine Monitoring Site)
 
 #Load required packages.
 library(readxl)
@@ -33,89 +36,69 @@ library(measurements)
 library(viridis)
 library(moments)
 
-# Initial Data Exploration ------------------------------------------------
-#Read in the thinned out excel files from NHDES EMD
-LMP <- read_excel("data/original_files/031020_Lamprey_Tidal_Trib.xlsx", guess_max = 40000) #Lamprey River (Site ID: 05-LMP)
-WNC <- read_excel("data/original_files/043020_Winnicut_Tidal_Trib.xlsx", guess_max = 10000) #Winnicut River (Site ID: 02-WNC)
-SQR <- read_excel("data/original_files/101220_Squamscott_Dammed.xlsx", guess_max = 3500) #Squamscott River (Site ID: 09-EXT)
-AP <- read_excel("data/original_files/043020_AdamsPoint.xlsx", guess_max = 55800) #Adams Point (GRBAP) (high + low tide)
+# Import DES Site Data ------------------------------------------------
+#Files have been amended to put colnames as the first row.
+library(readxl)
+subdir <- "data/original_files/Original_EMD"
+files <- list.files(path = subdir, pattern = ".xlsx", full.names = T)  
+df.list <- lapply(files, read_excel)
 
-#Fix class of date column
-LMP$START_DATE <- as.Date(LMP$START_DATE)
-AP$START_DATE <- as.Date(AP$START_DATE)
-SQR$START_DATE <- as.Date(SQR$START_DATE)
-WNC$START_DATE <- as.Date(WNC$START_DATE)
+library(dplyr)
+df <- bind_rows(df.list)
 
+unique(df$'STATION ID')
+colnames(df)
 
-sapply(AP,class) #Method Detection Limit Column is empty for this spreadsheet; returns logical as class by default
-sapply(LMP, class)
-sapply(WNC, class)
-sapply(SQR,class)
+#Replace spaces in colnames with "_"
+names(df) <- gsub(" ", "_", names(df))
+names(df) <- gsub("/", "_", names(df))
+#Convert START_DATE column to date class
+df$START_DATE <- as.Date(df$START_DATE)
 
-#TIDALWQ is the project name for PREP sample collection at monthly time-step
-LMP <- LMP %>%
-  filter(STATION_ID == "05-LMP") %>%
-  filter(SAMPLE_COLLECTION_METHOD_ID == "TIDALWQ") %>%
-  filter(START_DATE > "2008-01-01") #filter for time period of interest
-
-AP <- AP %>%
-  filter(STATION_ID == "GRBAP") %>%
-  filter(SAMPLE_COLLECTION_METHOD_ID == "TIDALWQ") %>%
+#Select for columns of interest; filter for sites of interest
+df <- df %>%
+  select(STATION_ID:SAMPLE_SIZE) %>%
+  filter(STATION_ID == "05-LMP" | STATION_ID == "02-WNC" | STATION_ID == "09-EXT" | STATION_ID == "09-EXT-DAMMED" |
+           STATION_ID == "GRBAP") %>%
+  filter(SAMPLE_COLLECTION_METHOD_ID == "TIDALWQ") %>% #Project Name for Tidal Tribs and Adams Point Sampling
   filter(START_DATE > "2008-01-01")
 
-AP_Tide <- AP %>%
-  select(STATION_ID, START_DATE, START_TIME, PARAMETER, QUALIFIER_AND_RESULTS) %>%
-  filter(PARAMETER == "TIDE STAGE")
+unique(df$STATION_ID)
+
+AP_Tide <- df %>%
+  select(STATION_ID, START_DATE, START_TIME, PARAMETER_ANALYTE, QUALIFIER_AND_RESULTS) %>%
+  filter(STATION_ID == "GRBAP") %>%
+  filter(PARAMETER_ANALYTE == "TIDE STAGE") %>%
+  filter(!is.na(QUALIFIER_AND_RESULTS))
 
 #Fix "Tide Stage" PARAMETER To be either High or Low Tide
-AP_Tide$QUALIFIER_AND_RESULTS <- ifelse(AP_Tide$PARAMETER == "TIDE STAGE" & AP_Tide$QUALIFIER_AND_RESULTS == "EBB", "LOW", AP_Tide$QUALIFIER_AND_RESULTS)
-AP_Tide$QUALIFIER_AND_RESULTS <- ifelse(AP_Tide$PARAMETER == "TIDE STAGE" & AP_Tide$QUALIFIER_AND_RESULTS == "FLOOD", "HIGH", AP_Tide$QUALIFIER_AND_RESULTS)
+AP_Tide$QUALIFIER_AND_RESULTS <- ifelse(AP_Tide$PARAMETER_ANALYTE == "TIDE STAGE" & AP_Tide$QUALIFIER_AND_RESULTS == "EBB", "LOW", AP_Tide$QUALIFIER_AND_RESULTS)
+AP_Tide$QUALIFIER_AND_RESULTS <- ifelse(AP_Tide$PARAMETER_ANALYTE == "TIDE STAGE" & AP_Tide$QUALIFIER_AND_RESULTS == "FLOOD", "HIGH", AP_Tide$QUALIFIER_AND_RESULTS)
 
 AP_Tide <- AP_Tide %>%
-  select(-PARAMETER)
+  select(-PARAMETER_ANALYTE)
 
-#Rename STATION ID based on high/low tide
+#Rename Great Bay Adams Point (GRBAP) STATION ID based on high/low tide
 AP_Tide$STATION_ID <- ifelse(AP_Tide$QUALIFIER_AND_RESULTS == "LOW", "GRBAPL", "GRBAPH")
 
 #Remove duplicates
-deduped.APTIDE <- unique( AP_Tide[ , 1:4 ] )
+deduped.APTIDE <- AP_Tide[!duplicated(AP_Tide[,1:4]),]
 
 deduped.APTIDE <- deduped.APTIDE %>%
   select(-QUALIFIER_AND_RESULTS)
 
-#Join Adams Point df with the Adams Point Tide Stage df
+#Join df with deduped.APTIDE
 #Replace Station ID in AP data frame
-AP_new <- left_join(AP, deduped.APTIDE, by = c("START_DATE", "START_TIME"))
+df <- left_join(df, deduped.APTIDE, by = c("START_DATE", "START_TIME"))
 
-AP_new$STATION_ID <- AP_new$STATION_ID.y
+df$STATION_ID <- ifelse(!is.na(df$STATION_ID.y), df$STATION_ID.y, df$STATION_ID.x) 
 
-AP_new <- AP_new %>%
-  select(-STATION_ID.x, -STATION_ID.y, STATION_ID, LATITUDE_DECIMAL_DEGREE:SAMPLE_SIZE)
-
-#Couple of missing High and Low Tide IDS
-AP_new$STATION_ID <- ifelse(AP_new$START_DATE == "2008-06-11" & AP_new$START_TIME == "09:35", "GRBAPH",
-                            ifelse(AP_new$START_DATE == "2009-06-29" & AP_new$START_TIME == "08:31", "GRBAPL", 
-                                   ifelse(AP_new$START_DATE == "2009-07-13" & AP_new$START_TIME == "14:17", "GRBAPH",
-                                          ifelse(AP_new$START_DATE == "2011-08-22" & AP_new$START_TIME == "07:10", "GRBAPH", AP_new$STATION_ID))))
-
-
-SQR <- SQR %>%
-  filter(SAMPLE_COLLECTION_METHOD_ID == "TIDALWQ") %>%
-  filter(START_DATE > "2008-01-01")
-
-WNC <- WNC %>%
-  filter(STATION_ID == "02-WNC") %>%
-  filter(SAMPLE_COLLECTION_METHOD_ID == "TIDALWQ") %>%
-  filter(START_DATE > "2008-01-01")
-
-#Merge sites into one data frame
-df <- full_join(LMP, AP_new)
-df <- full_join(df, SQR)
-df <- full_join(df, WNC)
+df <- df %>%
+  select(-STATION_ID.x, -STATION_ID.y)
 
 colnames(df)
 
-### END Initial Data Exploration ###
+### END Import DES Data ###
 #### Resolve Variable and Column Header Names ####
 
 #Fix columns that aren't numeric, but should be
@@ -126,11 +109,15 @@ df$METHOD_DETECTION_LIMIT <- as.numeric(df$METHOD_DETECTION_LIMIT)
 #Fix station ID names, 09-EXT and 09-EXT-DAMMED are the same site, but differ over time
 df$STATION_ID <- ifelse(df$STATION_ID == "09-EXT-DAMMED", "09-EXT", df$STATION_ID)
 
-unique(df$STATION_ID)
+unique(df$STATION_ID) #check for 05-LMP, 02-WNC, 09-EXT, and GRBAPH and GRBAPL
 
-#Removing blank/unneccesary columns from data frame
+#Removing blank/unnecessary columns from data frame
+colnames(df)
+
 df <- df %>%
-  select(-LATITUDE_DECIMAL_DEGREE, -LONGITUDE_DECIMAL_DEGREE, - REPLICATE_NUMBER_REFERENCE,
+  select(STATION_ID, WATERBODY_ID, RIVER_NAME, ACTIVITY_TYPE,
+    
+    -LATITUDE_DECIMAL_DEGREE, -LONGITUDE_DECIMAL_DEGREE, - REPLICATE_NUMBER_REFERENCE,
          -DATA_STATUS, -UPPER_DEPTH, -LOWER_DEPTH, -DEPTH_RANGE_UNITS, - LAB_QUALIFIER,
          -STATISTIC_TYPE, -SAMPLE_SIZE, -RIVER_NAME, -MEDIUM, -DEPTH_ZONE, -RAIN_PRIOR_3_DAYS)
 
