@@ -2,10 +2,11 @@
 # Biogeochemical Stressors and Ecological Response in Great Bay Estuary
 
 # Author: Anna Lowien, University of New Hampshire
-# Last Updated: 10/15/2021
+# Last Updated: 11/15/2021
 
 # Purpose: Read and process raw solute concentration data for the three tidal tributaries (head-of-tide monitoring stations) that flow into Great Bay.
-  # Also processes raw solute concentrations from the estuary, at Adams Point (high and low tide).
+  # Also process raw solute concentrations from the estuary, at Adams Point (high and low tide). Prepare discharge data for flux calculations.
+  # Create physiochemical parameter appendix tables. 
 
 # Data was sourced from the NH Department of Environmental Services, Environmental Monitoring Database (EMD). 
 # Data was pulled for grab samples and physical chemistry based on assigned water body IDs.
@@ -19,7 +20,7 @@
     #05-LMP: Lamprey River (LMP)
     #09-EXT: Squamscott River (SQR)
     #09-EXT-DAMMED: Squamscott River pre dam removal in 2016
-    #02-WNC: Winnicut River WNC)
+    #02-WNC: Winnicut River (WNC)
     #GRBAP: Great Bay Adams Point (Estuarine Monitoring Site)
 
 #Load required packages.
@@ -55,7 +56,7 @@ names(df) <- gsub("/", "_", names(df))
 #Convert START_DATE column to date class
 df$START_DATE <- as.Date(df$START_DATE)
 
-#Select for columns of interest; filter for sites of interest
+#Select for columns of interest; filter for sites of interest and time period of interest
 df <- df %>%
   select(STATION_ID:SAMPLE_SIZE) %>%
   filter(STATION_ID == "05-LMP" | STATION_ID == "02-WNC" | STATION_ID == "09-EXT" | STATION_ID == "09-EXT-DAMMED" |
@@ -65,6 +66,7 @@ df <- df %>%
 
 unique(df$STATION_ID)
 
+#Distinguish GRBAP sampling by low and high tide events
 AP_Tide <- df %>%
   select(STATION_ID, START_DATE, START_TIME, PARAMETER_ANALYTE, QUALIFIER_AND_RESULTS) %>%
   filter(STATION_ID == "GRBAP") %>%
@@ -360,7 +362,7 @@ colnames(df6)
 df6 <- df6 %>%
   select(STATION_ID, START_DATE, TP_UGL, PO4_UGL, PN_MGL, TN_MGL, TDN_MGL, NH4_UGL, NO3_MGL, NO3_NO2_MGL, DIN_MGL, 
          DON_MGL, DOC_MGL, PC_MGL, SIO2_MGL, TSS_MGL:DO_sat, DO_MGL, SPC_UMHO_CM, SALINITY_PSS, TEMP_WATER_DEGC, CHLA_corr_pheo_UGL,
-         PHEOPHYTIN_A_UGL, Light_Attten_1_m, Tide_Stage)
+         PHEOPHYTIN_A_UGL, Light_Attten_1_m)
 
 
 df6$TP_MGL <- conv_unit(df6$TP_UGL, "ug", "mg")
@@ -371,7 +373,7 @@ df6$NH4_MGL <- conv_unit(df6$NH4_UGL, "ug", "mg")
 df6 <- df6 %>%
   select(STATION_ID, START_DATE, TP_MGL, PO4_MGL, PN_MGL, TN_MGL, TDN_MGL, NH4_MGL, NO3_MGL, NO3_NO2_MGL, DIN_MGL, 
          DON_MGL, DOC_MGL, PC_MGL, SIO2_MGL, TSS_MGL:DO_sat, DO_MGL, SPC_UMHO_CM, SALINITY_PSS, TEMP_WATER_DEGC, CHLA_corr_pheo_UGL,
-         PHEOPHYTIN_A_UGL, Light_Attten_1_m, Tide_Stage)
+         PHEOPHYTIN_A_UGL, Light_Attten_1_m)
 
 #Summarize physicochemical parameter columns for Appendix Tables
 df6_DO <- df6 %>%
@@ -404,7 +406,7 @@ df6$DON_MGL_calc_final <- ifelse(df6$DON_MGL_calc < df6$DON_MDL, df6$DON_MDL/2, 
 
 
 df6 <- df6 %>%
-  select(STATION_ID:NO3_NO2_MGL, DIN_MGL = DIN_MGL_calc, DON_MGL = DON_MGL_calc_final, DOC_MGL:Tide_Stage)
+  select(STATION_ID:NO3_NO2_MGL, DIN_MGL = DIN_MGL_calc, DON_MGL = DON_MGL_calc_final, DOC_MGL:Light_Attten_1_m)
 #this is now corrected for MDLs across all solutes
 
 ### END Convert Dataframe from Long to Wide ###
