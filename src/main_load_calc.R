@@ -1,9 +1,9 @@
 #main_load_calc.R
 
 #Author: Anna Lowien, University of New Hampshire
-#Last Updated: 8/11/2021
+#Last Updated: 11/15/2021
 
-#This script calculates annual (CY and WY) and monthly loads for the three tidal tributaries to Great Bay.
+#This script calculates annual (CY and WY) and monthly loads for the three tidal tributaries (Lamprey, Squamscott, and Winnicut) to Great Bay.
 
 #Load libraries needed
 library(readxl)
@@ -20,7 +20,8 @@ library(gridExtra)
 library(viridis)
 library(tidyr)
 
-#Read in cleaned up df6 data frame from the main_dataformat.R script 
+#Read in cleaned up df6 data frame from the main_dataformat.R script
+  #Saved in results/main_dataformat
 #df6 is tidal tributary solute concentrations over time
 #df6 includes site id, sample collection date, solute concentrations, and water chemistry (pH, DO)
 conc <- read.csv("results/main_dataformat/df6.csv")
@@ -37,7 +38,8 @@ conc_sub <- conc %>%
   select(STATION_ID:TSS_MGL, Month, Year) %>%
   select(-NO3_MGL, -SIO2_MGL, -PC_MGL) #delete NO3, SiO2, and PC columns b/c they are empty 
 
-#_______________________________________________
+#___________________________________________________________________
+#______________________________________________________________________
 #Read in discharge data frame created in main_dataformat.R
 Q <- read.csv("results/main_dataformat/Q_tidal_tribs.csv")
 
@@ -45,11 +47,8 @@ Q <- Q %>% #flow is daily mean Q in m^3/s
   select(STATION_ID, datetime, flow)
 
 Q$datetime <- as.POSIXct(Q$datetime) #fix class of date column
-
 #_________________________________________________________________________________________________________________________
 #___________________________________________________________________________________________________________________________
-#______________________________________________________________________________________________________________________________
-#Use db.union function from RiverLoad package, but will calculate fluxes independently of package
 
 #Separate concentration and flow data by Station IDs to facilitate correct union of conc and flow
 #Separate out Lamprey River Flow and Solute Concentrations 
@@ -119,12 +118,12 @@ union.WNC <- db.union(flow.WNC, conc.WNC)
 write.csv(union.WNC, "results/main_load_calc/union.WNC.csv") #Saving a file of Q+WNC concentrations saved together
 
 #Flow_Multipliers to resolve difference in location b/t stream gauge and head-of-tide
+#These are calculated as the ratio of watershed area to watershed area at the stream gauge
 LMP_Flow_Multiplier <- 1.145435
 SQR_Flow_Multiplier <- 1.683529
 WNC_Flow_Multiplier <- 1.005443
 
 # Flow Weighted Load Calculations Lamprey River (05-LMP) (ANNUAL (CY and WY) ESTIMATES) ----------------------
-
 #ANNUAL ESTIMATE (CY)
 #WATER YEAR ESTIMATE (WY)
 
