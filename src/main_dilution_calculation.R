@@ -155,7 +155,7 @@ dec_wnc_mean$site <- "wnc"
 dec_river <- full_join(dec_lmp_mean, dec_sqr_mean)
 dec_river <- full_join(dec_river, dec_wnc_mean)
 
-write.csv(dec_river, "results/dec_river.csv")
+write.csv(dec_river, "results/main_dilution_calculation/dec_river.csv")
 
 #LMP average FW concentration: 0.436367 mg/L
 #LMP average Q:8.9263006m3/s
