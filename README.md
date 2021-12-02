@@ -13,3 +13,24 @@
 
 #### main_load_calc.R
 ##### Purpose: Calculate flow-weighted annual (calendar year and water year) and monthly solute loads for the three tidal tributaries of Great Bay (Lamprey, Squamscott, & Winnicut). 
+
+#### main_estuarine_load_calc.R
+##### Purpose: Calculates high and low tide flux of solutes based on river input of freshwater and known tidal prism
+
+#### main_precipitation_format.R
+##### Purpose: Calculates precipitation-weighted concentrations for precipitation over Great Bay estuary.
+
+#### main_runoff.R
+##### Purpose: Estimates load from coastal runoff based on Lamprey River loads and watershed areas.
+
+#### main_wwtf_format.R
+##### Purpose: Combines wastewater treatment facility water flux with concentration data for TN, DIN, and TSS into wastewater treatment loads for facilities downstream of the tidal tributary monitoring stations. C and P fluxes were estimated using C:N:P ratios for the epping wastewater treatment facility.
+
+#### main_dilution_calculation.R
+##### Purpose: Exercise to see what we would expect the N concentration in Great Bay to be if the rivers were the only N source. How much does the river load dilute once in the estuary?
+
+#### main_compile_inputs.R
+##### Purpose: Combine input loads and output loads into one dataframe, calculate delta storage terms.
+
+#### main_plot_annual_budgets.R
+##### Purpose: Plot annual solute budget inputs, outputs, and delta storage terms.
