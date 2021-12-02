@@ -83,7 +83,7 @@ Q_daily <- Q %>%
   group_by(START_DATE) %>%
   summarise(m3_day = sum(m3_day_fm)) #sum of flow multiplied daily Q
 
-#write.csv(Q_daily, "results/AP_Flux/Total_Q_day.csv")
+write.csv(Q_daily, "results/main_estuarine_load_calc/total_q_day.csv")
 
 #Join salinity data with discharge as m3/s or m3/day but not summed across rivers
 Salinity <- full_join(AP_salinity, Q)
