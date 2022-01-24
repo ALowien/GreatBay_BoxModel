@@ -5,20 +5,10 @@
 
 #This script calculates annual (CY and WY) and monthly loads for the three tidal tributaries (Lamprey, Squamscott, and Winnicut) to Great Bay.
 
-#Load libraries needed
-library(readxl)
-library(dplyr)
-library(ggplot2)
-library(measurements)
-library(plotly)
-library(RiverLoad)
-library(lubridate)
-library(cowplot)
-library(ggpubr)
-library(dataRetrieval)
-library(gridExtra)
-library(viridis)
-library(tidyr)
+#Load required packages.
+Packages <- c("readxl", "dplyr", "ggplot2", "measurements", "plotly", "lubridate",
+              "cowplot", "ggpubr", "dataRetrieval", "gridExtra", "tidyr", "viridis", "RiverLoad")
+lapply(Packages, library, character.only = TRUE)
 
 #Read in cleaned up df6 data frame from the main_dataformat.R script
   #Saved in results/main_dataformat
