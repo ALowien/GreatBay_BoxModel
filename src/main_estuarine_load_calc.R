@@ -1,32 +1,27 @@
 #main_estuarine_load_calc.R
 
 #Author: Anna Lowien, University of New Hampshire
-#Last Updated 11/15/2021
+#Last Updated 1/24/2022
 
-#Calculates high and low tide flux of solutes based on river input of freshwater and known tidal prism
+#Purpose: Calculates high and low tide flux of solutes based on river input of freshwater and known tidal prism
 
-library(dplyr)
-library(lubridate)
-library(tidyr)
-library(ggplot2)
-library(plotly)
-library(cowplot)
-library(viridis)
-library(zoo)
-library(car)
-library(agricolae)
-library(measurements)
+Packages <- c("readr", "dplyr", "lubridate", "ggplot2", "cowplot", 
+              "tidyr","viridis",  "plotly", "measurements", "zoo", "car", "agricolae")
+
+lapply(Packages, library, character.only = TRUE)
+
 
 #Great Bay Tidal Prism
 #Tidal Prism: Volume of water in an estuary b/t mean high tide and mean low tide
 
 #Great Bay Estuary has a tidal prism of 79*10^6 m3/day
-  #Since two tidal cycles per day - 178*10^6 m3/day enters and leaves
+  #Since two tidal cycles per day = 178*10^6 m3/day enters and leaves
 
 #Scale estuary prism to the Great Bay prism using ratio of surface area at high tide
 #Great Bay: Great Bay Estuary = 16.7km^2:54.66km^2
 GB_Prism_m3day <- 55180000
 GB_Prism_m3_year <- GB_Prism_m3day * 365
+
 #Load formatted data frame "df6" and filter for Adams Point Stations
 AP <- read.csv("results/main_dataformat/df6.csv") %>%
   select(-X, -pH, -SPC_UMHO_CM, -TP_MGL, -NO3_MGL) %>% #Tide Stage was used to renname GRBAP to High or Low Tide
