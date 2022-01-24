@@ -2,7 +2,7 @@
 # Biogeochemical Stressors and Ecological Response in Great Bay Estuary
 
 # Author: Anna Lowien, University of New Hampshire
-# Last Updated: 11/15/2021
+# Last Updated: 1/24/2022
 
 # Purpose: Read and process raw solute concentration data for the three tidal tributaries (head-of-tide monitoring stations) that flow into Great Bay.
   # Also process raw solute concentrations from the estuary, at Adams Point (high and low tide). Prepare discharge data for flux calculations.
@@ -412,8 +412,8 @@ df6 <- df6 %>%
   mutate(TSS_MGL = ifelse(START_DATE == "2008-11-25" & STATION_ID == "GRBAPL", NA, TSS_MGL)) %>%
   mutate(TSS_MGL = ifelse(START_DATE == "2012-01-30" & STATION_ID == "GRBAPL", NA, TSS_MGL))
   
-skewness(df6$TSS_MGL, na.rm=T)
-kurtosis(df6$TSS_MGL, na.rm=T)
+skewness(df6$TSS_MGL)
+kurtosis(df6$TSS_MGL)
 
 #See how many months in given year are sampled at eah site
 df6$Month <- month(df6$START_DATE)
