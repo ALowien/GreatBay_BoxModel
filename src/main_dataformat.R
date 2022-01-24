@@ -24,27 +24,19 @@
     #GRBAP: Great Bay Adams Point (Estuarine Monitoring Site)
 
 #Load required packages.
-library(readxl)
-library(dplyr)
-library(ggplot2)
-library(tidyquant)
-library(cowplot)
-library(RColorBrewer)
-library(tidyr)
-library(stringr)
-library(plotly)
-library(measurements)
-library(viridis)
-library(moments)
+
+Packages <- c("readxl", "dplyr", "ggplot2", "tidyquant", "cowplot", "RColorBrewer",
+              "tidyr","stringr",  "plotly", "measurements", "viridis", "moments")
+
+lapply(Packages, library, character.only = TRUE)
+
 
 # Import DES Site Data ------------------------------------------------
-#Files have been amended to put colnames as the first row.
-library(readxl)
+#Files have been amended to put columns names as the first row.
 subdir <- "data/original_files/Original_EMD"
 files <- list.files(path = subdir, pattern = ".xlsx", full.names = T)  
 df.list <- lapply(files, read_excel)
 
-library(dplyr)
 df <- bind_rows(df.list)
 
 unique(df$'STATION ID')
