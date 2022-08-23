@@ -1,7 +1,7 @@
 #main_runoff.R
 
 #Author: Anna Lowien, University of New Hampshire
-#Last Updated: 11/30/2021
+#Last Updated: 8/23/2022
 
 #Purpose: Estimate load from coastal runoff using Lamprey concentrations and coastal watershed area
 
@@ -42,7 +42,7 @@ GRB_CR <- GRB_CR %>%
 write.csv(GRB_CR, "results/main_runoff/runoff_estimate_kgyr.csv")
 
 #Repeat to get monthly coastal runoff
-lmp_monthly <- read.csv("results/Tributary_FW_Loads/Monthly_Loads/LR_MLoads_kg_month.csv")
+lmp_monthly <- read.csv("results/main_load_calc/FW_Loads/LR_MLoads_kg_month.csv")
 
 lmp_Monthly <- lmp_Monthly %>%
   select(-X, - flow_month) %>%
