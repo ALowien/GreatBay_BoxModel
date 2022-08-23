@@ -14,7 +14,7 @@ lapply(Packages, library, character.only = TRUE)
   #Saved in results/main_dataformat
 #df6 is tidal tributary solute concentrations over time
 #df6 includes site id, sample collection date, solute concentrations, and water chemistry (pH, DO)
-conc <- read.csv("results/main_dataformat/df6.csv")
+conc <- read.csv("results/main_dataformat/df_conc.csv")
 
 conc$START_DATE<- as.POSIXct(conc$START_DATE) #fix class of date column
 
