@@ -24,7 +24,7 @@
 #### main_load_calc.R
 ##### Purpose: Calculate flow-weighted annual (calendar year and water year) and monthly solute loads for the three tidal tributaries of Great Bay (Lamprey, Squamscott, & Winnicut).
 ###### Key final products: 
-* Calendar Year and Water Year loads for each tributary
+* Calendar Year and Water Year loads for each tributary saved in results/main_load_calc/FW_loads
 
 #### main_estuarine_load_calc.R
 ##### Purpose: Calculates high and low tide flux of solutes based on river input of freshwater and known tidal prism
