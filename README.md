@@ -9,13 +9,16 @@
 ### **Data**
 
 #### original_files/Original_EMD
-##### Contains water quality data for the head of tide river stations (05-LMP, 09-EXT, 02-WNC, GRBAP). Includes sample date, time, water quality data for each station. 
+##### Contains water quality data for the head of tide river stations (05-LMP, 09-EXT, 02-WNC, GRBAP). Includes sample date, time, water quality data for each station. These data files have been unaltered & were downloaded from the publicly accessible NH Environmental Monitoring Database.
+
+
+### 
 
 ### **Source Scripts**
 #### main_dataformat.R
 ##### Purpose: Read in, process, and clean up water quality concentration data for tidal tributaries to Great Bay and for estuarine monitoring stations in Great Bay. 
 ###### Key final products: 
-* "df6" - data frame of organized solute concentrations by date and site, corrected for method detection limits (except for DON concentrations)
+* "df_conc" - data frame of organized solute concentrations by date and site, corrected for method detection limits (except for DON concentrations)
 * "Q_tidal_tribs" - combined discharge dataframe for Lamprey, Squamscott, and Winnicut
 
 #### main_load_calc.R
