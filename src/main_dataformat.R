@@ -23,6 +23,11 @@
     #02-WNC: Winnicut River (WNC)
     #GRBAP: Great Bay Adams Point (Estuarine Monitoring Site)
 
+#To update solute budgets, first download a recent copy of the EMD database for the above listed sites. 
+#Place the new files into the Original_EMD subfolder (make sure to delete the older file - so as to not have duplicated data)
+#Replace the discharge files with up-to-date versions.
+#Run this script to format the EMD dataset and the discharge dataset for later scripts.
+
 #Load required packages.
 
 Packages <- c("readxl", "dplyr", "ggplot2", "tidyquant", "cowplot", "RColorBrewer",
