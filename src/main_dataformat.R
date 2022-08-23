@@ -257,154 +257,145 @@ df$RESULT <- ifelse(df$DETECTION_LIMIT == "BELOW", df$RESULTS_clean / 2, df$RESU
 #Compare results to results_clean
 df$Results_Comp <- df$RESULTS_clean - df$RESULT
 
-#saving df as an intermediate step; 
-#at this point dataframe character issues are resolved and results below MDL are set to 1/2 the MDL
-#Once this df is saved, the script can be run from line 273 onward
-write.csv(df, "results/main_dataformat/df.csv")
 ### END TIDY RESULTS ###
 #_____________________________________________________________________________________________________________
 
 #### Convert Dataframe from Long to Wide ####
-df <- read.csv("results/main_dataformat/df.csv")
-
-df <- df %>%
-  select(-X)
-
 #Thin out to columns necessary for converting from long to wide
-df5 <- df %>%
+df <- df %>%
   select(STATION_ID, START_DATE, PARAMETER, UNITS, RESULT) %>%
   unite("PARAMETER", PARAMETER:UNITS, sep= "_")
 
-unique(df5$PARAMETER)
+unique(df$PARAMETER)
 #Unit Conversions
 #convert all ug/L to mg/L
 
 #NH4 reported in MG/L and UG/L; convert the MG/L to UG/L
-df5$RESULT <- ifelse(df5$PARAMETER == "NH4_MG/L", conv_unit(df5$RESULT, "mg", "ug"), df5$RESULT)
-df5$PARAMETER <- ifelse(df5$PARAMETER == "NH4_MG/L", "NH4_UG/L", df5$PARAMETER)
+df$RESULT <- ifelse(df$PARAMETER == "NH4_MG/L", conv_unit(df$RESULT, "mg", "ug"), df$RESULT)
+df$PARAMETER <- ifelse(df$PARAMETER == "NH4_MG/L", "NH4_UG/L", df$PARAMETER)
 
-df5$RESULT <- ifelse(df5$PARAMETER == "PO4_MG/L", conv_unit(df5$RESULT, "mg", "ug"), df5$RESULT)
-df5$PARAMETER <- ifelse(df5$PARAMETER == "PO4_MG/L", "PO4_UG/L", df5$PARAMETER)
+df$RESULT <- ifelse(df$PARAMETER == "PO4_MG/L", conv_unit(df$RESULT, "mg", "ug"), df$RESULT)
+df$PARAMETER <- ifelse(df$PARAMETER == "PO4_MG/L", "PO4_UG/L", df$PARAMETER)
 
-df5$RESULT <- ifelse(df5$PARAMETER == "TP_MG/L", conv_unit(df5$RESULT, "mg", "ug"), df5$RESULT)
-df5$PARAMETER <- ifelse(df5$PARAMETER == "TP_MG/L", "TP_UG/L", df5$PARAMETER)
+df$RESULT <- ifelse(df$PARAMETER == "TP_MG/L", conv_unit(df$RESULT, "mg", "ug"), df$RESULT)
+df$PARAMETER <- ifelse(df$PARAMETER == "TP_MG/L", "TP_UG/L", df$PARAMETER)
 
 #units for SPC are the same 1 US/CM = 1 UMHO/CM
-df5$PARAMETER <- ifelse(df5$PARAMETER == "SPC_US/CM", "SPC_UMHO/CM", df5$PARAMETER)
+df$PARAMETER <- ifelse(df$PARAMETER == "SPC_US/CM", "SPC_UMHO/CM", df$PARAMETER)
 
-unique(df5$PARAMETER)
+unique(df$PARAMETER)
 
 # Replace "/" with "_"
 
-df5_count <- df5 %>% count(PARAMETER)
+df_count <- df %>% count(PARAMETER)
 
-df5$PARAMETER <- ifelse(df5$PARAMETER == "TP_UG/L", "TP_UGL", 
-                        ifelse(df5$PARAMETER == "TN_MG/L", "TN_MGL", df5$PARAMETER))
+df$PARAMETER <- ifelse(df$PARAMETER == "TP_UG/L", "TP_UGL", 
+                        ifelse(df$PARAMETER == "TN_MG/L", "TN_MGL", df$PARAMETER))
 
-df5$PARAMETER <- ifelse(df5$PARAMETER == "TSS_MG/L", "TSS_MGL", 
-                        ifelse(df5$PARAMETER == "PH_NONE", "pH",
-                               ifelse(df5$PARAMETER == "DO_sat_%", "DO_sat", 
-                                      ifelse(df5$PARAMETER == "SPC_UMHO/CM", "SPC_UMHO_CM", df5$PARAMETER))))
+df$PARAMETER <- ifelse(df$PARAMETER == "TSS_MG/L", "TSS_MGL", 
+                        ifelse(df$PARAMETER == "PH_NONE", "pH",
+                               ifelse(df$PARAMETER == "DO_sat_%", "DO_sat", 
+                                      ifelse(df$PARAMETER == "SPC_UMHO/CM", "SPC_UMHO_CM", df$PARAMETER))))
 
-df5$PARAMETER <- ifelse(df5$PARAMETER == "DO_MG/L", "DO_MGL", 
-                        ifelse(df5$PARAMETER == "Temp_Water_DEG C", "TEMP_WATER_DEGC", 
-                               ifelse(df5$PARAMETER == "TDN_MG/L", "TDN_MGL", df5$PARAMETER)))
+df$PARAMETER <- ifelse(df$PARAMETER == "DO_MG/L", "DO_MGL", 
+                        ifelse(df$PARAMETER == "Temp_Water_DEG C", "TEMP_WATER_DEGC", 
+                               ifelse(df$PARAMETER == "TDN_MG/L", "TDN_MGL", df$PARAMETER)))
 
-df5$PARAMETER <- ifelse(df5$PARAMETER == "NH4_UG/L", "NH4_UGL", 
-                        ifelse(df5$PARAMETER == "NO3_NO2_MG/L", "NO3_NO2_MGL", df5$PARAMETER))
+df$PARAMETER <- ifelse(df$PARAMETER == "NH4_UG/L", "NH4_UGL", 
+                        ifelse(df$PARAMETER == "NO3_NO2_MG/L", "NO3_NO2_MGL", df$PARAMETER))
 
-df5$PARAMETER <- ifelse(df5$PARAMETER == "PO4_UG/L", "PO4_UGL", 
-                        ifelse(df5$PARAMETER == "DON_MG/L", "DON_MGL", 
-                               ifelse(df5$PARAMETER == "DOC_MG/L", "DOC_MGL", 
-                                      ifelse(df5$PARAMETER == "PN_MG/L", "PN_MGL", df5$PARAMETER))))
+df$PARAMETER <- ifelse(df$PARAMETER == "PO4_UG/L", "PO4_UGL", 
+                        ifelse(df$PARAMETER == "DON_MG/L", "DON_MGL", 
+                               ifelse(df$PARAMETER == "DOC_MG/L", "DOC_MGL", 
+                                      ifelse(df$PARAMETER == "PN_MG/L", "PN_MGL", df$PARAMETER))))
 
-df5$PARAMETER <- ifelse(df5$PARAMETER == "DIN_MG/L", "DIN_MGL",
-                        ifelse(df5$PARAMETER == "CHLA_corrected_pheophytin_UG/L", "CHLA_corr_pheo_UGL", 
-                               ifelse(df5$PARAMETER == "NO3_MG/L", "NO3_MGL", 
-                                      ifelse(df5$PARAMETER == "Tide_Stage_NA", "Tide_Stage", df5$PARAMETER))))
+df$PARAMETER <- ifelse(df$PARAMETER == "DIN_MG/L", "DIN_MGL",
+                        ifelse(df$PARAMETER == "CHLA_corrected_pheophytin_UG/L", "CHLA_corr_pheo_UGL", 
+                               ifelse(df$PARAMETER == "NO3_MG/L", "NO3_MGL", 
+                                      ifelse(df$PARAMETER == "Tide_Stage_NA", "Tide_Stage", df$PARAMETER))))
 
-df5$PARAMETER <- ifelse(df5$PARAMETER == "SIO2_MG/L","SIO2_MGL", 
-                        ifelse(df5$PARAMETER == "PC_MG/L", "PC_MGL", 
-                               ifelse(df5$PARAMETER == "PHEOPHYTIN-A_UG/L", "PHEOPHYTIN_A_UGL", 
-                                      ifelse(df5$PARAMETER == "Light_Atten_Coeff_1/M", "Light_Attten_1_m", df5$PARAMETER))))
+df$PARAMETER <- ifelse(df$PARAMETER == "SIO2_MG/L","SIO2_MGL", 
+                        ifelse(df$PARAMETER == "PC_MG/L", "PC_MGL", 
+                               ifelse(df$PARAMETER == "PHEOPHYTIN-A_UG/L", "PHEOPHYTIN_A_UGL", 
+                                      ifelse(df$PARAMETER == "Light_Atten_Coeff_1/M", "Light_Attten_1_m", df$PARAMETER))))
 
 
-df5$START_DATE <- as.Date(df5$START_DATE)
+df$START_DATE <- as.Date(df$START_DATE)
 
-unique(df5$PARAMETER)
+unique(df$PARAMETER)
 
 #___________________________________Make data frame wide instead of long __________________________________________________________
 
-df6 <- df5 %>%
+df <- df %>%
   pivot_wider(names_from = PARAMETER, values_from = RESULT, 
               values_fn = mean)
 
-#Reorganize columns in df6
-colnames(df6)
+#Reorganize columns in df
+colnames(df)
 
-df6 <- df6 %>%
+df <- df %>%
   select(STATION_ID, START_DATE, TP_UGL, PO4_UGL, PN_MGL, TN_MGL, TDN_MGL, NH4_UGL, NO3_MGL, NO3_NO2_MGL, DIN_MGL, 
          DON_MGL, DOC_MGL, PC_MGL, SIO2_MGL, TSS_MGL:DO_sat, DO_MGL, SPC_UMHO_CM, SALINITY_PSS, TEMP_WATER_DEGC, CHLA_corr_pheo_UGL,
          PHEOPHYTIN_A_UGL, Light_Attten_1_m)
 
 
-df6$TP_MGL <- conv_unit(df6$TP_UGL, "ug", "mg")
-df6$PO4_MGL <- conv_unit(df6$PO4_UGL, "ug", "mg")
-df6$NH4_MGL <- conv_unit(df6$NH4_UGL, "ug", "mg")
+df$TP_MGL <- conv_unit(df$TP_UGL, "ug", "mg")
+df$PO4_MGL <- conv_unit(df$PO4_UGL, "ug", "mg")
+df$NH4_MGL <- conv_unit(df$NH4_UGL, "ug", "mg")
 
 
-df6 <- df6 %>%
+df <- df %>%
   select(STATION_ID, START_DATE, TP_MGL, PO4_MGL, PN_MGL, TN_MGL, TDN_MGL, NH4_MGL, NO3_MGL, NO3_NO2_MGL, DIN_MGL, 
          DON_MGL, DOC_MGL, PC_MGL, SIO2_MGL, TSS_MGL:DO_sat, DO_MGL, SPC_UMHO_CM, SALINITY_PSS, TEMP_WATER_DEGC, CHLA_corr_pheo_UGL,
          PHEOPHYTIN_A_UGL, Light_Attten_1_m)
 
 #Summarize physicochemical parameter columns for Appendix Tables
-df6_DO <- df6 %>%
+df_DO <- df %>%
   group_by(STATION_ID) %>%
   summarize(mean_DO_sat = mean(DO_sat, na.rm=T), sd_DO_sat = sd(DO_sat, na.rm=T), count = n())
 
-df6_DOmgl <- df6 %>%
+df_DOmgl <- df %>%
   group_by(STATION_ID) %>%
   summarize(mean_DO_mgl = mean(DO_MGL, na.rm=T), sd_DO_mgl = sd(DO_MGL, na.rm=T), count = n())
 
-df6_temp <- df6 %>%
+df_temp <- df %>%
   group_by(STATION_ID) %>%
   summarize(mean_temp = mean(TEMP_WATER_DEGC, na.rm=T), sd_temp = sd(TEMP_WATER_DEGC, na.rm=T), count = n())
 
 
 #Calculate DIN and DON in instances where it is missing
-df6$DIN_MGL_calc <- df6$NH4_MGL + df6$NO3_NO2_MGL
-df6$DON_MGL_calc <- df6$TDN_MGL - df6$NO3_NO2_MGL - df6$NH4_MGL
+df$DIN_MGL_calc <- df$NH4_MGL + df$NO3_NO2_MGL
+df$DON_MGL_calc <- df$TDN_MGL - df$NO3_NO2_MGL - df$NH4_MGL
 
 #METHOD DETECTION LIMITS FOR DON (b/c not included in EMD)
 
-df6$DON_MDL <- (df6$TDN_MGL + df6$NO3_NO2_MGL + df6$NH4_MGL) * 0.05
+df$DON_MDL <- (df$TDN_MGL + df$NO3_NO2_MGL + df$NH4_MGL) * 0.05
 
 #Is DON below MDL?
-df6$DON_B_MDL <- ifelse(df6$DON_MGL_calc < df6$DON_MDL, "BDL", "G") #7 instances where calculate DON is less than 5% lab error MDL
+df$DON_B_MDL <- ifelse(df$DON_MGL_calc < df$DON_MDL, "BDL", "G") #7 instances where calculate DON is less than 5% lab error MDL
 
 #Set those 7 values to 1/2 of the method detection limit
 
-df6$DON_MGL_calc_final <- ifelse(df6$DON_MGL_calc < df6$DON_MDL, df6$DON_MDL/2, df6$DON_MGL_calc)
+df$DON_MGL_calc_final <- ifelse(df$DON_MGL_calc < df$DON_MDL, df$DON_MDL/2, df$DON_MGL_calc)
 
 
-df6 <- df6 %>%
+df <- df %>%
   select(STATION_ID:NO3_NO2_MGL, DIN_MGL = DIN_MGL_calc, DON_MGL = DON_MGL_calc_final, DOC_MGL:Light_Attten_1_m)
 #this is now corrected for MDLs across all solutes
 
 ### END Convert Dataframe from Long to Wide ###
 
-skewness(df6$TSS_MGL, na.rm=T)
-kurtosis(df6$TSS_MGL, na.rm=T)
+skewness(df$TSS_MGL, na.rm=T)
+kurtosis(df$TSS_MGL, na.rm=T)
 
 #Remove the three high TSS concentrations at Adams Point Low Tide due to anecdotal knowledge from Jackson Estuarine Laboratory that winter values are worse for TSS b/c dock is out of the water
-df6 <- df6 %>%
+df <- df %>%
  mutate(TSS_MGL = ifelse(START_DATE == "2010-03-29" & STATION_ID == "GRBAPL", NA, TSS_MGL)) %>%
   mutate(TSS_MGL = ifelse(START_DATE == "2008-11-25" & STATION_ID == "GRBAPL", NA, TSS_MGL)) %>%
   mutate(TSS_MGL = ifelse(START_DATE == "2012-01-30" & STATION_ID == "GRBAPL", NA, TSS_MGL))
   
-skewness(df6$TSS_MGL, na.rm=T)
-kurtosis(df6$TSS_MGL, na.rm=T)
+skewness(df$TSS_MGL, na.rm=T)
+kurtosis(df$TSS_MGL, na.rm=T)
 
 #### Discharge Data Formatting ####
 #______________________________________________________________________________________________________________________________________
@@ -448,17 +439,17 @@ write.csv(Q, "results/main_dataformat/Q_tidal_tribs.csv")
 
 #Average + standard deviation of each solute for each river
 
-avg_conc <- df6 %>%
+avg_conc <- df %>%
   group_by(STATION_ID) %>%
   summarize(across(TP_MGL:TEMP_WATER_DEGC, mean, na.rm=T))
 
 write.csv(avg_conc, "results/main_dataformat/avg_solute_conc_site.csv")
 
-std_conc <- df6 %>%
+std_conc <- df %>%
   group_by(STATION_ID) %>%
   summarize(across(TP_MGL:TEMP_WATER_DEGC, sd, na.rm=T))
 
 write.csv(std_conc, "results/main_dataformat/std_solute_conc_site.csv")
  
 #This data frame has final solute concentrations that can be used for further load analysis
-write.csv(df6, "results/main_dataformat/df6.csv")
+write.csv(df, "results/main_dataformat/df_conc.csv")
