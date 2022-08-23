@@ -2,11 +2,11 @@
 # Biogeochemical Stressors and Ecological Response in Great Bay Estuary
 
 # Author: Anna Lowien, University of New Hampshire
-# Last Updated: 1/24/2022
+# Last Updated: 8/23/2022
 
 # Purpose: Read and process raw solute concentration data for the three tidal tributaries (head-of-tide monitoring stations) that flow into Great Bay.
   # Also process raw solute concentrations from the estuary, at Adams Point (high and low tide). Prepare discharge data for flux calculations.
-  # Create physiochemical parameter appendix tables. 
+  # Create physiochemical characteristics tables. 
 
 # Data was sourced from the NH Department of Environmental Services, Environmental Monitoring Database (EMD). 
 # Data was pulled for grab samples and physical chemistry based on assigned water body IDs.
@@ -38,7 +38,6 @@ files <- list.files(path = subdir, pattern = ".xlsx", full.names = T)
 df.list <- lapply(files, read_excel)
 
 df <- bind_rows(df.list)
-
 unique(df$'STATION ID')
 colnames(df)
 
@@ -105,7 +104,7 @@ colnames(df)
 df$RDL <- as.numeric(df$RDL)
 df$METHOD_DETECTION_LIMIT <- as.numeric(df$METHOD_DETECTION_LIMIT)
 
-#Dam removal on Squamscott occurred in 2016
+#Dam removal on Squamscott River occurred in 2016; resulting in two different site ids depending on whether sampling occurred before or after the dam removal
 #Fix station ID names, 09-EXT and 09-EXT-DAMMED are the same site, but differ over time
 df$STATION_ID <- ifelse(df$STATION_ID == "09-EXT-DAMMED", "09-EXT", df$STATION_ID)
 
@@ -119,16 +118,14 @@ df <- df %>%
 
 colnames(df)
 
-unique(df$RESULT_VALID)
-
-df %>% count(RESULT_VALID)
 
 #Delete the 119 occurrences where results are not valid 
+df %>% count(RESULT_VALID)
+
 df <- df %>%
   filter(RESULT_VALID == "Y" | is.na(RESULT_VALID))
 
-
-#Remove result valid column and filter out unnecessary parameters
+#Remove result valid column and filter out unnecessary parameters for the box model
 df <- df %>%
   select(-RESULT_VALID) %>%
   filter(PARAMETER_ANALYTE != "CLOSTRIDIUM PERFRINGENS" & PARAMETER_ANALYTE != "ENTEROCOCCUS") %>%
@@ -138,11 +135,6 @@ df <- df %>%
            PARAMETER_ANALYTE != "TURBIDITY" & 
            PARAMETER_ANALYTE != "DEPTH") %>%
   filter(PARAMETER_ANALYTE != "TIDE STAGE")
-
-
-unique(df$PARAMETER_ANALYTE)
-
-df %>% count(PARAMETER_ANALYTE)
 
 df <- df %>%
   select(STATION_ID:ACTIVITY_COMMENTS, PARAMETER = PARAMETER_ANALYTE, QUALIFIER_AND_RESULTS:FRACTION_TYPE)
@@ -212,9 +204,7 @@ unique(df$PARAMETER)
 #Look at fraction types measured
 unique(df$FRACTION_TYPE)
 
-df %>% count(FRACTION_TYPE)
-
-#6 samples measured for Volatile Solids at 09-EXT-DAMMED; not needed
+#Filter for Dissolved, Suspended, and Total Fractions (representative of dissolved and particulate forms of nutrients/carbon)
 df <- df %>%
   filter(FRACTION_TYPE == "DISSOLVED" | FRACTION_TYPE == "SUSPENDED" | FRACTION_TYPE == "TOTAL" | is.na(FRACTION_TYPE))
 
@@ -269,6 +259,7 @@ df$Results_Comp <- df$RESULTS_clean - df$RESULT
 
 #saving df as an intermediate step; 
 #at this point dataframe character issues are resolved and results below MDL are set to 1/2 the MDL
+#Once this df is saved, the script can be run from line 273 onward
 write.csv(df, "results/main_dataformat/df.csv")
 ### END TIDY RESULTS ###
 #_____________________________________________________________________________________________________________
@@ -345,8 +336,8 @@ unique(df5$PARAMETER)
 #___________________________________Make data frame wide instead of long __________________________________________________________
 
 df6 <- df5 %>%
-  pivot_wider(id_cols = c(STATION_ID, START_DATE, PARAMETER), names_from = PARAMETER, values_from = RESULT, 
-              values_fn = list(RESULT = mean, na.rm = T))
+  pivot_wider(names_from = PARAMETER, values_from = RESULT, 
+              values_fn = mean)
 
 #Reorganize columns in df6
 colnames(df6)
@@ -406,22 +397,14 @@ df6 <- df6 %>%
 skewness(df6$TSS_MGL, na.rm=T)
 kurtosis(df6$TSS_MGL, na.rm=T)
 
-#Remove the three high TSS concentrations at Adams Point Low Tide due to anecodotal knowledge from Tom Gregory that winter values are worse for TSS b/c dock is out of the water
+#Remove the three high TSS concentrations at Adams Point Low Tide due to anecdotal knowledge from Jackson Estuarine Laboratory that winter values are worse for TSS b/c dock is out of the water
 df6 <- df6 %>%
  mutate(TSS_MGL = ifelse(START_DATE == "2010-03-29" & STATION_ID == "GRBAPL", NA, TSS_MGL)) %>%
   mutate(TSS_MGL = ifelse(START_DATE == "2008-11-25" & STATION_ID == "GRBAPL", NA, TSS_MGL)) %>%
   mutate(TSS_MGL = ifelse(START_DATE == "2012-01-30" & STATION_ID == "GRBAPL", NA, TSS_MGL))
   
-skewness(df6$TSS_MGL)
-kurtosis(df6$TSS_MGL)
-
-#See how many months in given year are sampled at eah site
-df6$Month <- month(df6$START_DATE)
-df6$Year <- year(df6$START_DATE)
-
-df6_months <- df6 %>%
-  group_by(STATION_ID, Month) %>%
-  tally()
+skewness(df6$TSS_MGL, na.rm=T)
+kurtosis(df6$TSS_MGL, na.rm=T)
 
 #### Discharge Data Formatting ####
 #______________________________________________________________________________________________________________________________________
