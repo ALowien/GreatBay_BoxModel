@@ -113,16 +113,9 @@ df$METHOD_DETECTION_LIMIT <- as.numeric(df$METHOD_DETECTION_LIMIT)
 #Fix station ID names, 09-EXT and 09-EXT-DAMMED are the same site, but differ over time
 df$STATION_ID <- ifelse(df$STATION_ID == "09-EXT-DAMMED", "09-EXT", df$STATION_ID)
 
-unique(df$STATION_ID) #check for 05-LMP, 02-WNC, 09-EXT, and GRBAPH and GRBAPL
-
-#Removing blank/unnecessary columns from data frame
-colnames(df)
-
+#Subset for columns of interest
 df <- df %>%
   select(STATION_ID, WATERBODY_ID, RIVER_NAME, ACTIVITY_TYPE, START_DATE:FRACTION_TYPE)
-
-colnames(df)
-
 
 #Delete the 119 occurrences where results are not valid 
 df %>% count(RESULT_VALID)
@@ -131,30 +124,19 @@ df <- df %>%
   filter(RESULT_VALID == "Y" | is.na(RESULT_VALID))
 
 #Remove result valid column and filter out unnecessary parameters for the box model
-df <- df %>%
-  select(-RESULT_VALID) %>%
-  filter(PARAMETER_ANALYTE != "CLOSTRIDIUM PERFRINGENS" & PARAMETER_ANALYTE != "ENTEROCOCCUS") %>%
-  filter(PARAMETER_ANALYTE != "ESCHERICHIA COLI" & PARAMETER_ANALYTE != "TOTAL FECAL COLIFORM") %>%
-  filter(PARAMETER_ANALYTE != "WIND DIRECTION" & PARAMETER_ANALYTE  != "WIND VELOCITY" & PARAMETER_ANALYTE != "SECCHI DISK TRANSPARENCY") %>%
-  filter(PARAMETER_ANALYTE != "COLORED DISSOLVED ORGANIC MATTER (CDOM)" & 
-           PARAMETER_ANALYTE != "TURBIDITY" & 
-           PARAMETER_ANALYTE != "DEPTH") %>%
-  filter(PARAMETER_ANALYTE != "TIDE STAGE")
+remove_parms <- c("CLOSTRIDIUM PERFRINGENS", "ENTEROCOCCUS", "ESCHERICHIA COLI","TOTAL FECAL COLIFORM", "WIND DIRECTION", "WIND VELOCITY", "SECCHI DISK TRANSPARENCY","COLORED DISSOLVED ORGANIC MATTER (CDOM)", "TURBIDITY","DEPTH", "TIDE STAGE")
+
+df <- subset(df, !(PARAMETER_ANALYTE %in% remove_parms))
 
 df <- df %>%
   select(STATION_ID:ACTIVITY_COMMENTS, PARAMETER = PARAMETER_ANALYTE, QUALIFIER_AND_RESULTS:FRACTION_TYPE)
 
 #Fix the issue where NH DES starting putting NA instead of 1/2 of MDL
-sum(is.na(df$QUALIFIER_AND_RESULTS)) #22 NAs that should be 1/2 of the MDL
-
 df$QUALIFIER_AND_RESULTS <- ifelse(is.na(df$QUALIFIER_AND_RESULTS), df$RDL/2, df$QUALIFIER_AND_RESULTS)
-
-sum(is.na(df$QUALIFIER_AND_RESULTS)) 
 
 #Figure out Parameter Methods and Rename to clarify
 
 #PHOSPHORUS AS P, fraction type is "Total"; which means PHOSPHORUS samples are TOTAL PHOSPHORUS ("TP")
-
 df$PARAMETER <- ifelse(df$PARAMETER == "PHOSPHORUS AS P", "TP", df$PARAMETER)
 
 #PHOSPHORUS, ORTHOPHOSPHATE AS P is PO4 molecule
