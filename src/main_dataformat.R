@@ -1,7 +1,7 @@
 # main_dataformat.R
 # Biogeochemical Stressors and Ecological Response in Great Bay Estuary
 
-# Author: Anna Lowien, University of New Hampshire
+# Author: Anna Mikulis, University of New Hampshire
 # Last Updated: 8/23/2022
 
 # Purpose: Read and process raw solute concentration data for the three tidal tributaries (head-of-tide monitoring stations) that flow into Great Bay.
@@ -23,8 +23,8 @@
     #02-WNC: Winnicut River (WNC)
     #GRBAP: Great Bay Adams Point (Estuarine Monitoring Site)
 
-#To update solute budgets, first download a recent copy of the EMD database for the above listed sites. 
-#Place the new files into the Original_EMD subfolder (make sure to delete the older file - so as to not have duplicated data)
+#To update solute budgets, first download a recent copy of the NH DES EMD database for the above listed sites. 
+#Place the new files into the Original_EMD subfolder (make sure to delete the older file - so as to not have duplicated data).
 #Replace the discharge files with up-to-date versions.
 #Run this script to format the EMD dataset and the discharge dataset for later scripts.
 
@@ -46,7 +46,7 @@ df <- bind_rows(df.list)
 unique(df$'STATION ID')
 colnames(df)
 
-#Replace spaces in colnames with "_"
+#Replace spaces in column names with "_"
 names(df) <- gsub(" ", "_", names(df))
 names(df) <- gsub("/", "_", names(df))
 #Convert START_DATE column to date class
@@ -69,14 +69,14 @@ AP_Tide <- df %>%
   filter(PARAMETER_ANALYTE == "TIDE STAGE") %>%
   filter(!is.na(QUALIFIER_AND_RESULTS))
 
-#Fix "Tide Stage" PARAMETER To be either High or Low Tide
+#Categorize "Tide Stage" PARAMETER To be either High or Low Tide (e.x. ebb tides are re-classified as low tide samples)
 AP_Tide$QUALIFIER_AND_RESULTS <- ifelse(AP_Tide$PARAMETER_ANALYTE == "TIDE STAGE" & AP_Tide$QUALIFIER_AND_RESULTS == "EBB", "LOW", AP_Tide$QUALIFIER_AND_RESULTS)
 AP_Tide$QUALIFIER_AND_RESULTS <- ifelse(AP_Tide$PARAMETER_ANALYTE == "TIDE STAGE" & AP_Tide$QUALIFIER_AND_RESULTS == "FLOOD", "HIGH", AP_Tide$QUALIFIER_AND_RESULTS)
 
 AP_Tide <- AP_Tide %>%
   select(-PARAMETER_ANALYTE)
 
-#Rename Great Bay Adams Point (GRBAP) STATION ID based on high/low tide
+#Rename Great Bay Adams Point (GRBAP) STATION ID based on high/low tide (GRBAPL indicates low tide sample; GRBAPH indicates high tide sample)
 AP_Tide$STATION_ID <- ifelse(AP_Tide$QUALIFIER_AND_RESULTS == "LOW", "GRBAPL", "GRBAPH")
 
 #Remove duplicates
@@ -131,7 +131,7 @@ df <- subset(df, !(PARAMETER_ANALYTE %in% remove_parms))
 df <- df %>%
   select(STATION_ID:ACTIVITY_COMMENTS, PARAMETER = PARAMETER_ANALYTE, QUALIFIER_AND_RESULTS:FRACTION_TYPE)
 
-#Fix the issue where NH DES starting putting NA instead of 1/2 of MDL
+#For instances where result is NA instead of 1/2 of method detection limit, run this line of code
 df$QUALIFIER_AND_RESULTS <- ifelse(is.na(df$QUALIFIER_AND_RESULTS), df$RDL/2, df$QUALIFIER_AND_RESULTS)
 
 #Figure out Parameter Methods and Rename to clarify
@@ -330,7 +330,6 @@ df$TP_MGL <- conv_unit(df$TP_UGL, "ug", "mg")
 df$PO4_MGL <- conv_unit(df$PO4_UGL, "ug", "mg")
 df$NH4_MGL <- conv_unit(df$NH4_UGL, "ug", "mg")
 
-
 df <- df %>%
   select(STATION_ID, START_DATE, TP_MGL, PO4_MGL, PN_MGL, TN_MGL, TDN_MGL, NH4_MGL, NO3_MGL, NO3_NO2_MGL, DIN_MGL, 
          DON_MGL, DOC_MGL, PC_MGL, SIO2_MGL, TSS_MGL:DO_sat, DO_MGL, SPC_UMHO_CM, SALINITY_PSS, TEMP_WATER_DEGC, CHLA_corr_pheo_UGL,
@@ -355,13 +354,14 @@ df$DIN_MGL_calc <- df$NH4_MGL + df$NO3_NO2_MGL
 df$DON_MGL_calc <- df$TDN_MGL - df$NO3_NO2_MGL - df$NH4_MGL
 
 #METHOD DETECTION LIMITS FOR DON (b/c not included in EMD)
-
 df$DON_MDL <- (df$TDN_MGL + df$NO3_NO2_MGL + df$NH4_MGL) * 0.05
 
 #Is DON below MDL?
-df$DON_B_MDL <- ifelse(df$DON_MGL_calc < df$DON_MDL, "BDL", "G") #7 instances where calculate DON is less than 5% lab error MDL
+df$DON_B_MDL <- ifelse(df$DON_MGL_calc < df$DON_MDL, "BDL", "G") 
 
-#Set those 7 values to 1/2 of the method detection limit
+length(which(df$DON_B_MDL == "BDL")) #9 instances below detection limit
+
+#Set those DON values below detection limit to 1/2 of the method detection limit
 
 df$DON_MGL_calc_final <- ifelse(df$DON_MGL_calc < df$DON_MDL, df$DON_MDL/2, df$DON_MGL_calc)
 
@@ -371,7 +371,7 @@ df <- df %>%
 #this is now corrected for MDLs across all solutes
 
 ### END Convert Dataframe from Long to Wide ###
-
+#assess normality of TSS values
 skewness(df$TSS_MGL, na.rm=T)
 kurtosis(df$TSS_MGL, na.rm=T)
 
@@ -381,8 +381,8 @@ df <- df %>%
   mutate(TSS_MGL = ifelse(START_DATE == "2008-11-25" & STATION_ID == "GRBAPL", NA, TSS_MGL)) %>%
   mutate(TSS_MGL = ifelse(START_DATE == "2012-01-30" & STATION_ID == "GRBAPL", NA, TSS_MGL))
   
-skewness(df$TSS_MGL, na.rm=T)
-kurtosis(df$TSS_MGL, na.rm=T)
+skewness(df$TSS_MGL, na.rm=T) #notable improvement in skewness from 12.6 to 2.1
+kurtosis(df$TSS_MGL, na.rm=T) #notable improvement in kurtosis from 224 to 11
 
 #### Discharge Data Formatting ####
 #______________________________________________________________________________________________________________________________________
@@ -425,7 +425,6 @@ Q$datetime <- as.POSIXct(Q$datetime, format = "%Y-%m-%d")
 write.csv(Q, "results/main_dataformat/Q_tidal_tribs.csv")
 
 #Average + standard deviation of each solute for each river
-
 avg_conc <- df %>%
   group_by(STATION_ID) %>%
   summarize(across(TP_MGL:TEMP_WATER_DEGC, mean, na.rm=T))
