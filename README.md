@@ -1,8 +1,8 @@
 # GreatBay_BoxModel
 
-### Author: Anna Lowien, University of New Hampshire
+### Author: Anna Mikulis, University of New Hampshire
 #### Date Created: August 6, 2021
-#### Last Modified: August 23, 2022
+#### Last Modified: January 26, 2023
 ##### Purpose: A respository of data and scripts necessary to create a box-model for solute loading to Great Bay Estuary, NH/ME. This respository is associated with the M.S. Thesis Work titled, "Biogeochemical Stressors and Ecological Reponse in Great Bay Estuary, NH/ME". Data was sourced from monitoring efforts of the UNH Water Quality Analyis Lab, the NH Department of Environmental Services, the Piscataqua Region Estuaries Partnership, and the Great Bay National Estuarine Research Reserve. 
 
 
@@ -17,17 +17,22 @@
 ### **Source Scripts**
 #### main_dataformat.R
 ##### Purpose: Read in, process, and clean up water quality concentration data for tidal tributaries to Great Bay and for estuarine monitoring stations in Great Bay. 
-###### Key final products: 
-* "df_conc" - data frame of organized solute concentrations by date and site, corrected for method detection limits (except for DON concentrations)
-* "Q_tidal_tribs" - combined discharge dataframe for Lamprey, Squamscott, and Winnicut
+###### Key results from main_dataformat.R saved in /results/main_dataformat 
+* "df_conc.csv" - data frame of organized solute concentrations by date and site, corrected for method detection limits (except for DON concentrations)
+* "Q_tidal_tribs" - combined discharge dataframe for Lamprey, Squamscott, and Winnicut Rivers
 
 #### main_load_calc.R
 ##### Purpose: Calculate flow-weighted annual (calendar year and water year) and monthly solute loads for the three tidal tributaries of Great Bay (Lamprey, Squamscott, & Winnicut).
 ###### Key final products: 
 * Calendar Year and Water Year loads for each tributary saved in results/main_load_calc/FW_loads
+* Flow weighted concentrations are saved in results/main_load_calc/FWC
 
 #### main_estuarine_load_calc.R
-##### Purpose: Calculates high and low tide flux of solutes based on river input of freshwater and known tidal prism
+##### Purpose: Calculates high and low tide flux of solutes based on river input of freshwater and known tidal prism. This script uses the saved output from the main_dataformat.R script (df_conc.csv). Products created in this script are saved in results/main_estuarine_load_calc
+
+###### Key final products: 
+* "AP_Flux_kgyr.csv" - dataframe of high and low tide estuarine fluxes
+* "AP_Monthly_Flux_kgmonth.csv" - dataframe of monthly estuarine fluxes
 
 #### main_precipitation_format.R
 ##### Purpose: Calculates precipitation-weighted concentrations for precipitation over Great Bay estuary.
