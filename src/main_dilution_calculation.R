@@ -1,7 +1,7 @@
 #main_dilution_calculation.R
-#Author: Anna Lowien, University of New Hampshire
+#Author: Anna Mikulis, University of New Hampshire
 
-#Last Updated: 11/30/2021
+#Last Updated: 1/26/2023
 
 #Purpose: Calculate the expected dilution of river inputs into the Great Bay basin
 
@@ -70,6 +70,8 @@ dec_lmp <- lmp %>%
             PO4 = mean(FW_PO4, na.rm=T),
             DOC = mean(FW_DOC, na.rm=T))
 
+dec_lmp[,] <- round(dec_lmp[,], 2)
+
 dec_lmp$stat <- "mean"
 
 sd_lmp <- lmp %>%
@@ -80,10 +82,10 @@ sd_lmp <- lmp %>%
             PO4 = sd(FW_PO4, na.rm=T),
             DOC = sd(FW_DOC, na.rm=T))
 
+
+sd_lmp[,] <- round(sd_lmp[,], 2)
 sd_lmp$stat <- "sd"
 
-round(dec_lmp[,], 2)
-round(sd_lmp[,], 2)
 
 dec_lmp_mean <- full_join(dec_lmp, sd_lmp)
 dec_lmp_mean$site <- "lmp"
@@ -101,7 +103,7 @@ dec_sqr <- sqr %>%
             PO4 = mean(FW_PO4, na.rm=T),
             DOC = mean(FW_DOC, na.rm=T))
 
-
+dec_sqr[,] <- round(dec_sqr[,], 2)
 
 dec_sqr$stat <- "mean"
 
@@ -112,16 +114,14 @@ sd_sqr <- sqr %>%
             TSS= sd(FW_TSS, na.rm=T),
             PO4 = sd(FW_PO4, na.rm=T),
             DOC = sd(FW_DOC, na.rm=T))
-sd_sqr$stat <- "sd"
 
-round(dec_sqr[,], 2)
-round(sd_sqr[,], 2)
+sd_sqr[,] <- round(sd_sqr[,], 2)
+sd_sqr$stat <- "sd"
 
 dec_sqr_mean <- full_join(dec_sqr, sd_sqr)
 dec_sqr_mean$site <- "sqr"
 
-
-
+#Winnicut River (WNC)
 wnc <- wnc %>%
   select(-X, -FW_TP, -FW_NH4, -FW_NO3_NO2) %>%
   mutate(site = "wnc")
@@ -133,6 +133,7 @@ dec_wnc <- wnc %>%
             TSS= mean(FW_TSS, na.rm=T),
             PO4 = mean(FW_PO4, na.rm=T),
             DOC = mean(FW_DOC, na.rm=T))
+dec_wnc[,] <- round(dec_wnc[,], 2)
 dec_wnc$stat <- "mean"
 
 sd_wnc <- wnc %>%
@@ -143,10 +144,8 @@ sd_wnc <- wnc %>%
             PO4 = sd(FW_PO4, na.rm=T),
             DOC = sd(FW_DOC, na.rm=T))
 
+sd_wnc[,] <- round(sd_wnc[,], 2)
 sd_wnc$stat <- "sd"
-
-round(dec_wnc[,], 2)
-round(sd_wnc[,], 2)
 
 dec_wnc_mean <- full_join(dec_wnc, sd_wnc)
 dec_wnc_mean$site <- "wnc"
