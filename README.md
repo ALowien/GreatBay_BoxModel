@@ -35,22 +35,42 @@
 * "AP_Monthly_Flux_kgmonth.csv" - dataframe of monthly estuarine fluxes
 
 #### main_precipitation_format.R
-##### Purpose: Calculates precipitation-weighted concentrations for precipitation over Great Bay estuary.
+##### Purpose: Calculates precipitation-weighted concentrations for precipitation over Great Bay estuary using rain chemistry from UNH Thompson Farm
+
+###### Key final products: 
+* "cy_precip_loads.csv" - dataframe of calendar year precipitation fluxes
 
 #### main_runoff.R
-##### Purpose: Estimates load from coastal runoff based on Lamprey River loads and watershed areas.
+##### Purpose: Estimates load from coastal runoff for area surrounding Great Bay that is not encompassed by river watersheds. Estimates use the Lamprey River loads and watershed areas as a model system.
+
+###### Key final products: 
+* "runoff_estimate_kgyr.csv" - dataframe of runoff fluxes
 
 #### main_wwtf_format.R
 ##### Purpose: Combines wastewater treatment facility water flux with concentration data for TN, DIN, and TSS into wastewater treatment loads for facilities downstream of the tidal tributary monitoring stations. C and P fluxes were estimated using C:N:P ratios for the epping wastewater treatment facility.
+
+###### Key final products:
+* "wwtf_annual_loads.csv" - wastewater treatment estimated loads
 
 #### main_dilution_calculation.R
 ##### Purpose: Exercise to see what we would expect the N concentration in Great Bay to be if the rivers were the only N source. How much does the river load dilute once in the estuary?
 
 #### main_compile_inputs.R
-##### Purpose: Combine input loads and output loads into one dataframe, calculate delta storage terms.
+##### Purpose: Combine input loads and output loads into one dataframe, calculate delta storage terms. Requires loading of products saved in results files, including:
+* LR_Annual_Loads.csv
+* SQR_Annual_Loads.csv
+* WNC_Annual_Loads.csv
+* cy_precip_loads.csv
+* wwtf_annual_loads.csv
+* AP_Flux_kgyr.csv
+* runoff_estimate_kgyr.csv"
+
+###### Key final products:
+* Budget_Components.csv - dataframe of each budget component solute flux, categorized as input or output
+* inputsaspercentage.csv - dataframe that considers inputs as percentage of the total input for the year
 
 #### main_plot_annual_budgets.R
-##### Purpose: Plot annual solute budget inputs, outputs, and delta storage terms.
+##### Purpose: Plot annual solute budget inputs, outputs, and delta storage terms using the dataframes built in main_compile_inputs
 
 ### Sources
 * Trowbridge, P. Hydrological Parameters for New Hampshire’s Estuaries. PREP Reports & Publications (2007).
