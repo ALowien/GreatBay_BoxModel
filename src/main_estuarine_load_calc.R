@@ -1,7 +1,7 @@
 #main_estuarine_load_calc.R
 
-#Author: Anna Lowien, University of New Hampshire
-#Last Updated 8/23/2022
+#Author: Anna Mikulis, University of New Hampshire
+#Last Updated 1/26/2022
 
 #Purpose: Calculates high and low tide flux of solutes based on river input of freshwater and known tidal prism
 
@@ -19,16 +19,19 @@ lapply(Packages, library, character.only = TRUE)
 #Scale estuary prism to the Great Bay prism using ratio of surface area at high tide
 #Great Bay: Great Bay Estuary = 16.7km^2:54.66km^2
 
+scalar_ratio <- 16.7/54.66
+
+round(scalar_ratio,2)
+(178*10^6)*(0.31)
 
 GB_Prism_m3day <- 55180000
-                  553604098
 GB_Prism_m3_year <- GB_Prism_m3day * 365
 
 #Load formatted data frame "df6" and filter for Adams Point Stations
 AP <- read.csv("results/main_dataformat/df_conc.csv") %>%
-  select(-X, -pH, -SPC_UMHO_CM, -TP_MGL, -NO3_MGL) %>% #Tide Stage was used to renname GRBAP to High or Low Tide
+  select(-X, -pH, -SPC_UMHO_CM, -TP_MGL, -NO3_MGL) %>% #
   filter(STATION_ID == "GRBAPH" | STATION_ID == "GRBAPL")
-
+#Tide Stage was used to renname GRBAP to High or Low Tide
 AP$START_DATE <- as.POSIXct(AP$START_DATE)
 
 #Calculate TN as PN + TDN
@@ -117,29 +120,34 @@ SalvsQ_HT <- ggplot(Daily_Sal_hightide, aes(m3_day, SALINITY_PSS)) + geom_point(
 SalvsQ_HT
 
 SalvsQ_LT <- ggplot(Daily_Sal_lowtide, aes(m3_day, SALINITY_PSS)) + geom_point(color="black", size=2) +
-  #geom_smooth(method="lm", se=T) +
   stat_smooth(method="lm", formula=y~log(x), color="black") +
-  scale_x_log10() + ylab("Low Tide Salinity (PSS)") +xlab("Total Freshwater Discharge"~m^3~day^-1) +
-  theme_cowplot()
+  scale_x_log10() + 
+  #scale_y_log10() + 
+  ylab("Low Tide Salinity (PSS)") +xlab("Total Freshwater Discharge"~m^3~day^-1) +
+  theme_cowplot() 
 SalvsQ_LT
 
-ggsave(SalvsQ_LT, file=paste0("results/figures/LT_salvsq.png"),
-       width=8, height=6, units="in", dpi=300)
+#SalvsQ_LT +  annotation_logticks(sides="b")
+
+#Save freshwater discharge vs low tide salinity plot
+ggsave(SalvsQ_LT, file=paste0("results/figures/lowtide_salvsdischarge.png"),
+       width=8, height=6, units="in", dpi=300, bg="white")
 
 #Regression between salinity and discharge
+#Hightide
 HT_lm <- lm(SALINITY_PSS ~ m3_day, Daily_Sal_hightide)
 summary(HT_lm)
 
 plot(HT_lm)
 
-ncvTest(HT_lm) #suggests no heteroskedasticity p > 0.05; fail to reject null of homoskedasticity 
+ncvTest(HT_lm)#suggests no heteroskedasticity p > 0.05; fail to reject null of homoskedasticity 
 
 LT_lm <- lm(SALINITY_PSS ~ m3_day, Daily_Sal_lowtide)
 summary(LT_lm)
 
-plot(LT_lm)
+#plot(LT_lm)
 
-ncvTest(LT_lm)#suggests heteroskedasticity p < 0.05; reject null of homoskedasticity 
+ncvTest(LT_lm) #suggests heteroskedasticity p < 0.05; reject null of homoskedasticity 
 
 #Plot Adams Point Solute Concentrations Against Freshwater Input
 AP_Solutes <- AP %>%
@@ -171,7 +179,7 @@ CQ_HT <- ggplot(AP_All_HT_long, aes(m3_day, Concentration)) + geom_point() +
   geom_smooth(data=subset(AP_All_HT_long, Solute == "NO3_NO2_MGL") ,method="lm", se=T, colour = "red", size = 1) +
   geom_smooth(data=subset(AP_All_HT_long, Solute == "SIO2_MGL") ,method="lm", se=T, colour = "red", size = 1) +
   geom_smooth(data=subset(AP_All_HT_long, Solute == "PN_MGL") ,method="lm", se=T, colour = "red", size = 1) +
-  geom_smooth(data=subset(AP_All_HT_long, Solute == "PO4_MGL") ,method="lm", se=T, colour = "blue", size = 1) +
+ # geom_smooth(data=subset(AP_All_HT_long, Solute == "PO4_MGL") ,method="lm", se=T, colour = "blue", size = 1) +
   geom_smooth(data=subset(AP_All_HT_long, Solute == "TDN_MGL") ,method="lm", se=T, colour = "red", size = 1) +
   geom_smooth(data=subset(AP_All_HT_long, Solute == "DON_MGL") ,method="lm", se=T, colour = "red", size = 1) +
   geom_smooth(data=subset(AP_All_HT_long, Solute == "TN_MGL") ,method="lm", se=T, colour = "red", size = 1) +
@@ -209,10 +217,10 @@ ht.pn.lm <- lm(PN_MGL ~ m3_day, AP_All_HT)
 summary(ht.pn.lm)
 
 ht.po4.lm <- lm(PO4_MGL ~ m3_day, AP_All_HT)
-summary(ht.po4.lm)
+summary(ht.po4.lm) #not significant
 
 ht.pc.lm <- lm(PC_MGL ~ m3_day, AP_All_HT)
-summary(ht.pc.lm) #not signficant
+summary(ht.pc.lm) #not significant
 
 ht.tss.lm <- lm(TSS_MGL ~ m3_day, AP_All_HT)
 summary(ht.tss.lm) #not significant regression
@@ -252,7 +260,9 @@ CQ_LT <- ggplot(AP_All_LT_long, aes(m3_day, Concentration)) + geom_point() +
   geom_smooth(data=subset(AP_All_LT_long, Solute == "TN") ,method="lm", se=T, colour = "red", size = 1) +
   geom_smooth(data=subset(AP_All_LT_long, Solute == "PN") ,method="lm", se=T, colour = "red", size = 1) +
   geom_smooth(data=subset(AP_All_LT_long, Solute == "PO4") ,method="lm", se=T, colour = "blue", size = 1) +
-  scale_x_log10() + ylab(expression('Low Tide Concentration mg L'^{-1})) +
+  scale_x_log10() + 
+  #scale_y_log10() + 
+  ylab(expression('Low Tide Concentration mg L'^{-1})) +
   xlab(expression('Freshwater Input m'^{3}~day^{-1})) +
   facet_wrap(~Solute, scales = "free") +
   theme_cowplot()
@@ -261,8 +271,7 @@ CQ_LT
 ggsave(CQ_LT, file=paste0("results/figures/lowtide_cq.png"),
        width=8, height=6, dpi=300, units="in")
 
-#Regression between DIN and discharge
-
+#Regression between concentration & discharge
 lt.din.lm <- lm(DIN_MGL ~ m3_day, AP_All_LT)
 summary(lt.din.lm)
 
