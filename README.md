@@ -74,3 +74,6 @@
 
 ### Sources
 * Trowbridge, P. Hydrological Parameters for New Hampshire’s Estuaries. PREP Reports & Publications (2007).
+
+#### Notes
+When running these scripts, keep track of where you are saving things. The scripts are organized in such a way that one can work within a project space. Within the project space, created products will be saved down into a "results" folder. 
