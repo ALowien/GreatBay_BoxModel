@@ -1,7 +1,7 @@
 #main_wwtf_format.R
 
-#Author: Anna Lowien, University of New Hampshire
-#Last Updated: 11/29/2021
+#Author: Anna Mikulis, University of New Hampshire
+#Last Updated: 1/26/2023
 
 #This script calculates loads from waste water treatment facilities (wwtf) that flow into Great Bay Estuary 
 #Data compiled by the UNH Water Quality Analysis Lab, for PREP State of Our Estuaries
