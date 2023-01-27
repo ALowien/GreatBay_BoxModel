@@ -1,7 +1,7 @@
 #main_plot_annual_budgets.R
 
 #Author: Anna Mikulis, University of New Hampshire
-#Last Updated 1/26/2023
+#Last Updated 1/27/2023
 
 #Purpose: Calculate Input, Output and Delta Storage Terms for each solute of interest. Plot results.
 
@@ -21,11 +21,12 @@ GB_hectares <- 1677.21
 budget_components_w <- budget_components %>%
   pivot_wider(names_from = "Solute",
               values_from = "Load_kgyr")
-  
+
+#Total Nitrogen Budget Plots
+#Subset out TN numbers
 tn_budget <- budget_components_w %>%
   select(Type, Year, Balance, TN) %>%
   filter(Year <2019) 
-  
 
 #Normalize TN Budget
 tn_budget$TN_normalized_kghayr <- tn_budget$TN/GB_hectares
@@ -37,12 +38,14 @@ tn_budget_final <- tn_budget %>%
               values_from = "TN_Load")
   
 tn_budget_final$Storage <- tn_budget_final$Input - tn_budget_final$Output
+#Calculate GB area normalized storage, because we did not use normalized storage in the calculation of storage
 tn_budget_final$Storage_normalized <- tn_budget_final$Storage / GB_hectares 
   
 tn_budget_final$Input_normalized <- tn_budget_final$Input / GB_hectares
 tn_budget_final$Output_normalized <- tn_budget_final$Output / GB_hectares
-  
-tn.average.storage<- mean(tn_budget_final$Storage_normalized)
+
+#average storage of tn over period of record
+tn.average.storage <- mean(tn_budget_final$Storage_normalized)
   
 tn_budget_final_long <- tn_budget_final %>%
   select(Year, Storage_normalized:Output_normalized) %>%
@@ -65,7 +68,7 @@ tn.storage <- ggplot(tn_budget_final, aes(x=Year)) +
   annotate("text", x = 2013, y = -20, label = "-1.24", size = 4, color="darkseagreen3") +
   theme(axis.title.x = element_blank())
 tn.storage
-  
+#If you want to save the plot, remove hashtag & run these next few lines of code
 #ggsave(tn.storage, 
  #        file=paste0("results/figures/annual_box_model/tn.storage.png"),
   #       width = 8, height = 6, units = "in", dpi = 300)
@@ -89,6 +92,7 @@ tn.inputs.outputs
  #        file=paste0("results/figures/annual_box_model/tn.inputs.outputs.png"),
   #       width = 8, height = 6, units = "in", dpi = 300)
   
+#Create combined pannel of TN inputs/outputs and storage
 tn.annual_panel <- plot_grid(tn.inputs.outputs, tn.storage, labels = "AUTO")
 tn.annual_panel
   
@@ -473,14 +477,12 @@ ggplotly(tss.inputs.outputs)
 tss.annual.panel <- plot_grid(tss.inputs.outputs, tss.storage, labels = "AUTO")
 tss.annual.panel
 
-
 #ggsave(tss.annual.panel,
  #      file=paste0("results/Budget/annual_yield/tss.annual.panel.png"),
   #     width = 12, height = 6, units = "in", dpi = 300)
 
 
 #TN, DIN and PN as percentages
-
 TN_Budget_Final2<- tn_budget_final %>%
   select(Year, Input, Output, Storage)
 
@@ -518,17 +520,6 @@ Budget_Components_PN <- budget_components %>%
 
 Budget_Components_PN$PercentRiver <- Budget_Components_PN$Riverine / Budget_Components_PN$APH * 100
 
-
-ggplot(tn_budget_final, aes(Year, Storage)) + geom_col() +
-  geom_hline(yintercept = -4.0*10^6) +
-  geom_hline(yintercept = 3.2*10^6) + theme_cowplot()
-
-ggplot(din_budget_final, aes(Year, Storage)) + geom_col() +
-  geom_hline(yintercept = -2.4*10^6) +
-  geom_hline(yintercept = 3.1*10^6) + theme_cowplot()
-
-
-
 #plot delta storage values for TN, PN, and DIN
 #Combine them
 head(pn_budget_final_long)
@@ -556,10 +547,7 @@ storage_a <- ggplot(n_budget_long, aes(Solute, Load_kghayr)) +
         axis.title.x = element_blank())
 storage_a
 
-ggsave(storage_a,file=paste0("results/manuscript_figures/n_storage.png"),
-       width=5, height=6)
-
-
+#Combine the non nitrogen storage terms into a dataframe
 other_budget_combined <- full_join(po4_budget_final_long, doc_budget_final_long)
 other_budget_combined <- full_join(other_budget_combined, TSS_Budget_Final_long)
 
@@ -612,44 +600,3 @@ panel_fig
 
 ggsave("./results/figures/manuscript_figures/panel_fig.jpg", plot=panel_fig,
        width=7, height = 6, units = "in", dpi=300)
-
-storageb <- ggplot(subset(other_budget_long, Solute == "PO4_kghayr"), aes(Solute, Load_kghayr)) +
-  geom_boxplot() +
-  geom_point(position="jitter") +
-  geom_hline(yintercept = 0, color="black", alpha=0.5) +
-  theme_cowplot() + 
-  labs(y= Storage~kg~P~ha^-1~year^-1) +
-  scale_x_discrete(labels=c("PO4_kghayr"= "PO4")) +
-    theme(axis.text=element_text(size=15),
-        axis.title = element_text(size=18),
-        axis.title.x=element_blank())
-storageb
-
-
-storagec <- ggplot(subset(other_budget_long, Solute == "DOC_kghayr"), aes(Solute, Load_kghayr)) +
-  geom_boxplot() +
-  geom_point(position="jitter") +
-  geom_hline(yintercept = 0, color="black", alpha=0.5) +
-  scale_x_discrete(limits=c('DOC', '', '')) +
-  theme_cowplot() + 
-  ylab(Storage~kg~C~ha^-1~year^-1) +
-  scale_x_discrete(labels=c("DOC_kghayr"= "DOC")) +
-  theme(axis.text=element_text(size=15),
-        axis.title = element_text(size=18),
-        axis.title.x=element_blank())
-storagec
-
-storaged <- ggplot(subset(other_budget_long, Solute == "TSS_kghayr"), aes(Solute, Load_kghayr)) +
-  geom_boxplot() +
-  geom_point(position="jitter") +
-  geom_hline(yintercept = 0, color="black", alpha=0.5) +
-  theme_cowplot() + 
-  labs(x = "Solute", y= Storage~kg~ha^-1~year^-1) +
-  scale_x_discrete(labels=c("TSS_kghayr"= "TSS")) +
-  scale_y_continuous(limits=c(-1e+05, 0),labels = function(x) format(x, scientific = TRUE)) +
-  theme(axis.text=element_text(size=15),
-        axis.title = element_text(size=18),
-        axis.title.x=element_blank())
-storaged
-
-ggpubr::ggarrange(storage_a, storageb, storagec, align="h", widths=2)
