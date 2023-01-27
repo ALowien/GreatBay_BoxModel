@@ -1,8 +1,7 @@
 #main_plot_annual_budgets.R
 
-#Author: Anna Lowien, University of New Hampshire
-#Last Updated 11/30/2021
-
+#Author: Anna Mikulis, University of New Hampshire
+#Last Updated 1/26/2023
 
 #Purpose: Calculate Input, Output and Delta Storage Terms for each solute of interest. Plot results.
 
@@ -53,14 +52,14 @@ tn_budget_final_long <- tn_budget_final %>%
   
 TN_norm_avg <- tn_budget_final_long %>%
   group_by(Component) %>%
-   summarize(mean=mean(TN_kghayr, na.rm=T))
+  summarize(mean=mean(TN_kghayr, na.rm=T))
   
 tn.storage <- ggplot(tn_budget_final, aes(x=Year)) + 
   geom_col(aes(y=Storage_normalized), fill="darkseagreen3") +
   geom_hline(yintercept=0) +
   geom_line(aes(y=- 276.81), color="darkseagreen2", linetype = 'dotdash', size =1.5) +
   scale_x_continuous(limits=c(2007.5,2018.5), breaks=seq(from=2008,to=2018, by=1)) +
-  scale_y_continuous(limits=c(-725, 300), breaks=seq(from=-700,to=300,by=100)) +
+ # scale_y_continuous(limits=c(-725, 300), breaks=seq(from=-700,to=300,by=100)) +
   ylab(expression(TN~Storage~(kg-N-ha^{-1}~year^{-1}))) +
   theme_cowplot() +
   annotate("text", x = 2013, y = -20, label = "-1.24", size = 4, color="darkseagreen3") +
@@ -290,7 +289,7 @@ po4.storage <- ggplot(po4_budget_final, aes(x=Year))  +
   geom_hline(yintercept=0) +
   geom_line(aes(y=19.26482), color="darkseagreen2", linetype = 'dotdash', size =1.5) +
   scale_x_continuous(limits=c(2009.5,2018.5), breaks=seq(from=2010,to=2018, by=1)) +
-  scale_y_continuous(limits=c(-10,62), breaks=seq(from=-10,to=62, by=10)) +
+  scale_y_continuous(limits=c(-30,62), breaks=seq(from=-30,to=62, by=10)) +
   ylab(expression(PO[4]~Storage~(kg-P~ha^{-1}~year^{-1}))) +
   theme_cowplot()
 po4.storage
@@ -527,3 +526,130 @@ ggplot(tn_budget_final, aes(Year, Storage)) + geom_col() +
 ggplot(din_budget_final, aes(Year, Storage)) + geom_col() +
   geom_hline(yintercept = -2.4*10^6) +
   geom_hline(yintercept = 3.1*10^6) + theme_cowplot()
+
+
+
+#plot delta storage values for TN, PN, and DIN
+#Combine them
+head(pn_budget_final_long)
+
+n_budget_combined <- full_join(pn_budget_final_long, tn_budget_final_long)
+n_budget_combined <- full_join(n_budget_combined, din_budget_final_long)
+
+#make long
+n_budget_long <- n_budget_combined %>%
+  pivot_longer(cols = PN_kghayr:DIN_kghayr, names_to = "Solute", values_to="Load_kghayr") %>%
+  filter(Component == "Storage_normalized")
+
+
+storage_a <- ggplot(n_budget_long, aes(Solute, Load_kghayr)) +
+  geom_boxplot() +
+  geom_point(position="jitter") +
+  geom_hline(yintercept = 0, color="black", alpha=0.5) +
+ # annotate("text", x="DIN_kghayr", y=-650, label= "Net Export") + 
+  #annotate("text", x="TN_kghayr",y=300, label= "Net Import") +
+  theme_cowplot() + 
+  ylab(Storage~kg~N~ha^-1~year^-1) +
+  scale_x_discrete(labels=c("DIN_kghayr" = "DIN", "PN_kghayr"= "PN", "TN_kghayr"= "TN")) +
+  theme(axis.text=element_text(size=15),
+        axis.title = element_text(size=18),
+        axis.title.x = element_blank())
+storage_a
+
+ggsave(storage_a,file=paste0("results/manuscript_figures/n_storage.png"),
+       width=5, height=6)
+
+
+other_budget_combined <- full_join(po4_budget_final_long, doc_budget_final_long)
+other_budget_combined <- full_join(other_budget_combined, TSS_Budget_Final_long)
+
+
+#make long
+other_budget_long <- other_budget_combined %>%
+  pivot_longer(cols = PO4_kghayr:TSS_kghayr, names_to = "Solute", values_to="Load_kghayr") %>%
+  filter(Component == "Storage_normalized")
+
+full_combo <- full_join(other_budget_long, n_budget_long)
+
+type <- c("Nitrogen", "Nitrogen", "Nitrogen", "Phosphate", "Suspended Solids", "Dissolved Organic Carbon")
+Solute <- c("DIN_kghayr", "PN_kghayr", "TN_kghayr", "PO4_kghayr", "TSS_kghayr", "DOC_kghayr")
+
+key <- cbind(type, Solute)
+key <- as.data.frame(key)
+
+full_combo <- full_join(full_combo, key, by="Solute")
+
+full_combo$type <- as.factor(full_combo$type)
+full_combo$Solute <- as.factor(full_combo$Solute)
+
+solute_vector <- c("a.nitrogen", "b.phosphate", "c.carbon", "d.solids")
+
+full_combo$solute_vector <- ifelse(full_combo$type == "Phosphate", "B",
+                                   ifelse(full_combo$type == "Dissolved Organic Carbon", "C", 
+                                          ifelse(full_combo$type == "Nitrogen", "A", "D")))
+  
+#FIGURE FOR MANUSCRIPT
+panel_fig <- ggplot(full_combo, aes(as.factor(Solute), Load_kghayr)) + 
+  geom_boxplot(width=0.1,outlier.shape = NA) +
+  geom_point(aes(color=as.factor(Year)), 
+             position = position_jitterdodge(jitter.width=.1, dodge.width = 0.2),
+             size=1.8) + 
+  geom_hline(yintercept = 0, color="black", alpha=0.8) +
+  scale_x_discrete(labels=c("PO4_kghayr"= ~PO[4], "DIN_kghayr" = "DIN", "PN_kghayr"= "PN", "TN_kghayr"= "TN", "DOC_kghayr"= "DOC", "TSS_kghayr" = "TSS")) +
+   scale_color_viridis_d(option="viridis", name="Year", direction=-1) +
+   theme_bw() +
+   ylab(Storage~kg~ha^-1~year^-1) +
+   facet_wrap(~solute_vector, scales="free", strip.position = "top") +
+   theme(axis.title.x = element_blank(), 
+        axis.text=element_text(size=15, color="black"),
+        axis.title = element_text(size=18),
+        strip.background = element_blank(),
+        strip.placement= "inside",
+        strip.text = element_text(size=14, face="bold", hjust=0, vjust=-1),
+        legend.text = element_text(size=12),
+        legend.title = element_text(size=18))
+panel_fig
+
+ggsave("./results/figures/manuscript_figures/panel_fig.jpg", plot=panel_fig,
+       width=7, height = 6, units = "in", dpi=300)
+
+storageb <- ggplot(subset(other_budget_long, Solute == "PO4_kghayr"), aes(Solute, Load_kghayr)) +
+  geom_boxplot() +
+  geom_point(position="jitter") +
+  geom_hline(yintercept = 0, color="black", alpha=0.5) +
+  theme_cowplot() + 
+  labs(y= Storage~kg~P~ha^-1~year^-1) +
+  scale_x_discrete(labels=c("PO4_kghayr"= "PO4")) +
+    theme(axis.text=element_text(size=15),
+        axis.title = element_text(size=18),
+        axis.title.x=element_blank())
+storageb
+
+
+storagec <- ggplot(subset(other_budget_long, Solute == "DOC_kghayr"), aes(Solute, Load_kghayr)) +
+  geom_boxplot() +
+  geom_point(position="jitter") +
+  geom_hline(yintercept = 0, color="black", alpha=0.5) +
+  scale_x_discrete(limits=c('DOC', '', '')) +
+  theme_cowplot() + 
+  ylab(Storage~kg~C~ha^-1~year^-1) +
+  scale_x_discrete(labels=c("DOC_kghayr"= "DOC")) +
+  theme(axis.text=element_text(size=15),
+        axis.title = element_text(size=18),
+        axis.title.x=element_blank())
+storagec
+
+storaged <- ggplot(subset(other_budget_long, Solute == "TSS_kghayr"), aes(Solute, Load_kghayr)) +
+  geom_boxplot() +
+  geom_point(position="jitter") +
+  geom_hline(yintercept = 0, color="black", alpha=0.5) +
+  theme_cowplot() + 
+  labs(x = "Solute", y= Storage~kg~ha^-1~year^-1) +
+  scale_x_discrete(labels=c("TSS_kghayr"= "TSS")) +
+  scale_y_continuous(limits=c(-1e+05, 0),labels = function(x) format(x, scientific = TRUE)) +
+  theme(axis.text=element_text(size=15),
+        axis.title = element_text(size=18),
+        axis.title.x=element_blank())
+storaged
+
+ggpubr::ggarrange(storage_a, storageb, storagec, align="h", widths=2)
