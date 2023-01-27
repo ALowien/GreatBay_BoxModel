@@ -1,7 +1,7 @@
 #main_precipitation_format.R
 
-#Author: Anna Lowien, University of New Hampshire
-#Last Updated: 11/29/2021
+#Author: Anna Mikulis, University of New Hampshire
+#Last Updated: 1/26/2023
 
 #This script calculates the solute load from precipitation over Great Bay
 
@@ -10,7 +10,7 @@ Packages <- c("readxl", "dplyr", "ggplot2", "measurements", "plotly", "lubridate
 
 lapply(Packages, library, character.only = TRUE)
 
-#Precipitation excel file has been QAQC'd, correctd for MDLs, and had correct NCDC rainfall volumes matched
+#Precipitation file has been QAQC'd, correctd for MDLs, and had correct NCDC rainfall volumes matched
 precipitation <- read.csv("data/precipitation/QAQC_Precip.csv") #ALL solutes corrected for method detection limits except DON
 
 colnames(precipitation) 
@@ -25,7 +25,7 @@ summary(precip)
 
 precip$Collection_Date <- as.Date(precip$Collection_Date)
 
-#Delete values if they were flagged with a 4 or 5
+#Keep values only if they have a flag of 2 - which means they have been QC'd and determined to be valid
 precip$NH4_UGL <- ifelse(precip$NH4f != 2, NA, precip$NH4_UGL)
 precip$PO4_UGL <- ifelse(precip$PO4f != 2, NA, precip$PO4_UGL)
 precip$TDN_MGL <- ifelse(precip$TDNf != 2, NA, precip$TDN_MGL)
