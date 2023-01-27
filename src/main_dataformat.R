@@ -2,7 +2,7 @@
 # Biogeochemical Stressors and Ecological Response in Great Bay Estuary
 
 # Author: Anna Mikulis, University of New Hampshire
-# Last Updated: 8/23/2022
+# Last Updated: 1/27/2023
 
 # Purpose: Read and process raw solute concentration data for the three tidal tributaries (head-of-tide monitoring stations) that flow into Great Bay.
   # Also process raw solute concentrations from the estuary, at Adams Point (high and low tide). Prepare discharge data for flux calculations.
@@ -124,7 +124,7 @@ df <- df %>%
   filter(RESULT_VALID == "Y" | is.na(RESULT_VALID))
 
 #Remove result valid column and filter out unnecessary parameters for the box model
-remove_parms <- c("CLOSTRIDIUM PERFRINGENS", "ENTEROCOCCUS", "ESCHERICHIA COLI","TOTAL FECAL COLIFORM", "WIND DIRECTION", "WIND VELOCITY", "SECCHI DISK TRANSPARENCY","COLORED DISSOLVED ORGANIC MATTER (CDOM)", "TURBIDITY","DEPTH", "TIDE STAGE")
+remove_parms <- c("CLOSTRIDIUM PERFRINGENS", "ENTEROCOCCUS", "ESCHERICHIA COLI","TOTAL FECAL COLIFORM", "WIND DIRECTION", "WIND VELOCITY", "SECCHI DISK TRANSPARENCY","COLORED DISSOLVED ORGANIC MATTER (CDOM)", "TURBIDITY","DEPTH", "TIDE STAGE", "LIGHT ATTENUATION COEFFICIENT")
 
 df <- subset(df, !(PARAMETER_ANALYTE %in% remove_parms))
 
@@ -132,7 +132,12 @@ df <- df %>%
   select(STATION_ID:ACTIVITY_COMMENTS, PARAMETER = PARAMETER_ANALYTE, QUALIFIER_AND_RESULTS:FRACTION_TYPE)
 
 #For instances where result is NA instead of 1/2 of method detection limit, run this line of code
-df$QUALIFIER_AND_RESULTS <- ifelse(is.na(df$QUALIFIER_AND_RESULTS), df$RDL/2, df$QUALIFIER_AND_RESULTS)
+#subset(df, is.na(QUALIFIER_AND_RESULTS))
+
+#df$QUALIFIER_AND_RESULTS <- ifelse(is.na(df$QUALIFIER_AND_RESULTS), df$RDL/2, df$QUALIFIER_AND_RESULTS)
+
+
+
 
 #Figure out Parameter Methods and Rename to clarify
 
@@ -174,9 +179,8 @@ df$PARAMETER <- ifelse(df$PARAMETER == "CARBON, SUSPENDED", "PC", df$PARAMETER)
 df$PARAMETER <- ifelse(df$PARAMETER == "CARBON, ORGANIC", "DOC", df$PARAMETER)
 
 #Misc. condensing of Parameter Names to eliminate spaces
-df$PARAMETER <- ifelse(df$PARAMETER == "LIGHT ATTENUATION COEFFICIENT", "Light_Atten_Coeff", 
-                               ifelse(df$PARAMETER == "DISSOLVED OXYGEN SATURATION", "DO_sat", 
-                                      ifelse(df$PARAMETER == "TEMPERATURE WATER", "Temp_Water", df$PARAMETER)))
+df$PARAMETER <- ifelse(df$PARAMETER == "DISSOLVED OXYGEN SATURATION", "DO_sat", 
+                                      ifelse(df$PARAMETER == "TEMPERATURE WATER", "Temp_Water", df$PARAMETER))
 
 df$PARAMETER <- ifelse(df$PARAMETER == "SPECIFIC CONDUCTANCE", "SPC", 
                         ifelse(df$PARAMETER == "DISSOLVED OXYGEN", "DO", 
@@ -323,7 +327,7 @@ colnames(df)
 df <- df %>%
   select(STATION_ID, START_DATE, TP_UGL, PO4_UGL, PN_MGL, TN_MGL, TDN_MGL, NH4_UGL, NO3_MGL, NO3_NO2_MGL, DIN_MGL, 
          DON_MGL, DOC_MGL, PC_MGL, SIO2_MGL, TSS_MGL:DO_sat, DO_MGL, SPC_UMHO_CM, SALINITY_PSS, TEMP_WATER_DEGC, CHLA_corr_pheo_UGL,
-         PHEOPHYTIN_A_UGL, Light_Attten_1_m)
+         PHEOPHYTIN_A_UGL)
 
 
 df$TP_MGL <- conv_unit(df$TP_UGL, "ug", "mg")
@@ -333,7 +337,7 @@ df$NH4_MGL <- conv_unit(df$NH4_UGL, "ug", "mg")
 df <- df %>%
   select(STATION_ID, START_DATE, TP_MGL, PO4_MGL, PN_MGL, TN_MGL, TDN_MGL, NH4_MGL, NO3_MGL, NO3_NO2_MGL, DIN_MGL, 
          DON_MGL, DOC_MGL, PC_MGL, SIO2_MGL, TSS_MGL:DO_sat, DO_MGL, SPC_UMHO_CM, SALINITY_PSS, TEMP_WATER_DEGC, CHLA_corr_pheo_UGL,
-         PHEOPHYTIN_A_UGL, Light_Attten_1_m)
+         PHEOPHYTIN_A_UGL)
 
 #Summarize physicochemical parameter columns for Appendix Tables
 df_DO <- df %>%
@@ -367,7 +371,7 @@ df$DON_MGL_calc_final <- ifelse(df$DON_MGL_calc < df$DON_MDL, df$DON_MDL/2, df$D
 
 
 df <- df %>%
-  select(STATION_ID:NO3_NO2_MGL, DIN_MGL = DIN_MGL_calc, DON_MGL = DON_MGL_calc_final, DOC_MGL:Light_Attten_1_m)
+  select(STATION_ID:NO3_NO2_MGL, DIN_MGL = DIN_MGL_calc, DON_MGL = DON_MGL_calc_final, DOC_MGL:PHEOPHYTIN_A_UGL)
 #this is now corrected for MDLs across all solutes
 
 ### END Convert Dataframe from Long to Wide ###
