@@ -1,19 +1,19 @@
 #main_load_calc.R
 
-#Author: Anna Lowien, University of New Hampshire
-#Last Updated: 11/15/2021
+#Author: Anna Mikulis, University of New Hampshire
+#Last Updated: 1/26/2023
 
 #This script calculates annual (CY and WY) and monthly loads for the three tidal tributaries (Lamprey, Squamscott, and Winnicut) to Great Bay.
+#This script pulls in products created in the main_dataformat.R script, including measured water quality concentrations and discharge readings. 
 
 #Load required packages.
 Packages <- c("readxl", "dplyr", "ggplot2", "measurements", "plotly", "lubridate",
               "cowplot", "ggpubr", "dataRetrieval", "gridExtra", "tidyr", "viridis", "RiverLoad")
 lapply(Packages, library, character.only = TRUE)
 
-#Read in cleaned up df6 data frame from the main_dataformat.R script
+#Read in cleaned up concentration data frame (df_conc.csv) from the main_dataformat.R script
   #Saved in results/main_dataformat
-#df6 is tidal tributary solute concentrations over time
-#df6 includes site id, sample collection date, solute concentrations, and water chemistry (pH, DO)
+#the dataframe is tidal tributary solute concentrations over time and includes site id, sample collection date, solute concentrations, and water chemistry (pH, DO)
 conc <- read.csv("results/main_dataformat/df_conc.csv")
 
 conc$START_DATE<- as.POSIXct(conc$START_DATE) #fix class of date column
@@ -44,35 +44,36 @@ Q$datetime <- as.POSIXct(Q$datetime) #fix class of date column
 #Separate out Lamprey River Flow and Solute Concentrations 
 flow.LR <- Q %>% #Separates discharge for Lamprey
   filter(STATION_ID == "05-LMP") %>%
-  select(datetime, flow)              
+  select(datetime, flow) %>%
+  filter(datetime <= "2020-01-01")
 
 #Split out concentrations to just Lamprey
 conc.LR <- conc_sub %>% #separates concentrations for Lamprey
   filter(STATION_ID == "05-LMP") %>%
-  select(datetime, TP_MGL:TSS_MGL) %>%
-  filter(datetime != "2020-03-16")
+  select(datetime, TP_MGL:TSS_MGL)
 
-#Date formatting
+#Date formatting for each dataframe
 flow.LR$datetime <- as.POSIXct(flow.LR$datetime, format = "%Y-%m-%d %H:%M:%S")
 conc.LR$datetime <- as.POSIXct(conc.LR$datetime, format = "%Y-%m-%d %H:%M:%S")
 
-#Add arbitrary time stamp to dates
+#Add arbitrary time stamp to dates to make date matching easier
 flow.LR$datetime <-lubridate::ymd_hm(paste(flow.LR$datetime, "6:00 PM"))
 conc.LR$datetime <-lubridate::ymd_hm(paste(conc.LR$datetime, "6:00 PM"))
 
 union.LR <- db.union(flow.LR, conc.LR)
-write.csv(union.LR, "results/main_load_calc/union.LR.csv") #Saving a file of Q+LMP concentrations saved together
+write.csv(union.LR, "results/main_load_calc/union.LR.csv") #Saving a file of discharge & LMP concentrations saved together
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #Repeat for Squamscott River
+#Separate out Squamscott River Flow and Solute Concentrations 
 flow.SQR <- Q %>%
   filter(STATION_ID == "09-EXT") %>%
-  select(datetime, flow)              
+  select(datetime, flow) %>%
+  filter(datetime <= "2020-01-01")
 
-#Split out conc to just Squamscott
+#Split out concentrations to just Squamscott
 conc.SQR <- conc_sub %>%
   filter(STATION_ID == "09-EXT") %>%
-  select(datetime, TP_MGL:TSS_MGL) %>%
-  filter(datetime != "2020-03-16")
+  select(datetime, TP_MGL:TSS_MGL) 
 
 #Date formatting
 flow.SQR$datetime <- as.POSIXct(flow.SQR$datetime, format = "%Y-%m-%d %H:%M:%S")
@@ -83,13 +84,13 @@ flow.SQR$datetime <-lubridate::ymd_hm(paste(flow.SQR$datetime, "6:00 PM"))
 conc.SQR$datetime <-lubridate::ymd_hm(paste(conc.SQR$datetime, "6:00 PM"))
 
 union.SQR <- db.union(flow.SQR, conc.SQR)
-write.csv(union.SQR, "results/main_load_calc/union.SQR.csv") #Saving a file of Q+SQR concentrations saved together
+write.csv(union.SQR, "results/main_load_calc/union.SQR.csv") #Saving a file of discharge & SQR concentrations saved together
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #Repeat this for Winnicut River
 flow.WNC <- Q %>%
   filter(STATION_ID == "02-WNC") %>%
   select(datetime, flow) %>%
-  filter(datetime != "2020-03-16")          
+  filter(datetime <= "2020-01-01")          
 
 #Split out conc to just Winnicut
 conc.WNC <- conc_sub %>%
@@ -105,10 +106,10 @@ flow.WNC$datetime <-lubridate::ymd_hm(paste(flow.WNC$datetime, "6:00 PM"))
 conc.WNC$datetime <-lubridate::ymd_hm(paste(conc.WNC$datetime, "6:00 PM"))
 
 union.WNC <- db.union(flow.WNC, conc.WNC)
-write.csv(union.WNC, "results/main_load_calc/union.WNC.csv") #Saving a file of Q+WNC concentrations saved together
+write.csv(union.WNC, "results/main_load_calc/union.WNC.csv") #Saving a file of discharge & WNC concentrations saved together
 
 #Flow_Multipliers to resolve difference in location b/t stream gauge and head-of-tide
-#These are calculated as the ratio of watershed area to watershed area at the stream gauge
+#These are calculated as the ratio of watershed area to watershed area at the stream gauge; multipliers sourced from PREP State of Our Estuary 2018 Report
 LMP_Flow_Multiplier <- 1.145435
 SQR_Flow_Multiplier <- 1.683529
 WNC_Flow_Multiplier <- 1.005443
@@ -203,7 +204,7 @@ LR_FW_CY <- LR_FW_CY_Sums %>%
          FW_DOC = DOC/DOC_flow,
          FW_TSS = TSS/TSS_flow) %>%
   select(CY, FW_TP:FW_TSS)
-
+#save flow weighted concentrations
 write.csv(LR_FW_CY, "results/main_load_calc/FWC/CY_FW_Conc_LMP.csv")
 
 for (i in 2:12) {
@@ -211,7 +212,7 @@ for (i in 2:12) {
 }
 
 
-#WY ANNUAL ESTIMATE
+#WY ANNUAL ESTIMATE LAMPREY RIVER
 #Group by WY and sum
 LR_FW_WY_Sums <- LR_FW_conc %>%
   select(-CY, -Month) %>%
@@ -277,7 +278,7 @@ write.csv(LR_CY_Loads, "results/main_load_calc/FW_Loads/LR_Annual_Loads.csv")
 write.csv(LR_WY_Loads, "results/main_load_calc/FW_Loads/LR_Water_Year_Loads.csv")
 #_______________________________________________________________________________________________
 #________________________________________________________________________________________________________________________
-#Monthly Loads for Lamprey
+#Monthly Loads for Lamprey River
 LR_FW_MSums <- LR_FW_conc %>% #LR_FW_conc is mg/L * L/day, not yet divided by L/day to FW 
   group_by(CY, Month) %>%
   summarise_if(is.numeric, sum, na.rm =T)
@@ -315,8 +316,7 @@ LR_M_Loads <- left_join(LR_FW_M, flow.LR.m)
 LR_M_Loads <- LR_M_Loads %>%
   mutate(across(FW_Solutes,  ~.* flow_month))
 
-#As a test, if we sum the monthly loads by CY, do we get similiar estimate as the LR CY Loads?
-
+#As a test, if we sum the monthly loads by CY, do we get similar estimate as the LR CY Loads?
 LR_M_Loads_CY_Test <- LR_M_Loads %>%
   group_by(CY) %>%
   summarize(across(FW_Solutes, sum, na.rm=T)) #lower that the CY estimate, which makes sense because CY estimate used Jan - Dec in Annual discharge, whereas summing the months, we get March -Dec
@@ -749,7 +749,7 @@ Tidal_Trib_CY_Loads <- union(Tidal_Trib_CY_Loads, WNC_CY_Loads)
 Tidal_Trib_CY_Loads <- Tidal_Trib_CY_Loads %>%
   select(Station_ID, CY, FW_TP:FW_TSS)
 
-#Calculate watershed area normalized load; start with areas from SOE
+#Calculate watershed area normalized load; start with areas from  PREP State of Our Estuary 2018
 #Lamprey 211.91 sq miles
 #Winnicut 14.18 sq miles
 #Squamscott 106.90 sq miles
@@ -797,5 +797,16 @@ Tidal_Trib_WY_Loads$Watershed_Area_ha <- conv_unit(Tidal_Trib_WY_Loads$Watershed
 Tidal_Trib_Normalized_WY_Loads <- Tidal_Trib_WY_Loads %>%
   mutate(across(FW_TP:FW_TSS, ~. / Watershed_Area_ha))
 
-
+#Save normalized loads
 write.csv(Tidal_Trib_Normalized_WY_Loads, "results/main_load_calc/FW_Loads/Tidal_Trib_WY_Loads_kg_ha_yr.csv")
+
+TSS_Load <- ggplot(Tidal_Trib_CY_Loads, aes(CY, FW_TSS, colour = Station_ID)) + 
+  geom_point(size = 4) +
+  scale_x_continuous(breaks = seq(from=2008, to=2018, by=1))+
+  scale_y_log10(labels = scales::comma) +
+  scale_color_viridis_d(name="River") +
+  labs(x = "Calendar Year", y="TSS Load (kg/year)") +
+  theme_cowplot() +
+  annotation_logticks(sides = "l")
+TSS_Load 
+
