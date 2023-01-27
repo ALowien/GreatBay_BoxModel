@@ -1,7 +1,7 @@
 #main_compile_inputs.R
 
-#Author: Anna Lowien, University of New Hampshire
-#Last Updated: 11/30/2021
+#Author: Anna Mikulis, University of New Hampshire
+#Last Updated: 1/26/2023
 
 #Purpose: Compile calendar year fluxes for budget calculations
 
@@ -111,8 +111,8 @@ WWTF_long <- WWTF %>%
                names_to = "Solute",
                values_to = "Load_kgyr")
 
+#Adams Point Estuarine Flux
 AP_Flux <- read.csv("results/main_estuarine_load_calc/AP_Flux_kgyr.csv")
-
 
 AP_Flux <- AP_Flux %>%
   select(Year, Site = STATION_ID, PO4:NH4, NO3_NO2 = NO32, DIN:TSS, - PC, - SIO2) %>%
@@ -262,12 +262,17 @@ Budget_Components <- Budget %>%
   summarize(Load_kgyr = sum(Load_kgyr, na.rm=T)) %>%
   filter(Load_kgyr > 0) # remove any rows that are zero
 
-P_Components <- ggplot(Budget_Components, aes(Year, Load_kgyr, color=Type)) + geom_point(size=2) +
+P_Components <- ggplot(Budget_Components, aes(Year, Load_kgyr, color=Type)) + geom_point(size=2, alpha=0.2) +
   scale_color_viridis_d() +
   scale_x_continuous(limits=c(2008,2018),breaks=seq(from=2008, to=2018, by=2)) +
   facet_wrap(~Solute, scales="free") + theme_cowplot()
 P_Components
 
+ggplot(subset(Budget_Components, Type == "APH"), aes(Year, Load_kgyr, color=Type)) +
+ geom_point(size=2) +
+  scale_color_viridis_d() +
+  scale_x_continuous(limits=c(2008,2018),breaks=seq(from=2008, to=2018, by=2)) +
+  facet_wrap(~Solute, scales="free") + theme_cowplot()
 
 #Write an Input/Output Column
 Budget_Components$Balance <- ifelse(Budget_Components$Type == "APL", "Output", "Input")
@@ -288,12 +293,10 @@ Plot_Summary <- ggplot(Budget_Components_Summary, aes(Year, Loadkgyr, colour = B
 
 Plot_Summary
 
-
 write.csv(Budget_Components, "results/main_compile_inputs/Budget_Components.csv")
 
 
 #Table of each input as a % of total input
-
 Budget_Components_Percent <- Budget_Components %>%
   pivot_wider(names_from= "Solute",
               values_from="Load_kgyr")
@@ -309,6 +312,8 @@ Budget_Components_Summary_wide <- Budget_Components_Summary %>%
 #Join Annual Inputs to the site inputs in order to calculate percentage
 
 Budget_Components_Percent2 <- full_join(Budget_Components_Percent, Budget_Components_Summary_wide, by = c("Year", "Balance"))
+
+
 
 #Summarize as % of the total input for each type of input and year
 
@@ -328,10 +333,3 @@ Inputs_Percent$DOC_per <- ifelse(Inputs_Percent$Year == 2011, NA,
                                  ifelse(Inputs_Percent$Year < 2010, NA, Inputs_Percent$DOC_per))  
 
 write.csv(Inputs_Percent, "results/main_compile_inputs/inputsaspercentage.csv")
-  
-
-#WHY DOC INCREASING?
-c <- ggplot(subset(Budget_Components, Solute == "DOC"), aes(Year, Load_kgyr, color=Type))+ geom_point() + geom_line()
-ggplotly(c)
-
-
