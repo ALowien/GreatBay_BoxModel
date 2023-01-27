@@ -1,7 +1,7 @@
 #main_runoff.R
 
-#Author: Anna Lowien, University of New Hampshire
-#Last Updated: 8/23/2022
+#Author: Anna Mikulis, University of New Hampshire
+#Last Updated: 1/26/2022
 
 #Purpose: Estimate load from coastal runoff using Lamprey concentrations and coastal watershed area
 
@@ -10,11 +10,11 @@ Packages <- c("readr", "dplyr", "measurements")
 
 lapply(Packages, library, character.only = TRUE)
 
-#Read in Lamprey Loads
+#Read in Lamprey Riverine Loads
 lmp <- read.csv("results/main_load_calc/FW_Loads/LR_Annual_Loads.csv")
 
 #Coastal Area 36km2
-GB_Coastal_Area <- 37
+GB_Coastal_Area <- 37 #estimated using Google Earth mapping tools
 
 #Load in kg/year, need to normalize it to runoff.
 #Lamprey River Watershed Area 
@@ -23,8 +23,6 @@ lmp_Area <- 54897.39 #hectares
 lmp_Area_km2 <- conv_unit(lmp_Area, "hectare", "km2")
 
 #Scale lmp loads by watershed area
-
-
 lmp <- lmp %>%
   select(-X) %>%
   mutate(across(FW_TP:FW_TSS, ~./lmp_Area_km2))
