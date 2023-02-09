@@ -4,6 +4,8 @@
 # Author: Anna Mikulis, University of New Hampshire
 # Last Updated: 1/27/2023
 
+#R Version 4.2.2. (2022-10-31) "Innocent & Trusting"
+
 # Purpose: Read and process raw solute concentration data for the three tidal tributaries (head-of-tide monitoring stations) that flow into Great Bay.
   # Also process raw solute concentrations from the estuary, at Adams Point (high and low tide). Prepare discharge data for flux calculations.
   # Create physiochemical characteristics tables. 
@@ -88,11 +90,11 @@ deduped.APTIDE <- deduped.APTIDE %>%
 #Join df with deduped.APTIDE
 #Replace Station ID in AP data frame
 df <- left_join(df, deduped.APTIDE, by = c("START_DATE", "START_TIME"))
-
+#If "Station_ID.y" is not NA, (i.e says "GRBAPL" or "GRBAPH"), use STATION_ID.y as the STATION ID, else use the original station id from "Station_ID.x 
 df$STATION_ID <- ifelse(!is.na(df$STATION_ID.y), df$STATION_ID.y, df$STATION_ID.x) 
 
 df <- df %>%
-  select(-STATION_ID.x, -STATION_ID.y)
+  select(-STATION_ID.x, -STATION_ID.y) #remove extra Station ID columns now that everything has been summarized into the STATION_ID column
 
 #Couple of missing High and Low Tide IDS
 df$STATION_ID <- ifelse(df$START_DATE == "2008-06-11" & df$START_TIME == "09:35", "GRBAPH",
@@ -131,14 +133,10 @@ df <- subset(df, !(PARAMETER_ANALYTE %in% remove_parms))
 df <- df %>%
   select(STATION_ID:ACTIVITY_COMMENTS, PARAMETER = PARAMETER_ANALYTE, QUALIFIER_AND_RESULTS:FRACTION_TYPE)
 
-#For instances where result is NA instead of 1/2 of method detection limit, run this line of code
+#For instances where result is NA instead of 1/2 of method detection limit, run these next 2 lines of code (requires metadata to know if the sample was collected)
 #subset(df, is.na(QUALIFIER_AND_RESULTS))
-
 #df$QUALIFIER_AND_RESULTS <- ifelse(is.na(df$QUALIFIER_AND_RESULTS), df$RDL/2, df$QUALIFIER_AND_RESULTS)
-
-
-
-
+#_____________________________________________________
 #Figure out Parameter Methods and Rename to clarify
 
 #PHOSPHORUS AS P, fraction type is "Total"; which means PHOSPHORUS samples are TOTAL PHOSPHORUS ("TP")
@@ -220,7 +218,7 @@ df <- df %>%
 #Activity Comments Review and Assessment
 unique(df$ACTIVITY_COMMENTS) #Activity Comments are mostly UNH IDs and weather at GRBAP - removal of column for purposes of solute analysis is OK
 
-unique(df$ACTIVITY_TYPE) # Removing duplicates to see if that fixes spread issue)
+unique(df$ACTIVITY_TYPE) # Removing field duplicates to see if that fixes spread issue & because field duplicates are for QC purposes
 
 df <- df %>%
   select(-ACTIVITY_COMMENTS, - FRACTION_TYPE) %>%
@@ -352,7 +350,6 @@ df_temp <- df %>%
   group_by(STATION_ID) %>%
   summarize(mean_temp = mean(TEMP_WATER_DEGC, na.rm=T), sd_temp = sd(TEMP_WATER_DEGC, na.rm=T), count = n())
 
-
 #Calculate DIN and DON in instances where it is missing
 df$DIN_MGL_calc <- df$NH4_MGL + df$NO3_NO2_MGL
 df$DON_MGL_calc <- df$TDN_MGL - df$NO3_NO2_MGL - df$NH4_MGL
@@ -363,7 +360,7 @@ df$DON_MDL <- (df$TDN_MGL + df$NO3_NO2_MGL + df$NH4_MGL) * 0.05
 #Is DON below MDL?
 df$DON_B_MDL <- ifelse(df$DON_MGL_calc < df$DON_MDL, "BDL", "G") 
 
-length(which(df$DON_B_MDL == "BDL")) #9 instances below detection limit
+length(which(df$DON_B_MDL == "BDL")) #7 instances below detection limit
 
 #Set those DON values below detection limit to 1/2 of the method detection limit
 
