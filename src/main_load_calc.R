@@ -4,7 +4,7 @@
 #Last Updated: 1/26/2023
 
 #This script calculates annual (CY and WY) and monthly loads for the three tidal tributaries (Lamprey, Squamscott, and Winnicut) to Great Bay.
-#This script pulls in products created in the main_dataformat.R script, including measured water quality concentrations and discharge readings. 
+#This script pulls in products created in the main_dataformat.R script, including measured water quality concentrations and discharge readings. Start with an empty environment. 
 
 #Load required packages.
 Packages <- c("readxl", "dplyr", "ggplot2", "measurements", "plotly", "lubridate",
@@ -28,6 +28,9 @@ conc_sub <- conc %>%
   select(STATION_ID:TSS_MGL, Month, Year) %>%
   select(-NO3_MGL, -SIO2_MGL, -PC_MGL) #delete NO3, SiO2, and PC columns b/c they are empty 
 
+count <- conc_sub %>%
+  group_by(STATION_ID, Year) %>%
+  summarize(across(TP_MGL:TSS_MGL, ~ sum(!is.na(.x))))
 #___________________________________________________________________
 #______________________________________________________________________
 #Read in discharge data frame created in main_dataformat.R
