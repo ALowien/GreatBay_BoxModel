@@ -133,9 +133,9 @@ df <- subset(df, !(PARAMETER_ANALYTE %in% remove_parms))
 df <- df %>%
   select(STATION_ID:ACTIVITY_COMMENTS, PARAMETER = PARAMETER_ANALYTE, QUALIFIER_AND_RESULTS:FRACTION_TYPE)
 
-#For instances where result is NA instead of 1/2 of method detection limit, run these next 2 lines of code (requires metadata to know if the sample was collected)
-#subset(df, is.na(QUALIFIER_AND_RESULTS))
-#df$QUALIFIER_AND_RESULTS <- ifelse(is.na(df$QUALIFIER_AND_RESULTS), df$RDL/2, df$QUALIFIER_AND_RESULTS)
+#For instances where result is NA instead of 1/2 of method detection limit, run these next 2 lines of code (based on discussion with Water Quality Analysis Lab Manager)
+subset(df, is.na(QUALIFIER_AND_RESULTS))
+df$QUALIFIER_AND_RESULTS <- ifelse(is.na(df$QUALIFIER_AND_RESULTS), df$RDL/2, df$QUALIFIER_AND_RESULTS)
 #_____________________________________________________
 #Figure out Parameter Methods and Rename to clarify
 
@@ -351,7 +351,7 @@ df_temp <- df %>%
   summarize(mean_temp = mean(TEMP_WATER_DEGC, na.rm=T), sd_temp = sd(TEMP_WATER_DEGC, na.rm=T), count = n())
 
 #Calculate DIN and DON in instances where it is missing
-df$DIN_MGL_calc <- df$NH4_MGL + df$NO3_NO2_MGL
+df$DIN_MGL <- ifelse(is.na(df$DIN_MGL) & !is.na(df$NH4_MGL) & !is.na(df$NO3_NO2_MGL), df$NH4_MGL + df$NO3_NO2_MGL, df$DIN_MGL)
 df$DON_MGL_calc <- df$TDN_MGL - df$NO3_NO2_MGL - df$NH4_MGL
 
 #METHOD DETECTION LIMITS FOR DON (b/c not included in EMD)
@@ -363,13 +363,15 @@ df$DON_B_MDL <- ifelse(df$DON_MGL_calc < df$DON_MDL, "BDL", "G")
 length(which(df$DON_B_MDL == "BDL")) #7 instances below detection limit
 
 #Set those DON values below detection limit to 1/2 of the method detection limit
-
 df$DON_MGL_calc_final <- ifelse(df$DON_MGL_calc < df$DON_MDL, df$DON_MDL/2, df$DON_MGL_calc)
+df$DON_MGL <- df$DON_MGL_calc_final
+
+#Calculate TN as PN + TDN, as we stopped measuring TN directly around ~2015
+df$TN_MGL <- ifelse(is.na(df$TN_MGL) & !is.na(df$PN_MGL) & !is.na(df$TDN_MGL), df$PN_MGL + df$TDN_MGL, df$TN_MGL)
 
 
 df <- df %>%
-  select(STATION_ID:NO3_NO2_MGL, DIN_MGL = DIN_MGL_calc, DON_MGL = DON_MGL_calc_final, DOC_MGL:PHEOPHYTIN_A_UGL)
-#this is now corrected for MDLs across all solutes
+  select(-DON_MGL_calc, -DON_MDL, - DON_B_MDL, -DON_MGL_calc_final)
 
 ### END Convert Dataframe from Long to Wide ###
 #assess normality of TSS values
@@ -385,6 +387,7 @@ df <- df %>%
 skewness(df$TSS_MGL, na.rm=T) #notable improvement in skewness from 12.6 to 2.1
 kurtosis(df$TSS_MGL, na.rm=T) #notable improvement in kurtosis from 224 to 11
 
+#Count of concentration measurements
 #### Discharge Data Formatting ####
 #______________________________________________________________________________________________________________________________________
 #________________________________________________________________________________________________________________________________________
