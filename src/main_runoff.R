@@ -42,11 +42,11 @@ write.csv(GRB_CR, "results/main_runoff/runoff_estimate_kgyr.csv")
 #Repeat to get monthly coastal runoff
 lmp_monthly <- read.csv("results/main_load_calc/FW_Loads/LR_MLoads_kg_month.csv")
 
-lmp_Monthly <- lmp_Monthly %>%
+lmp_monthly <- lmp_monthly %>%
   select(-X, - flow_month) %>%
   mutate(across(FW_TP:FW_TSS, ~. /lmp_Area_km2))
 
-GRB_CR_monthly <- lmp_Monthly %>%
+GRB_CR_monthly <- lmp_monthly %>%
   mutate(across(FW_TP:FW_TSS, ~. * GB_Coastal_Area))
 
-write.csv(GRB_CR_monthly, "results/runoff_monthly.csv")
+write.csv(GRB_CR_monthly, "results/main_runoff/runoff_monthly.csv")
