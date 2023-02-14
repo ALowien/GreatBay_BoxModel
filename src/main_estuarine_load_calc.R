@@ -1,7 +1,7 @@
 #main_estuarine_load_calc.R
 
 #Author: Anna Mikulis, University of New Hampshire
-#Last Updated 1/26/2022
+#Last Updated 2/14/2022
 
 #Purpose: Calculates high and low tide flux of solutes based on river input of freshwater and known tidal prism
 
@@ -20,11 +20,11 @@ lapply(Packages, library, character.only = TRUE)
 #Great Bay: Great Bay Estuary = 16.7km^2:54.66km^2
 
 scalar_ratio <- 16.7/54.66
-
 round(scalar_ratio,2)
-(178*10^6)*(0.31)
 
-GB_Prism_m3day <- 55180000
+tidalprism_m3day <- 178*10^6
+
+GB_Prism_m3day <- tidalprism_m3day*round(scalar_ratio,2)
 GB_Prism_m3_year <- GB_Prism_m3day * 365
 
 #Load formatted data frame "df6" and filter for Adams Point Stations
@@ -127,8 +127,6 @@ SalvsQ_LT <- ggplot(Daily_Sal_lowtide, aes(m3_day, SALINITY_PSS)) + geom_point(c
   theme_cowplot() 
 SalvsQ_LT
 
-#SalvsQ_LT +  annotation_logticks(sides="b")
-
 #Save freshwater discharge vs low tide salinity plot
 ggsave(SalvsQ_LT, file=paste0("results/figures/lowtide_salvsdischarge.png"),
        width=8, height=6, units="in", dpi=300, bg="white")
@@ -145,11 +143,10 @@ ncvTest(HT_lm)#suggests no heteroskedasticity p > 0.05; fail to reject null of h
 LT_lm <- lm(SALINITY_PSS ~ m3_day, Daily_Sal_lowtide)
 summary(LT_lm)
 
-#plot(LT_lm)
-
+plot(LT_lm)
 ncvTest(LT_lm) #suggests heteroskedasticity p < 0.05; reject null of homoskedasticity 
 
-#Plot Adams Point Solute Concentrations Against Freshwater Input
+#Plot Low Tide Adams Point Solute Concentrations Against Freshwater Input
 AP_Solutes <- AP %>%
   select(Site = STATION_ID, START_DATE:TSS_MGL)
 
@@ -165,65 +162,6 @@ AP_All_LT_long <- AP_All_LT %>%
   filter(Solute != "DON_MGL") %>%
   filter(Solute != "TDN_MGL" & Solute != "NO3_NO2_MGL") %>%
   filter(Solute != "NH4_MGL")
-
-AP_All_HT <- AP_All %>%
-  filter(Site == "GRBAPH")
-
-AP_All_HT_long <- AP_All_HT %>%
-  pivot_longer(cols=PO4_MGL:TSS_MGL, values_to = "Concentration", names_to = "Solute")
-
-CQ_HT <- ggplot(AP_All_HT_long, aes(m3_day, Concentration)) + geom_point() +
-  geom_smooth(data=subset(AP_All_HT_long, Solute == "DIN_MGL") ,method="lm", se=T, colour = "red", size = 1) +
-  geom_smooth(data=subset(AP_All_HT_long, Solute == "DOC_MGL") ,method="lm", se=T, colour = "red", size = 1) +
-  geom_smooth(data=subset(AP_All_HT_long, Solute == "DIN_MGL") ,method="lm", se=T, colour = "red", size = 1) +
-  geom_smooth(data=subset(AP_All_HT_long, Solute == "NO3_NO2_MGL") ,method="lm", se=T, colour = "red", size = 1) +
-  geom_smooth(data=subset(AP_All_HT_long, Solute == "SIO2_MGL") ,method="lm", se=T, colour = "red", size = 1) +
-  geom_smooth(data=subset(AP_All_HT_long, Solute == "PN_MGL") ,method="lm", se=T, colour = "red", size = 1) +
- # geom_smooth(data=subset(AP_All_HT_long, Solute == "PO4_MGL") ,method="lm", se=T, colour = "blue", size = 1) +
-  geom_smooth(data=subset(AP_All_HT_long, Solute == "TDN_MGL") ,method="lm", se=T, colour = "red", size = 1) +
-  geom_smooth(data=subset(AP_All_HT_long, Solute == "DON_MGL") ,method="lm", se=T, colour = "red", size = 1) +
-  geom_smooth(data=subset(AP_All_HT_long, Solute == "TN_MGL") ,method="lm", se=T, colour = "red", size = 1) +
-  scale_x_log10() + ylab("Adams Point High Tide Concentration") + xlab("Freshwater Input m3/day") +
-  facet_wrap(~Solute, scales = "free") +
-  theme_cowplot()
-CQ_HT
-
-#Regression between DIN and discharge
-ht.din.lm <- lm(DIN_MGL ~ m3_day, AP_All_HT)
-summary(ht.din.lm)
-
-ht.doc.lm <- lm(DOC_MGL ~ m3_day, AP_All_HT)
-summary(ht.doc.lm)
-
-ht.nh4.lm <- lm(NH4_MGL ~ m3_day, AP_All_HT)
-summary(ht.nh4.lm) #not significant
-
-ht.no32.lm <- lm(NO3_NO2_MGL ~ m3_day, AP_All_HT)
-summary(ht.no32.lm)
-
-ht.sio2.lm <- lm(SIO2_MGL ~ m3_day, AP_All_HT)
-summary(ht.sio2.lm)
-
-ht.tdn.lm <- lm(TDN_MGL ~ m3_day, AP_All_HT)
-summary(ht.tdn.lm)
-
-ht.tn.lm <- lm(TN_MGL ~ m3_day, AP_All_HT)
-summary(ht.tn.lm)
-
-ht.don.lm <- lm(DON_MGL ~ m3_day, AP_All_HT)
-summary(ht.don.lm)
-
-ht.pn.lm <- lm(PN_MGL ~ m3_day, AP_All_HT)
-summary(ht.pn.lm)
-
-ht.po4.lm <- lm(PO4_MGL ~ m3_day, AP_All_HT)
-summary(ht.po4.lm) #not significant
-
-ht.pc.lm <- lm(PC_MGL ~ m3_day, AP_All_HT)
-summary(ht.pc.lm) #not significant
-
-ht.tss.lm <- lm(TSS_MGL ~ m3_day, AP_All_HT)
-summary(ht.tss.lm) #not significant regression
 
 #LOW TIDE
 AP_All_LT_long$Solute <- ifelse(AP_All_LT_long$Solute == "PO4_MGL", "PO4", AP_All_LT_long$Solute)
@@ -273,42 +211,33 @@ ggsave(CQ_LT, file=paste0("results/figures/lowtide_cq.png"),
 
 #Regression between concentration & discharge
 lt.din.lm <- lm(DIN_MGL ~ m3_day, AP_All_LT)
-summary(lt.din.lm)
+summary(lt.din.lm) #signficant
 
 lt.doc.lm <- lm(DOC_MGL ~ m3_day, AP_All_LT)
-summary(lt.doc.lm)
+summary(lt.doc.lm) #significant
 
 lt.nh4.lm <- lm(NH4_MGL ~ m3_day, AP_All_LT)
-summary(lt.nh4.lm)
+summary(lt.nh4.lm) #significant
 
 lt.no32.lm <- lm(NO3_NO2_MGL ~ m3_day, AP_All_LT)
-summary(lt.no32.lm)
-
-lt.sio2.lm <- lm(SIO2_MGL ~ m3_day, AP_All_LT)
-summary(lt.sio2.lm)
+summary(lt.no32.lm) #significant
 
 lt.tdn.lm <- lm(TDN_MGL ~ m3_day, AP_All_LT)
-summary(lt.tdn.lm)
+summary(lt.tdn.lm) #significant
 
 lt.tn.lm <- lm(TN_MGL ~ m3_day, AP_All_LT)
-summary(lt.tn.lm)
-
-lt.don.lm <- lm(DON_MGL ~ m3_day, AP_All_LT)
-summary(lt.don.lm) #not significant
+summary(lt.tn.lm) #significant
 
 lt.pn.lm <- lm(PN_MGL ~ m3_day, AP_All_LT)
-summary(lt.pn.lm)
-
-lt.pc.lm <- lm(PC_MGL ~ m3_day, AP_All_LT)
-summary(lt.pc.lm) 
+summary(lt.pn.lm) #significant
 
 lt.tss.lm <- lm(TSS_MGL ~ m3_day, AP_All_LT)
 summary(lt.tss.lm) #not significant
 
 lt.po4.lm <- lm(PO4_MGL ~ m3_day, AP_All_LT)
-summary(lt.po4.lm)
+summary(lt.po4.lm) #significant
 
-#__________________________________________________________________________________________________________________________________________
+#____________________________________________
 #Monthly Discharge Estimate
 Q$Month <- month(Q$START_DATE)
 Q$Year <- year(Q$START_DATE)
@@ -350,9 +279,7 @@ Q_Year$L_Year <- conv_unit(Q_Year$Q_m3_year, "m3", "l")
 
 plot(Q_Year$Year, Q_Year$Q_m3_year)
 
-Annual_FW_Input <- ggplot(Q_Year, aes(Year, Q_m3_year)) + geom_point() +
-  theme_cowplot()
-Annual_FW_Input
+ggplot(Q_Year, aes(Year, Q_m3_year)) + geom_point() + theme_cowplot()
 
 ##Adams Point Flux
 
@@ -367,8 +294,6 @@ Tidal_Prism$TP_m3_year <- Tidal_Prism$daysinyear * GB_Prism_m3day
 
 #Tidal Prism with FW Input backed out
 Tidal_Prism$Ocean_m3_year <- Tidal_Prism$TP_m3_year - Tidal_Prism$Q_m3_year
-
-
 
 #Average Annual AP Concentrations
 AP_Annual <- AP 
