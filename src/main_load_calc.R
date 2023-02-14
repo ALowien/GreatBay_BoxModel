@@ -1,7 +1,7 @@
 #main_load_calc.R
 
 #Author: Anna Mikulis, University of New Hampshire
-#Last Updated: 1/26/2023
+#Last Updated: 2/14/2023
 
 #This script calculates annual (CY and WY) and monthly loads for the three tidal tributaries (Lamprey, Squamscott, and Winnicut) to Great Bay.
 #This script pulls in products created in the main_dataformat.R script, including measured water quality concentrations and discharge readings. Start with an empty environment. 
@@ -29,8 +29,19 @@ conc_sub <- conc %>%
   select(-NO3_MGL, -SIO2_MGL, -PC_MGL) #delete NO3, SiO2, and PC columns b/c they are empty 
 
 count <- conc_sub %>%
+  select(-TP_MGL, -NO3_NO2_MGL, -NH4_MGL) %>%
   group_by(STATION_ID, Year) %>%
-  summarize(across(TP_MGL:TSS_MGL, ~ sum(!is.na(.x))))
+  summarize(across(PO4_MGL:TSS_MGL, ~ sum(!is.na(.x)))) %>%
+  pivot_longer(cols=c(PO4_MGL:TSS_MGL), names_to= "Parameter", values_to="Count") 
+  
+ggplot(count, aes(Year, Count, color=STATION_ID)) + geom_bar(stat="identity", position="dodge") + facet_wrap(~Parameter) +
+  geom_hline(yintercept=7) + theme_bw()
+
+#make a table of years with insufficient concentration data
+years_to_omit <- count %>%
+  filter(Count < 7)
+
+write.csv(years_to_omit, "./results/main_load_calc/years_to_omit.csv")
 #___________________________________________________________________
 #______________________________________________________________________
 #Read in discharge data frame created in main_dataformat.R
@@ -802,14 +813,3 @@ Tidal_Trib_Normalized_WY_Loads <- Tidal_Trib_WY_Loads %>%
 
 #Save normalized loads
 write.csv(Tidal_Trib_Normalized_WY_Loads, "results/main_load_calc/FW_Loads/Tidal_Trib_WY_Loads_kg_ha_yr.csv")
-
-TSS_Load <- ggplot(Tidal_Trib_CY_Loads, aes(CY, FW_TSS, colour = Station_ID)) + 
-  geom_point(size = 4) +
-  scale_x_continuous(breaks = seq(from=2008, to=2018, by=1))+
-  scale_y_log10(labels = scales::comma) +
-  scale_color_viridis_d(name="River") +
-  labs(x = "Calendar Year", y="TSS Load (kg/year)") +
-  theme_cowplot() +
-  annotation_logticks(sides = "l")
-TSS_Load 
-
