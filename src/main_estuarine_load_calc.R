@@ -136,14 +136,14 @@ ggsave(SalvsQ_LT, file=paste0("results/figures/lowtide_salvsdischarge.png"),
 HT_lm <- lm(SALINITY_PSS ~ m3_day, Daily_Sal_hightide)
 summary(HT_lm)
 
-plot(HT_lm)
+#plot(HT_lm)
 
 ncvTest(HT_lm)#suggests no heteroskedasticity p > 0.05; fail to reject null of homoskedasticity 
 
 LT_lm <- lm(SALINITY_PSS ~ m3_day, Daily_Sal_lowtide)
 summary(LT_lm)
 
-plot(LT_lm)
+#plot(LT_lm)
 ncvTest(LT_lm) #suggests heteroskedasticity p < 0.05; reject null of homoskedasticity 
 
 #Plot Low Tide Adams Point Solute Concentrations Against Freshwater Input
@@ -367,7 +367,7 @@ Tidal_Prism_Monthly$Ocean_m3_month <- Tidal_Prism_Monthly$Prism_m3_month - Tidal
 AP_Monthly <- AP 
 
 AP_Monthly$Month <- month(AP_Monthly$START_DATE)
-AP_Monthly$Year <- month(AP_Monthly$START_DATE)
+AP_Monthly$Year <- year(AP_Monthly$START_DATE)
 
 AP_Monthly <- AP_Monthly %>%
   group_by(Year, Month, STATION_ID) %>%
