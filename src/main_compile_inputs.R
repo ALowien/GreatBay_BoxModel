@@ -4,12 +4,10 @@
 #Last Updated: 1/26/2023
 
 #Purpose: Compile calendar year fluxes for budget calculations
-
 Packages <- c("readr", "dplyr", "tidyr", "cowplot", "viridis", "ggplot2",
               "plotly", "measurements")
 
 lapply(Packages, library, character.only = TRUE)
-
 
 #River Inputs
 #NHDES Head-of-Tide Stations
@@ -22,51 +20,24 @@ SQR_Annual_Loads <- read.csv("results/main_load_calc/FW_Loads/SQR_Annual_Loads.c
 
 WNC_Annual_Loads <- read.csv("results/main_load_calc/FW_Loads/WNC_Annual_Loads.csv")
 
-#Thin load estimates based on QAQC (exclude years with <9 WQ samples)
+#Thin load estimates based on QAQC (exclude years with <8 WQ samples)
 
 #Lamprey River
 LMP_Annual_Loads <- LMP_Annual_Loads %>%
   select(-X, -Flow_l_year, TP = FW_TP, PO4 = FW_PO4, PN=FW_PN, TN=FW_TN, TDN=FW_TDN, NH4 = FW_NH4, NO3_NO2 = FW_NO3_NO2, 
          DIN=FW_DIN, DON=FW_DON, DOC=FW_DOC, TSS=FW_TSS)
 
-LMP_Annual_Loads$DIN <- ifelse(LMP_Annual_Loads$CY == 2008, NA, LMP_Annual_Loads$DIN)
-
-LMP_Annual_Loads$DON <- ifelse(LMP_Annual_Loads$CY == 2008, NA, LMP_Annual_Loads$DON)
-
-LMP_Annual_Loads$NH4 <- ifelse(LMP_Annual_Loads$CY == 2008, NA, LMP_Annual_Loads$NH4)
-
-LMP_Annual_Loads$NO3_NO2 <- ifelse(LMP_Annual_Loads$CY == 2008, NA, LMP_Annual_Loads$NO3_NO2)
-
 #Squamscott River
 SQR_Annual_Loads <- SQR_Annual_Loads %>%
   select(-X, -Flow_l_year, TP = FW_TP, PO4 = FW_PO4, PN=FW_PN, TN=FW_TN, TDN=FW_TDN, NH4 = FW_NH4, NO3_NO2 = FW_NO3_NO2, 
          DIN=FW_DIN, DON=FW_DON, DOC=FW_DOC, TSS=FW_TSS)
-
-SQR_Annual_Loads$DIN <- ifelse(SQR_Annual_Loads$CY == 2008, NA, SQR_Annual_Loads$DIN)
-
-SQR_Annual_Loads$DON <- ifelse(SQR_Annual_Loads$CY == 2008, NA, SQR_Annual_Loads$DON)
-
-SQR_Annual_Loads$NH4 <- ifelse(SQR_Annual_Loads$CY == 2008, NA, SQR_Annual_Loads$NH4)
-
-SQR_Annual_Loads$NO3_NO2 <- ifelse(SQR_Annual_Loads$CY == 2008, NA, SQR_Annual_Loads$NO3_NO2)
-
-SQR_Annual_Loads$PN <- ifelse(SQR_Annual_Loads$CY == 2011, NA, SQR_Annual_Loads$PN)
 
 #Winnicut River
 WNC_Annual_Loads <- WNC_Annual_Loads %>%
   select(-X, -Flow_l_year, TP = FW_TP, PO4 = FW_PO4, PN=FW_PN, TN=FW_TN, TDN=FW_TDN, NH4 = FW_NH4, NO3_NO2 = FW_NO3_NO2, 
          DIN=FW_DIN, DON=FW_DON, DOC=FW_DOC, TSS=FW_TSS)
 
-WNC_Annual_Loads$DIN <- ifelse(WNC_Annual_Loads$CY == 2008, NA, WNC_Annual_Loads$DIN)
-
-WNC_Annual_Loads$DON <- ifelse(WNC_Annual_Loads$CY == 2008, NA, WNC_Annual_Loads$DON)
-
-WNC_Annual_Loads$NH4 <- ifelse(WNC_Annual_Loads$CY == 2008, NA, WNC_Annual_Loads$NH4)
-
-WNC_Annual_Loads$NO3_NO2 <- ifelse(WNC_Annual_Loads$CY == 2008, NA, WNC_Annual_Loads$NO3_NO2)
-
 #Combine into one tidal tributary dataframe of annual loads
-
 LMP_Annual_Loads$Site <- "Lamprey"
 SQR_Annual_Loads$Site <- "Squamscott"
 WNC_Annual_Loads$Site <- "Winnicut"
@@ -76,7 +47,7 @@ Tidal_Tribs <- union(Tidal_Tribs, WNC_Annual_Loads)
 
 Tidal_Tribs_long <- Tidal_Tribs %>%
   select(Year = CY, Site, TP:TSS) %>%
-  pivot_longer(Tidal_Tribs, cols= c(TP:TSS), names_to = "Solute", values_to = "Load_kgyr")
+  pivot_longer(cols= c(TP:TSS), names_to = "Solute", values_to = "Load_kgyr")
 
 #Precipitation 
 Precip <- read.csv("results/main_precipitation_format/cy_precip_loads.csv")
@@ -89,25 +60,28 @@ summary(Precip)
 Precip <- Precip %>%
   select(-X, Site, Year= CY, DOC=DOC_kg_yr, TDN=TDN_kg_yr, TN=TN_kg_yr, NO3_NO2 = NO3_kg_yr, NH4 = NH4_kg_yr, PO4 = PO4_kg_yr, DIN=DIN_kg_yr, DON=DON_kg_yr)
 
+#Add a PN column, assuming 0 kg/yr for PN in rainfaill
+Precip$PN <- 0
+
 Precip_long <- Precip %>%
-  select(Site, Year, TDN:TN) %>%
-  pivot_longer(cols=c(TDN:TN),
+  select(Site, Year, PN, TDN:TN) %>%
+  pivot_longer(cols=c(PN:TN),
                names_to = "Solute", 
                values_to = "Load_kgyr")
 
 #Waste water Treatment Plants
-
-WWTF <- read.csv("results/main_wwtf_loads/wwtf_annual_loads.csv")
+WWTF <- read.csv("results/main_wwtf_loads/redone/wwtf_annual_loads.csv")
 
 WWTF <- WWTF %>%
-  select(Site = WWTF, Year, TN = TNkgyr, DIN = DINkgyr, TDN=TDNkgyr, TSS=TSSkgyr, DOC=DOCkgyr, PO4=P04kgyr)
+  select(Site = WWTF, Year = year, TN = TN_kgyr, DIN = DIN_kgyr, TDN=TDN_kgyr, TSS=TSS_kgyr, DOC=DOCkgyr, PO4=P04kgyr)
 
 WWTF$Site <- ifelse(WWTF$Site == "Exeter", "Exeter WWTF",
                     ifelse(WWTF$Site == "Newmarket", "Newmarket WWTF",
                            ifelse(WWTF$Site == "Newfields", "Newfields WWTF", NA)))
-
+#Add a PN column, assuming 0 kg/yr for PN in wwtf effluent 
+WWTF$PN <- 0
 WWTF_long <- WWTF %>%
-  pivot_longer(cols=c(TN:PO4),
+  pivot_longer(cols=c(TN:PN),
                names_to = "Solute",
                values_to = "Load_kgyr")
 
@@ -118,23 +92,13 @@ AP_Flux <- AP_Flux %>%
   select(Year, Site = STATION_ID, PO4:NH4, NO3_NO2 = NO32, DIN:TSS, - PC, - SIO2) %>%
   filter(Year < 2019)
 
-AP_Flux$DIN <- ifelse(AP_Flux$Year == 2008, NA, AP_Flux$DIN)
-AP_Flux$DOC <- ifelse(AP_Flux$Year == 2009, NA, AP_Flux$DOC)
-AP_Flux$NH4 <- ifelse(AP_Flux$Year == 2008, NA, AP_Flux$NH4)
-AP_Flux$DON <- ifelse(AP_Flux$Year == 2008, NA, AP_Flux$DON)
-AP_Flux$TSS <- ifelse(AP_Flux$Year == 2017, NA, AP_Flux$TSS)
-
-
 AP_Flux_long <- AP_Flux %>%
   pivot_longer(cols=c(PO4:TSS),
                names_to = "Solute", 
                values_to = "Load_kgyr")
-#Adams Point TN Loads
 
-AP_TNLoad <- ggplot(AP_Flux, aes(Year, TN)) + geom_point(aes(color=Site))
-AP_TNLoad
+
 #Coastal runoff
-
 Runoff <- read.csv("results/main_runoff/runoff_estimate_kgyr.csv") %>%
   select(Year = CY, PO4 = FW_PO4, PN=FW_PN, TN=FW_TN, TDN=FW_TDN, NH4 = FW_NH4, NO3_NO2 = FW_NO3_NO2, 
          DIN=FW_DIN, DON=FW_DON, DOC=FW_DOC, TSS=FW_TSS)
@@ -152,12 +116,17 @@ Groundwater <- data.frame(Site = "Groundwater",
                           DIN = 6800)
 
 #Assume DIN = TDN = TN for groundwater
-
 Groundwater$TN <- Groundwater$DIN
 Groundwater$TDN <- Groundwater$DIN
 
+#Assume PN is 0, PO4 is 0, DOC is 0
+Groundwater$PN <- 0
+Groundwater$DOC <- 0
+Groundwater$PO4 <- 0
+Groundwater$TSS <- 0
+
 Groundwater_long <- Groundwater %>%
-  pivot_longer(cols = c(DIN:TDN),
+  pivot_longer(cols = c(DIN:TSS),
                names_to ="Solute",
                values_to = "Load_kgyr")
 
@@ -175,10 +144,36 @@ Budget <- full_join(Budget, WWTF_long)
 Budget <- full_join(Budget, Runoff_long)
 Budget <- full_join(Budget, Groundwater_long)
 
+#Read in csv file that contains sites, years, and parameters with less than 7 measurements
+yearstoomit <- read.csv("results/main_load_calc/years_to_omit.csv")
+
+
+yearstoomit$STATION_ID <- ifelse(yearstoomit$STATION_ID == "02-WNC", "Winnicut",
+                                 ifelse(yearstoomit$STATION_ID == "05-LMP", "Lamprey",
+                                        ifelse(yearstoomit$STATION_ID == "09-EXT", "Squamscott", yearstoomit$STATION_ID)))
+
+colnames(yearstoomit)[colnames(yearstoomit) == "STATION_ID"] <- "Site"
+
+colnames(yearstoomit)[colnames(yearstoomit) == "Parameter"] <- "Solute"
+yearstoomit$Solute <- str_sub(yearstoomit$Solute, 1, str_length(yearstoomit$Solute)-4)
+
+yearstoomit <- yearstoomit %>% select(-X, -Count) 
+#make an identifying column for rows that need to be NA due to insufficient data
+Budget <- Budget %>%
+  mutate(Site_Year_Solute = paste(Site, Year, Solute, sep="_"))
+
+yearstoomit <- yearstoomit %>%
+  mutate(Site_Year_Solute = paste(Site, Year, Solute, sep="_"))
+# Replace the values in Load_kgyr column with NA where the conditions match
+Budget <- Budget %>% 
+  mutate(Load_kgyr = ifelse(Site_Year_Solute %in% yearstoomit$Site_Year_Solute, NA, Load_kgyr)) %>% 
+  select(-Site_Year_Solute) # remove the temporary column
+
 Budget_wide <- Budget %>%
-  pivot_wider(names_from = "Solute",
+  pivot_wider(id_cols = c(Year, Site),
+              names_from = "Solute",
               values_from = "Load_kgyr") %>%
-  select(-TP) #only measured at Tidal Tribs
+  select(-TP, -DON) #only measured at Tidal Tribs and/or Adams Point
 
 #kg/yr
 Budget_wide$Component <- ifelse(Budget_wide$Site == "GRBAPL", "Output" ,"Input")
@@ -190,7 +185,7 @@ Budget_wide_siteavg <- Budget_wide %>%
 
 write.csv(Budget_wide_siteavg, "results/main_compile_inputs/Avg.Load.Site.kgyr.csv")
 
-#Site averages
+#Site standard deviation
 Budget_wide_sitesd <- Budget_wide %>%
   group_by(Site) %>%
   summarize(across(PO4:TSS, sd,na.rm=T))
@@ -202,7 +197,7 @@ library(plotrix)
 budget.s.error <- Budget_wide %>%
   select(Site, PO4:TSS) %>%
   group_by(Site) %>%
-  summarize(across(PO4:TSS, std.error, na.rm=F))
+  summarize(across(PO4:TSS, std.error, na.rm=T))
 
 
 #calculate standard error as % of mean
@@ -211,25 +206,14 @@ budget.percent.error2 <- budget.percent.error %>%
   mutate(across(PO4:TSS, ~.*100)) %>%
   filter(Site != "Groundwater" & Site != "Runoff")
 
-
 #Black Box Calculations for Each Solute
 summary(Budget)
 summary(Budget_wide)
 
 Budget <- Budget %>%
-  filter(Solute != "SIO2" & Solute != "NO3" & Solute != "PC" & Solute != "TP") #not measured at all sites
+  filter(Solute != "SIO2" & Solute != "NO3" & Solute != "PC" & Solute != "TP" & Solute != "DON") #not measured at all sites
 
-M1 <- ggplot(Budget, aes(Site, Load_kgyr, color=Site)) + geom_boxplot() +
-  facet_wrap(~Solute, scales="free") +
-  theme(axis.title.x = element_blank(),
-        axis.text.x = element_text(size=9, angle=90),
-        axis.text.y = element_text(size=9),
-        legend.position = "none")
-M1
-
-ggplotly(M1)
-
-#Combine M1 Budget (Head-of-tide river stations) into input categories:
+#Combine individual components into input categories:
 # 1) Tributary Load
 # 2) WWTF Load
 # 3) Precipitation
@@ -259,31 +243,14 @@ unique(Budget$Type)
 
 Budget_Components <- Budget %>%
   group_by(Type, Year, Solute) %>%
-  summarize(Load_kgyr = sum(Load_kgyr, na.rm=T)) %>%
-  filter(Load_kgyr > 0) # remove any rows that are zero
-
-P_Components <- ggplot(Budget_Components, aes(Year, Load_kgyr, color=Type)) + geom_point(size=2, alpha=0.2) +
-  scale_color_viridis_d() +
-  scale_x_continuous(limits=c(2008,2018),breaks=seq(from=2008, to=2018, by=2)) +
-  facet_wrap(~Solute, scales="free") + theme_cowplot()
-P_Components
-
-ggplot(subset(Budget_Components, Type == "APH"), aes(Year, Load_kgyr, color=Type)) +
- geom_point(size=2) +
-  scale_color_viridis_d() +
-  scale_x_continuous(limits=c(2008,2018),breaks=seq(from=2008, to=2018, by=2)) +
-  facet_wrap(~Solute, scales="free") + theme_cowplot()
+  summarize(Load_kgyr = sum(Load_kgyr, na.rm=F))
 
 #Write an Input/Output Column
 Budget_Components$Balance <- ifelse(Budget_Components$Type == "APL", "Output", "Input")
 
 Budget_Components_Summary <- Budget_Components %>%
   group_by(Balance, Solute, Year) %>%
-  summarize(Loadkgyr = sum(Load_kgyr, na.rm=T))
-
-#Remove DOC 2011 because no DOC measurements at GRBAPH or GRBAPL
-Budget_Components_Summary$Loadkgyr <- ifelse(Budget_Components_Summary$Solute == "DOC" & Budget_Components_Summary$Year == "2011", NA, Budget_Components_Summary$Loadkgyr)
-
+  summarize(Loadkgyr = sum(Load_kgyr, na.rm=F))
 
 Plot_Summary <- ggplot(Budget_Components_Summary, aes(Year, Loadkgyr, colour = Balance)) + geom_point() +
   geom_line() +
