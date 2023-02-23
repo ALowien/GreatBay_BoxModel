@@ -33,7 +33,7 @@ tn_budget$TN_normalized_kghayr <- tn_budget$TN/GB_hectares
   
 tn_budget_final <- tn_budget %>%
   group_by(Year, Balance) %>%
-  summarize(TN_Load =sum(TN, na.rm=T)) %>%
+  summarize(TN_Load =sum(TN, na.rm=F)) %>%
   pivot_wider(names_from = "Balance",
               values_from = "TN_Load")
   
@@ -106,7 +106,7 @@ pn_budget <- budget_components_w %>%
 
 pn_budget_final <- pn_budget %>%
     group_by(Year, Balance) %>%
-    summarize(PN_Load =sum(PN, na.rm=T)) %>%
+    summarize(PN_Load =sum(PN, na.rm=F)) %>%
     pivot_wider(names_from = "Balance",
                 values_from = "PN_Load")
   
@@ -177,7 +177,7 @@ din_budget <- budget_components_w %>%
 
 din_budget_final <- din_budget %>%
   group_by(Year, Balance) %>%
-  summarize(DIN_Load =sum(DIN, na.rm=T)) %>%
+  summarize(DIN_Load =sum(DIN, na.rm=F)) %>%
   pivot_wider(names_from = "Balance",
               values_from = "DIN_Load")
 
@@ -250,7 +250,7 @@ TDN_Budget <- budget_components_w %>%
 
 TDN_Budget_Final <- TDN_Budget %>%
   group_by(Year, Balance) %>%
-  summarize(TDN_Load =sum(TDN, na.rm=T)) %>%
+  summarize(TDN_Load =sum(TDN, na.rm=F)) %>%
   pivot_wider(names_from = "Balance",
               values_from = "TDN_Load")
 
@@ -279,7 +279,7 @@ po4_budget <- budget_components_w %>%
 
 po4_budget_final <- po4_budget %>%
   group_by(Year, Balance) %>%
-  summarize(PO4_Load =sum(PO4, na.rm=T)) %>%
+  summarize(PO4_Load =sum(PO4, na.rm=F)) %>%
   pivot_wider(names_from = "Balance",
               values_from = "PO4_Load")
 
@@ -348,7 +348,7 @@ doc_budget <- budget_components_w %>%
 
 doc_budget_final <- doc_budget %>%
   group_by(Year, Balance) %>%
-  summarize(DOC_Load =sum(DOC, na.rm=T)) %>%
+  summarize(DOC_Load =sum(DOC, na.rm=F)) %>%
   pivot_wider(names_from = "Balance",
               values_from = "DOC_Load")
 
@@ -416,12 +416,11 @@ doc.annual.panel
 #TSS Budget
 TSS_Budget <- budget_components_w %>%
   select(Type, Year, Balance, TSS) %>%
-  filter(Year != 2017 & Year !=2019)  %>% #no AP data
   filter(Type != "Precip") # assume no TSS in precip
 
 TSS_Budget_Final <- TSS_Budget %>%
   group_by(Year, Balance) %>%
-  summarize(TSS_Load =sum(TSS, na.rm=T)) %>%
+  summarize(TSS_Load =sum(TSS, na.rm=F)) %>%
   pivot_wider(names_from = "Balance",
               values_from = "TSS_Load")
 
