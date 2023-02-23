@@ -1,5 +1,4 @@
 #main_wwtf_format.R
-
 #Author: Anna Mikulis, University of New Hampshire
 #Last Updated: 2/23/2023
 
@@ -115,9 +114,6 @@ exeter_annual$Notes <- "sum of monthly loads from town reports"
 
 monthlyloads <- bind_rows(monthlyloads, exeter_monthly)
 
-
-
-
 #Pre-2014 Annual Loads Need Exeter 2008 - 2011; Newmarket 2008 - 2013
 annual <- read.csv("./data/wwtf/WWTF_AnnualReportData.csv") 
 annual$TN_kgyr <- conv_unit(annual$TN_tonsyr, "metric_ton", "kg")
@@ -228,7 +224,6 @@ monthlyloads<- bind_rows(monthlyloads, monthly_estimates)
 #Estimate DIN as 78.5% for TN for years < 2012 per 2012 PREP SOOE Tech Report and as 84.1% for years > 2012 per the 2018 SOOE
 wwtf_annual$DIN_kgyr <- ifelse(is.na(wwtf_annual$DIN_kgyr) & wwtf_annual$year < 2012, wwtf_annual$TN_kgyr*0.785,
                                ifelse(is.na(wwtf_annual$DIN_kgyr) * wwtf_annual$year >= 2012, wwtf_annual$TN_kgyr*0.841, wwtf_annual$DIN_kgyr))
-
 
 #Repeat for monthly
 monthlyloads$DIN_kgmonth <- ifelse(is.na(monthlyloads$DIN_kgmonth) & monthlyloads$year < 2012, monthlyloads$TN_kgmonth*0.785,
