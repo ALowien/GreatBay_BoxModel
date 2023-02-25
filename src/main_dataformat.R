@@ -430,16 +430,48 @@ write.csv(Q, "results/main_dataformat/Q_tidal_tribs.csv")
 
 #Average + standard deviation of each solute for each river
 avg_conc <- df %>%
+  select(STATION_ID, START_DATE, PO4_MGL:NH4_MGL, NO3_NO2_MGL, DIN_MGL, DOC_MGL, TSS_MGL:DO_MGL, TEMP_WATER_DEGC) %>%
   group_by(STATION_ID) %>%
-  summarize(across(TP_MGL:TEMP_WATER_DEGC, mean, na.rm=T))
+  summarize(across(PO4_MGL:TEMP_WATER_DEGC, mean, na.rm=T))
+
+avg_conc <- avg_conc %>%
+  mutate(PO4_UGL = conv_unit(PO4_MGL, "mg", "ug"),
+         NH4_UGL = conv_unit(NH4_MGL, "mg", "ug")) %>%
+  select(-PO4_MGL, -NH4_MGL,-pH)
+
+avg_conc[,2:13] <- signif(avg_conc[,2:13], 3)
+
+avg_conc <- avg_conc %>%
+  pivot_longer(cols=c(PN_MGL:NH4_UGL),names_to = "Solute", values_to = "Concentration")
+
+avg_conc <- avg_conc %>%
+  pivot_wider(names_from= "STATION_ID", values_from = "Concentration")
 
 write.csv(avg_conc, "results/main_dataformat/avg_solute_conc_site.csv")
 
 std_conc <- df %>%
+  select(STATION_ID, START_DATE, PO4_MGL:NH4_MGL, NO3_NO2_MGL, DIN_MGL, DOC_MGL, TSS_MGL:DO_MGL, TEMP_WATER_DEGC) %>%
   group_by(STATION_ID) %>%
-  summarize(across(TP_MGL:TEMP_WATER_DEGC, sd, na.rm=T))
+  summarize(across(PO4_MGL:TEMP_WATER_DEGC, sd, na.rm=T))
+
+std_conc <- std_conc %>%
+  mutate(PO4_UGL = conv_unit(PO4_MGL, "mg", "ug"),
+         NH4_UGL = conv_unit(NH4_MGL, "mg", "ug")) %>%
+  select(-PO4_MGL, -NH4_MGL,-pH)
+std_conc[,2:13] <- signif(std_conc[,2:13], 3)
+
+std_conc <- std_conc %>%
+  pivot_longer(cols=c(PN_MGL:NH4_UGL),names_to = "Solute", values_to = "Concentration")
+
+std_conc <- std_conc %>%
+  pivot_wider(names_from= "STATION_ID", values_from = "Concentration")
 
 write.csv(std_conc, "results/main_dataformat/std_solute_conc_site.csv")
- 
+
+#Tally of values (n)
+tally <- df %>%
+  select(STATION_ID, START_DATE, PO4_MGL:NH4_MGL, NO3_NO2_MGL, DIN_MGL, DOC_MGL, TSS_MGL:DO_MGL, TEMP_WATER_DEGC) %>%
+  group_by(STATION_ID) %>%
+  summarize(across(PO4_MGL:TEMP_WATER_DEGC,function(x) sum(!is.na(x))))
 #This data frame has final solute concentrations that can be used for further load analysis
 write.csv(df, "results/main_dataformat/df_conc.csv")
