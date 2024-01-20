@@ -7,20 +7,8 @@
 #This script pulls in products created in the main_dataformat.R script, including measured water quality concentrations and discharge readings. Start with an empty environment. 
 
 #Load required packages.
-Packages <- c("readxl", "dplyr", "ggplot2", "measurements", "plotly", "lubridate",
-              "cowplot", "ggpubr", "dataRetrieval", "gridExtra", "tidyr", "viridis")
+Packages <- c("readxl", "dplyr", "ggplot2", "measurements", "plotly", "lubridate","cowplot", "ggpubr", "dataRetrieval", "gridExtra", "tidyr", "viridis")
 lapply(Packages, library, character.only = TRUE)
-
-#RiverLoad package was archived 2022-12-20 
-#https://cran.r-project.org/web/packages/RiverLoad/index.html
-# Specify the URL of the archive to install the package
-archive_url <- "https://cran.r-project.org/src/contrib/Archive/RiverLoad/RiverLoad_1.0.tar.gz"
-
-# Install RiverLoad package
-install.packages(archive_url, repos = NULL, type = "source")
-
-#Load RiverLoad
-library(RiverLoad)
 
 #Read in cleaned up concentration data frame (df_conc.csv) from the main_dataformat.R script
   #Saved in results/main_dataformat
@@ -83,9 +71,13 @@ conc.LR$datetime <- as.POSIXct(conc.LR$datetime, format = "%Y-%m-%d %H:%M:%S")
 
 #Add arbitrary time stamp to dates to make date matching easier
 flow.LR$datetime <-lubridate::ymd_hm(paste(flow.LR$datetime, "6:00 PM"))
+
 conc.LR$datetime <-lubridate::ymd_hm(paste(conc.LR$datetime, "6:00 PM"))
 
-union.LR <- db.union(flow.LR, conc.LR)
+head(flow.LR)
+head(conc.LR)
+
+union.LR <- left_join(flow.LR, conc.LR)
 write.csv(union.LR, "results/main_load_calc/union.LR.csv") #Saving a file of discharge & LMP concentrations saved together
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #Repeat for Squamscott River
@@ -108,7 +100,7 @@ conc.SQR$datetime <- as.POSIXct(conc.SQR$datetime, format = "%Y-%m-%d %H:%M:%S")
 flow.SQR$datetime <-lubridate::ymd_hm(paste(flow.SQR$datetime, "6:00 PM"))
 conc.SQR$datetime <-lubridate::ymd_hm(paste(conc.SQR$datetime, "6:00 PM"))
 
-union.SQR <- db.union(flow.SQR, conc.SQR)
+union.SQR <- left_join(flow.SQR, conc.SQR)
 write.csv(union.SQR, "results/main_load_calc/union.SQR.csv") #Saving a file of discharge & SQR concentrations saved together
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #Repeat this for Winnicut River
@@ -130,7 +122,7 @@ conc.WNC$datetime <- as.POSIXct(conc.WNC$datetime, format = "%Y-%m-%d %H:%M:%S")
 flow.WNC$datetime <-lubridate::ymd_hm(paste(flow.WNC$datetime, "6:00 PM"))
 conc.WNC$datetime <-lubridate::ymd_hm(paste(conc.WNC$datetime, "6:00 PM"))
 
-union.WNC <- db.union(flow.WNC, conc.WNC)
+union.WNC <- left_join(flow.WNC, conc.WNC)
 write.csv(union.WNC, "results/main_load_calc/union.WNC.csv") #Saving a file of discharge & WNC concentrations saved together
 
 #Flow_Multipliers to resolve difference in location b/t stream gauge and head-of-tide
