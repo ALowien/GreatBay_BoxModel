@@ -1,15 +1,26 @@
 #main_load_calc.R
 
 #Author: Anna Mikulis, University of New Hampshire
-#Last Updated: 2/14/2023
+#Last Updated: 1/20/2024
 
 #This script calculates annual (CY and WY) and monthly loads for the three tidal tributaries (Lamprey, Squamscott, and Winnicut) to Great Bay.
 #This script pulls in products created in the main_dataformat.R script, including measured water quality concentrations and discharge readings. Start with an empty environment. 
 
 #Load required packages.
 Packages <- c("readxl", "dplyr", "ggplot2", "measurements", "plotly", "lubridate",
-              "cowplot", "ggpubr", "dataRetrieval", "gridExtra", "tidyr", "viridis", "RiverLoad")
+              "cowplot", "ggpubr", "dataRetrieval", "gridExtra", "tidyr", "viridis")
 lapply(Packages, library, character.only = TRUE)
+
+#RiverLoad package was archived 2022-12-20 
+#https://cran.r-project.org/web/packages/RiverLoad/index.html
+# Specify the URL of the archive to install the package
+archive_url <- "https://cran.r-project.org/src/contrib/Archive/RiverLoad/RiverLoad_1.0.tar.gz"
+
+# Install RiverLoad package
+install.packages(archive_url, repos = NULL, type = "source")
+
+#Load RiverLoad
+library(RiverLoad)
 
 #Read in cleaned up concentration data frame (df_conc.csv) from the main_dataformat.R script
   #Saved in results/main_dataformat
@@ -218,8 +229,13 @@ LR_FW_CY <- LR_FW_CY_Sums %>%
          FW_DOC = DOC/DOC_flow,
          FW_TSS = TSS/TSS_flow) %>%
   select(CY, FW_TP:FW_TSS)
+
+LR_FW_CY$STATION_ID <- "Lamprey"
+
 #save flow weighted concentrations
 write.csv(LR_FW_CY, "results/main_load_calc/FWC/CY_FW_Conc_LMP.csv")
+
+LR_FW_CY <- LR_FW_CY %>% select(-STATION_ID)
 
 for (i in 2:12) {
   LR_FW_CY[,i] <-conv_unit(LR_FW_CY[,i], "mg", "kg")
@@ -426,7 +442,12 @@ SQR_FW_CY <- SQR_FW_CY_Sums %>%
          FW_TSS = TSS/TSS_flow) %>%
   select(CY, FW_TP:FW_TSS)
 
+
+SQR_FW_CY$STATION_ID <- "Squamscott"
 write.csv(SQR_FW_CY, "results/main_load_calc/FWC/CY_FW_Conc_SQR.csv")
+
+SQR_FW_CY <- SQR_FW_CY %>%
+  select(-STATION_ID)
 
 for (i in 2:12) {
   SQR_FW_CY[,i] <-conv_unit(SQR_FW_CY[,i], "mg", "kg")
@@ -633,8 +654,10 @@ WNC_FW_CY <- WNC_FW_CY_Sums %>%
          FW_TSS = TSS/TSS_flow) %>%
   select(CY, FW_TP:FW_TSS)
 
+WNC_FW_CY$STATION_ID <- "Winnicut"
 write.csv(WNC_FW_CY, "results/main_load_calc/FWC/CY_FW_Conc_WNC.csv")
 
+WNC_FW_CY <- WNC_FW_CY %>% select(-STATION_ID)
 for (i in 2:12) {
   WNC_FW_CY[,i] <-conv_unit(WNC_FW_CY[,i], "mg", "kg")
 }
@@ -813,3 +836,27 @@ Tidal_Trib_Normalized_WY_Loads <- Tidal_Trib_WY_Loads %>%
 
 #Save normalized loads
 write.csv(Tidal_Trib_Normalized_WY_Loads, "results/main_load_calc/FW_Loads/Tidal_Trib_WY_Loads_kg_ha_yr.csv")
+
+
+
+#Average annual river concentration across rivers (TABLE FOR MANUSCRIPT NUMBERS)
+#Combine river flow-weighted concentrations into one table
+LR_FW_CY$River <- "Lamprey"
+SQR_FW_CY$River <- "Squamscott"
+WNC_FW_CY$River <- "Winnicut"
+FY_combinedtable <- full_join(LR_FW_CY, SQR_FW_CY)
+FY_combinedtable <- full_join(FY_combinedtable, WNC_FW_CY)
+
+FY_combinedtable <- FY_combinedtable %>%
+  mutate(across(FW_PO4:FW_TSS,  ~conv_unit(., "kg","mg")))
+
+avg_river_fw_conc <- FY_combinedtable %>%
+  summarize(across(FW_PO4:FW_TSS, ~mean(., na.rm=T)))
+
+print(round(avg_river_fw_conc[,], 3))
+
+avg_river_sd_conc <- FY_combinedtable %>%
+  summarize(across(FW_PO4:FW_TSS, ~sd(., na.rm=T)))
+
+print(round(avg_river_sd_conc[,], 3))
+
