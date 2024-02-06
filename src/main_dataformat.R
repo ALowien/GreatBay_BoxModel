@@ -2,9 +2,9 @@
 # Biogeochemical Stressors and Ecological Response in Great Bay Estuary
 
 # Author: Anna Mikulis, University of New Hampshire
-# Last Updated: 1/27/2023
+# Last Updated: 2/6/2024
 
-#R Version 4.2.2. (2022-10-31) "Innocent & Trusting"
+#R Version 4.3.2 (2023-10-31 ucrt) -- "Eye Holes"
 
 # Purpose: Read and process raw solute concentration data for the three tidal tributaries (head-of-tide monitoring stations) that flow into Great Bay.
   # Also process raw solute concentrations from the estuary, at Adams Point (high and low tide). Prepare discharge data for flux calculations.
@@ -60,9 +60,9 @@ df <- df %>%
   filter(STATION_ID == "05-LMP" | STATION_ID == "02-WNC" | STATION_ID == "09-EXT" | STATION_ID == "09-EXT-DAMMED" |
            STATION_ID == "GRBAP") %>%
   filter(SAMPLE_COLLECTION_METHOD_ID == "TIDALWQ") %>% #Project Name for Tidal Tribs and Adams Point Sampling
-  filter(START_DATE > "2008-01-01")
+  filter(START_DATE > "2008-01-01") #Tidal Tribs sampling program began in 2008
 
-unique(df$STATION_ID)
+unique(df$STATION_ID) #check for correct site names
 
 #Distinguish GRBAP sampling by low and high tide events
 AP_Tide <- df %>%
@@ -102,8 +102,6 @@ df$STATION_ID <- ifelse(df$START_DATE == "2008-06-11" & df$START_TIME == "09:35"
                                    ifelse(df$START_DATE == "2009-07-13" & df$START_TIME == "14:17", "GRBAPH",
                                           ifelse(df$START_DATE == "2011-08-22" & df$START_TIME == "07:10", "GRBAPH", df$STATION_ID))))
 
-colnames(df)
-
 ### END Import DES Data ###
 #### Resolve Variable and Column Header Names ####
 
@@ -126,7 +124,7 @@ df <- df %>%
   filter(RESULT_VALID == "Y" | is.na(RESULT_VALID))
 
 #Remove result valid column and filter out unnecessary parameters for the box model
-remove_parms <- c("CLOSTRIDIUM PERFRINGENS", "ENTEROCOCCUS", "ESCHERICHIA COLI","TOTAL FECAL COLIFORM", "WIND DIRECTION", "WIND VELOCITY", "SECCHI DISK TRANSPARENCY","COLORED DISSOLVED ORGANIC MATTER (CDOM)", "TURBIDITY","DEPTH", "TIDE STAGE", "LIGHT ATTENUATION COEFFICIENT")
+remove_parms <- c("CLOSTRIDIUM PERFRINGENS", "ENTEROCOCCUS", "ESCHERICHIA COLI","TOTAL FECAL COLIFORM", "WIND DIRECTION", "WIND VELOCITY", "SECCHI DISK TRANSPARENCY","COLORED DISSOLVED ORGANIC MATTER (CDOM)", "TURBIDITY","DEPTH", "TIDE STAGE", "LIGHT ATTENUATION COEFFICIENT", "SILICA AS SIO2")
 
 df <- subset(df, !(PARAMETER_ANALYTE %in% remove_parms))
 
@@ -137,7 +135,7 @@ df <- df %>%
 subset(df, is.na(QUALIFIER_AND_RESULTS))
 df$QUALIFIER_AND_RESULTS <- ifelse(is.na(df$QUALIFIER_AND_RESULTS), df$RDL/2, df$QUALIFIER_AND_RESULTS)
 #_____________________________________________________
-#Figure out Parameter Methods and Rename to clarify
+#Clarify Parameter Methods by Renaming
 
 #PHOSPHORUS AS P, fraction type is "Total"; which means PHOSPHORUS samples are TOTAL PHOSPHORUS ("TP")
 df$PARAMETER <- ifelse(df$PARAMETER == "PHOSPHORUS AS P", "TP", df$PARAMETER)
@@ -185,8 +183,7 @@ df$PARAMETER <- ifelse(df$PARAMETER == "SPECIFIC CONDUCTANCE", "SPC",
                                ifelse(df$PARAMETER == "SOLIDS, SUSPENDED", "TSS", 
                                       ifelse(df$PARAMETER == "TIDE STAGE", "Tide_Stage", df$PARAMETER))))
 
-df$PARAMETER <- ifelse(df$PARAMETER == "CHLOROPHYLL A, CORRECTED FOR PHEOPHYTIN", "CHLA_corrected_pheophytin",
-                        ifelse(df$PARAMETER == "SILICA AS SIO2", "SIO2", df$PARAMETER))
+df$PARAMETER <- ifelse(df$PARAMETER == "CHLOROPHYLL A, CORRECTED FOR PHEOPHYTIN", "CHLA_corrected_pheophytin", df$PARAMETER)
                       
 unique(df$PARAMETER)
 
@@ -218,7 +215,7 @@ df <- df %>%
 #Activity Comments Review and Assessment
 unique(df$ACTIVITY_COMMENTS) #Activity Comments are mostly UNH IDs and weather at GRBAP - removal of column for purposes of solute analysis is OK
 
-unique(df$ACTIVITY_TYPE) # Removing field duplicates to see if that fixes spread issue & because field duplicates are for QC purposes
+unique(df$ACTIVITY_TYPE) # Removing field duplicates, as they are for QC purposes only
 
 df <- df %>%
   select(-ACTIVITY_COMMENTS, - FRACTION_TYPE) %>%
@@ -277,41 +274,38 @@ unique(df$PARAMETER)
 # Replace "/" with "_"
 
 df_count <- df %>% count(PARAMETER)
+#Rename parameters to get ride of "/" in the names
+variables_renamed <- c("TP_UG/L" = "TP_UGL",
+                  "TN_MG/L" = "TN_MGL",
+                  "TSS_MG/L" = "TSS_MGL",
+                  "PH_NONE" = "pH",
+                  "DO_sat_%" = "DO_sat",
+                  "SPC_UMHO/CM" = "SPC_UMHO_CM",
+                  "DO_MG/L" = "DO_MGL",
+                  "Temp_Water_DEG C" = "TEMP_WATER_DEGC",
+                  "TDN_MG/L" = "TDN_MGL",
+                  "NH4_UG/L" = "NH4_UGL",
+                  "NO3_NO2_MG/L" = "NO3_NO2_MGL",
+                  "PO4_UG/L" = "PO4_UGL",
+                  "DON_MG/L" = "DON_MGL",
+                  "DOC_MG/L" = "DOC_MGL",
+                  "PN_MG/L" = "PN_MGL",
+                  "DIN_MG/L" = "DIN_MGL",
+                  "CHLA_corrected_pheophytin_UG/L" = "CHLA_corr_pheo_UGL",
+                  "NO3_MG/L" = "NO3_MGL",
+                  "PC_MG/L" = "PC_MGL",
+                  "PHEOPHYTIN-A_UG/L" = "PHEOPHYTIN_A_UGL",
+                  "SALINITY_PSS" = "SALINITY_PSS")
 
-df$PARAMETER <- ifelse(df$PARAMETER == "TP_UG/L", "TP_UGL", 
-                        ifelse(df$PARAMETER == "TN_MG/L", "TN_MGL", df$PARAMETER))
+# Replace values in PARAMETER column based on lookup table
+df$PARAMETER <- variables_renamed[df$PARAMETER]
+unique(df$PARAMETER) #check
+# Print the updated dataframe
+print(df)
+summary(df)
 
-df$PARAMETER <- ifelse(df$PARAMETER == "TSS_MG/L", "TSS_MGL", 
-                        ifelse(df$PARAMETER == "PH_NONE", "pH",
-                               ifelse(df$PARAMETER == "DO_sat_%", "DO_sat", 
-                                      ifelse(df$PARAMETER == "SPC_UMHO/CM", "SPC_UMHO_CM", df$PARAMETER))))
-
-df$PARAMETER <- ifelse(df$PARAMETER == "DO_MG/L", "DO_MGL", 
-                        ifelse(df$PARAMETER == "Temp_Water_DEG C", "TEMP_WATER_DEGC", 
-                               ifelse(df$PARAMETER == "TDN_MG/L", "TDN_MGL", df$PARAMETER)))
-
-df$PARAMETER <- ifelse(df$PARAMETER == "NH4_UG/L", "NH4_UGL", 
-                        ifelse(df$PARAMETER == "NO3_NO2_MG/L", "NO3_NO2_MGL", df$PARAMETER))
-
-df$PARAMETER <- ifelse(df$PARAMETER == "PO4_UG/L", "PO4_UGL", 
-                        ifelse(df$PARAMETER == "DON_MG/L", "DON_MGL", 
-                               ifelse(df$PARAMETER == "DOC_MG/L", "DOC_MGL", 
-                                      ifelse(df$PARAMETER == "PN_MG/L", "PN_MGL", df$PARAMETER))))
-
-df$PARAMETER <- ifelse(df$PARAMETER == "DIN_MG/L", "DIN_MGL",
-                        ifelse(df$PARAMETER == "CHLA_corrected_pheophytin_UG/L", "CHLA_corr_pheo_UGL", 
-                               ifelse(df$PARAMETER == "NO3_MG/L", "NO3_MGL", 
-                                      ifelse(df$PARAMETER == "Tide_Stage_NA", "Tide_Stage", df$PARAMETER))))
-
-df$PARAMETER <- ifelse(df$PARAMETER == "SIO2_MG/L","SIO2_MGL", 
-                        ifelse(df$PARAMETER == "PC_MG/L", "PC_MGL", 
-                               ifelse(df$PARAMETER == "PHEOPHYTIN-A_UG/L", "PHEOPHYTIN_A_UGL", 
-                                      ifelse(df$PARAMETER == "Light_Atten_Coeff_1/M", "Light_Attten_1_m", df$PARAMETER))))
-
-
+#fix Date column class
 df$START_DATE <- as.Date(df$START_DATE)
-
-unique(df$PARAMETER)
 
 #___________________________________Make data frame wide instead of long __________________________________________________________
 
@@ -324,7 +318,7 @@ colnames(df)
 
 df <- df %>%
   select(STATION_ID, START_DATE, TP_UGL, PO4_UGL, PN_MGL, TN_MGL, TDN_MGL, NH4_UGL, NO3_MGL, NO3_NO2_MGL, DIN_MGL, 
-         DON_MGL, DOC_MGL, PC_MGL, SIO2_MGL, TSS_MGL:DO_sat, DO_MGL, SPC_UMHO_CM, SALINITY_PSS, TEMP_WATER_DEGC, CHLA_corr_pheo_UGL,
+         DON_MGL, DOC_MGL, PC_MGL, TSS_MGL:DO_sat, DO_MGL, SPC_UMHO_CM, SALINITY_PSS, TEMP_WATER_DEGC, CHLA_corr_pheo_UGL,
          PHEOPHYTIN_A_UGL)
 
 
@@ -334,7 +328,7 @@ df$NH4_MGL <- conv_unit(df$NH4_UGL, "ug", "mg")
 
 df <- df %>%
   select(STATION_ID, START_DATE, TP_MGL, PO4_MGL, PN_MGL, TN_MGL, TDN_MGL, NH4_MGL, NO3_MGL, NO3_NO2_MGL, DIN_MGL, 
-         DON_MGL, DOC_MGL, PC_MGL, SIO2_MGL, TSS_MGL:DO_sat, DO_MGL, SPC_UMHO_CM, SALINITY_PSS, TEMP_WATER_DEGC, CHLA_corr_pheo_UGL,
+         DON_MGL, DOC_MGL, PC_MGL, TSS_MGL:DO_sat, DO_MGL, SPC_UMHO_CM, SALINITY_PSS, TEMP_WATER_DEGC, CHLA_corr_pheo_UGL,
          PHEOPHYTIN_A_UGL)
 
 #Summarize physicochemical parameter columns for Appendix Tables
@@ -360,7 +354,7 @@ df$DON_MDL <- (df$TDN_MGL + df$NO3_NO2_MGL + df$NH4_MGL) * 0.05
 #Is DON below MDL?
 df$DON_B_MDL <- ifelse(df$DON_MGL_calc < df$DON_MDL, "BDL", "G") 
 
-length(which(df$DON_B_MDL == "BDL")) #7 instances below detection limit
+length(which(df$DON_B_MDL == "BDL")) #9 instances below detection limit
 
 #Set those DON values below detection limit to 1/2 of the method detection limit
 df$DON_MGL_calc_final <- ifelse(df$DON_MGL_calc < df$DON_MDL, df$DON_MDL/2, df$DON_MGL_calc)
@@ -475,3 +469,11 @@ tally <- df %>%
   summarize(across(PO4_MGL:TEMP_WATER_DEGC,function(x) sum(!is.na(x))))
 #This data frame has final solute concentrations that can be used for further load analysis
 write.csv(df, "results/main_dataformat/df_conc.csv")
+
+#PN indirect from TN - TDN....
+df$PN_estimated <- df$TN_MGL - df$TDN_MGL
+ggplot(df, aes(PN_MGL, PN_estimated)) + geom_point() +
+  geom_abline(slope=1, intercept =0)
+
+pn_mod <- lm(PN_estimated ~ PN_MGL, data=df)
+summary(pn_mod)
