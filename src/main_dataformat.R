@@ -31,7 +31,6 @@
 #Run this script to format the EMD dataset and the discharge dataset for later scripts.
 
 #Load required packages.
-
 Packages <- c("readxl", "dplyr", "ggplot2", "tidyquant", "cowplot", "RColorBrewer",
               "tidyr","stringr",  "plotly", "measurements", "viridis", "moments")
 
@@ -64,32 +63,32 @@ df <- df %>%
 
 unique(df$STATION_ID) #check for correct site names
 
-#Distinguish GRBAP sampling by low and high tide events
-AP_Tide <- df %>%
+#Distinguish GRBAP sampling by low and high tide events; ap_tide stands for Adams Point Tide data
+ap_tide <- df %>%
   select(STATION_ID, START_DATE, START_TIME, PARAMETER_ANALYTE, QUALIFIER_AND_RESULTS) %>%
   filter(STATION_ID == "GRBAP") %>%
   filter(PARAMETER_ANALYTE == "TIDE STAGE") %>%
   filter(!is.na(QUALIFIER_AND_RESULTS))
 
 #Categorize "Tide Stage" PARAMETER To be either High or Low Tide (e.x. ebb tides are re-classified as low tide samples)
-AP_Tide$QUALIFIER_AND_RESULTS <- ifelse(AP_Tide$PARAMETER_ANALYTE == "TIDE STAGE" & AP_Tide$QUALIFIER_AND_RESULTS == "EBB", "LOW", AP_Tide$QUALIFIER_AND_RESULTS)
-AP_Tide$QUALIFIER_AND_RESULTS <- ifelse(AP_Tide$PARAMETER_ANALYTE == "TIDE STAGE" & AP_Tide$QUALIFIER_AND_RESULTS == "FLOOD", "HIGH", AP_Tide$QUALIFIER_AND_RESULTS)
+ap_tide$QUALIFIER_AND_RESULTS <- ifelse(ap_tide$PARAMETER_ANALYTE == "TIDE STAGE" & ap_tide$QUALIFIER_AND_RESULTS == "EBB", "LOW", ap_tide$QUALIFIER_AND_RESULTS)
+ap_tide$QUALIFIER_AND_RESULTS <- ifelse(ap_tide$PARAMETER_ANALYTE == "TIDE STAGE" & ap_tide$QUALIFIER_AND_RESULTS == "FLOOD", "HIGH", ap_tide$QUALIFIER_AND_RESULTS)
 
-AP_Tide <- AP_Tide %>%
+ap_tide <- ap_tide %>%
   select(-PARAMETER_ANALYTE)
 
 #Rename Great Bay Adams Point (GRBAP) STATION ID based on high/low tide (GRBAPL indicates low tide sample; GRBAPH indicates high tide sample)
-AP_Tide$STATION_ID <- ifelse(AP_Tide$QUALIFIER_AND_RESULTS == "LOW", "GRBAPL", "GRBAPH")
+ap_tide$STATION_ID <- ifelse(ap_tide$QUALIFIER_AND_RESULTS == "LOW", "GRBAPL", "GRBAPH")
 
-#Remove duplicates
-deduped.APTIDE <- AP_Tide[!duplicated(AP_Tide[,1:4]),]
+#Remove duplicates of tide codes
+ap_tide <- ap_tide[!duplicated(ap_tide[,1:4]),] #from 380 to 308 observations
 
-deduped.APTIDE <- deduped.APTIDE %>%
+ap_tide <- ap_tide %>%
   select(-QUALIFIER_AND_RESULTS)
 
 #Join df with deduped.APTIDE
 #Replace Station ID in AP data frame
-df <- left_join(df, deduped.APTIDE, by = c("START_DATE", "START_TIME"))
+df <- left_join(df, ap_tide, by = c("START_DATE", "START_TIME"))
 #If "Station_ID.y" is not NA, (i.e says "GRBAPL" or "GRBAPH"), use STATION_ID.y as the STATION ID, else use the original station id from "Station_ID.x 
 df$STATION_ID <- ifelse(!is.na(df$STATION_ID.y), df$STATION_ID.y, df$STATION_ID.x) 
 
@@ -469,11 +468,3 @@ tally <- df %>%
   summarize(across(PO4_MGL:TEMP_WATER_DEGC,function(x) sum(!is.na(x))))
 #This data frame has final solute concentrations that can be used for further load analysis
 write.csv(df, "results/main_dataformat/df_conc.csv")
-
-#PN indirect from TN - TDN....
-df$PN_estimated <- df$TN_MGL - df$TDN_MGL
-ggplot(df, aes(PN_MGL, PN_estimated)) + geom_point() +
-  geom_abline(slope=1, intercept =0)
-
-pn_mod <- lm(PN_estimated ~ PN_MGL, data=df)
-summary(pn_mod)
