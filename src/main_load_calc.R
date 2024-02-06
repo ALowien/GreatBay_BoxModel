@@ -1,9 +1,9 @@
 #main_load_calc.R
 
 #Author: Anna Mikulis, University of New Hampshire
-#Last Updated: 1/20/2024
+#Last Updated: 2/6/2024
 
-#This script calculates annual (CY and WY) and monthly loads for the three tidal tributaries (Lamprey, Squamscott, and Winnicut) to Great Bay.
+#This script calculates annual (calendar year) and monthly loads for the three tidal tributaries (Lamprey, Squamscott, and Winnicut) to Great Bay.
 #This script pulls in products created in the main_dataformat.R script, including measured water quality concentrations and discharge readings. Start with an empty environment. 
 
 #Load required packages.
@@ -25,7 +25,7 @@ conc$Year <- year(conc$datetime)
 #Build data frame with site id, date of sample collection, and solutes concentrations (Ex. NH4_UGL, TDN_MGL)
 conc_sub <- conc %>%
   select(STATION_ID:TSS_MGL, Month, Year) %>%
-  select(-NO3_MGL, -SIO2_MGL, -PC_MGL) #delete NO3, SiO2, and PC columns b/c they are empty 
+  select(-NO3_MGL, -PC_MGL) #delete NO3, SiO2, and PC columns b/c they are empty 
 
 count <- conc_sub %>%
   select(-TP_MGL, -NO3_NO2_MGL, -NH4_MGL) %>%
@@ -131,14 +131,12 @@ LMP_Flow_Multiplier <- 1.145435
 SQR_Flow_Multiplier <- 1.683529
 WNC_Flow_Multiplier <- 1.005443
 
-# Flow Weighted Load Calculations Lamprey River (05-LMP) (ANNUAL (CY and WY) ESTIMATES) ----------------------
+# Flow Weighted Load Calculations Lamprey River (05-LMP) (ANNUAL ESTIMATES) ----------------------
 #ANNUAL ESTIMATE (CY)
-#WATER YEAR ESTIMATE (WY)
+
 
 #Add Calendar Year
 union.LR$CY <- year(union.LR$datetime)
-#Add Water Year
-union.LR$WY <- calcWaterYear(union.LR$datetime)
 
 #Scale flow units to m3/day and correct with the flow-multiplier
 
@@ -154,8 +152,8 @@ union.LR$flow_l_day <- conv_unit(union.LR$flow_m3_day_cor, "m3", "l")
 conv_unit(1, "m3", "l") # good returns 1000L
 
 union.LR <- union.LR %>%
-  select(datetime, CY, WY, flow_l_day, TP_MGL:TSS_MGL) %>%
-  filter(WY > 2007 & WY < 2020) # have sampling data through annual year 2018 currently
+  select(datetime, CY, flow_l_day, TP_MGL:TSS_MGL) %>%
+  filter(CY > 2007 & CY < 2019) # have sampling data through annual year 2018 currently
 
 #Flow Weighted Concentrations Lamprey River
 #Flow Weighted Flux calculated by multiplying conc * daily average discharge of sampling day (corrected by flow multiplier)
@@ -175,7 +173,7 @@ LR_FW_conc <- union.LR %>%
          DON = DON_MGL * flow_l_day,
          DOC = DOC_MGL * flow_l_day,
          TSS = TSS_MGL * flow_l_day) %>%
-  select(datetime, CY, WY, flow_l_day, TP:TSS)
+  select(datetime, CY, flow_l_day, TP:TSS)
 
 #Remove empty columns and rows where solutes were not measured
 LR_FW_conc <- LR_FW_conc %>%
@@ -185,7 +183,7 @@ LR_FW_conc <- LR_FW_conc %>%
 LR_FW_conc$Month <- month(LR_FW_conc$datetime) #Extract month
 
 LR_FW_conc <- LR_FW_conc %>%
- select(datetime, WY, CY, Month, flow_l_day, TP:TSS)
+ select(datetime, CY, Month, flow_l_day, TP:TSS)
 
 LR_FW_conc$Empty <- NA 
 
@@ -204,7 +202,7 @@ LR_FW_conc$TSS_flow <- ifelse(LR_FW_conc$TSS, LR_FW_conc$flow_l_day, LR_FW_conc$
 #CY ANNUAL ESTIMATE
 #Group by CY and sum
 LR_FW_CY_Sums <- LR_FW_conc %>%
-  select(-WY, -Month) %>%
+  select(-Month) %>%
   group_by(CY) %>%
   summarise_if(is.numeric, sum, na.rm =T)
 
@@ -233,40 +231,12 @@ for (i in 2:12) {
   LR_FW_CY[,i] <-conv_unit(LR_FW_CY[,i], "mg", "kg")
 }
 
-
-#WY ANNUAL ESTIMATE LAMPREY RIVER
-#Group by WY and sum
-LR_FW_WY_Sums <- LR_FW_conc %>%
-  select(-CY, -Month) %>%
-  group_by(WY) %>%
-  summarise_if(is.numeric, sum, na.rm =T)
-
-LR_FW_WY <- LR_FW_WY_Sums %>%
-  mutate(FW_TP = TP/TP_flow,
-         FW_PO4 = PO4/PO4_flow,
-         FW_PN = PN/PN_flow,
-         FW_TN = TN/TN_flow,
-         FW_TDN = TDN/TDN_flow,
-         FW_NH4 = NH4/NH4_flow,
-         FW_NO3_NO2 = NO3_NO2/NO3_NO2_flow,
-         FW_DIN = DIN/DIN_flow,
-         FW_DON = DON/DON_flow,
-         FW_DOC = DOC/DOC_flow,
-         FW_TSS = TSS/TSS_flow) %>%
-  select(WY, FW_TP:FW_TSS)
-
-for (i in 2:12) {
-  LR_FW_WY[,i] <-conv_unit(LR_FW_WY[,i], "mg", "kg")
-}
-
-#Take CY and WY Flow-Weighted Concentrations and multiply by annual flow (corrected with the flow-multiplier)
+#Take CY Flow-Weighted Concentrations and multiply by annual flow (corrected with the flow-multiplier)
 
 #Multiply CY Flow_Weighted Concentrations by Annual Flow (multiplied by flow-multiplier)
 #[kg/L] * L/year
 
 flow.LR$CY <- year(flow.LR$datetime)
-
-flow.LR$WY <- calcWaterYear(flow.LR$datetime)
 
 flow.LR$flow <- conv_unit(flow.LR$flow, "m3", "l") * LMP_Flow_Multiplier #l/s
 flow.LR$flow_day <- flow.LR$flow * 86400 #L/s * 86400 s/day = L/day
@@ -275,9 +245,6 @@ CY.flow.LR <- flow.LR %>%
   group_by(CY) %>%
   summarize(Flow_l_year = sum(flow_day))
 
-WY.flow.LR <- flow.LR %>%
-  group_by(WY) %>%
-  summarize(Flow_l_year = sum(flow_day))
 
 #Join Flow-weighted concentrations with annual CY loads
 FW_Solutes <- c("FW_TP", "FW_PO4", "FW_PN", "FW_TN", "FW_TDN", "FW_NH4", "FW_NO3_NO2", "FW_DIN", "FW_DON", "FW_DOC", "FW_TSS")
@@ -287,17 +254,9 @@ LR_CY_Loads <- left_join(LR_FW_CY, CY.flow.LR)
 LR_CY_Loads <- LR_CY_Loads %>% #Loads are in kg/year
   mutate(across(FW_Solutes, ~.* Flow_l_year))
 
-#Join flow-weighted concentrations with water year (WY loads) 
-LR_WY_Loads <- left_join(LR_FW_WY, WY.flow.LR)
-
-LR_WY_Loads <- LR_WY_Loads %>% #Loads are in kg/year
-  mutate(across(FW_Solutes, ~.* Flow_l_year))
-
 #Calendar Year Annual FW Load (uses annual discharge and concentrations March-December)
 write.csv(LR_CY_Loads, "results/main_load_calc/FW_Loads/LR_Annual_Loads.csv")
 
-#Water Year Annual FW Load (uses annual discharge and concentrations March-December)
-write.csv(LR_WY_Loads, "results/main_load_calc/FW_Loads/LR_Water_Year_Loads.csv")
 #_______________________________________________________________________________________________
 #________________________________________________________________________________________________________________________
 #Monthly Loads for Lamprey River
@@ -347,14 +306,10 @@ write.csv(LR_M_Loads, "results/main_load_calc/FW_Loads/LR_MLoads_kg_month.csv")
 
 #### end #### 
 
-# Flow Weighted Load Calculations Squamscott River (09-EXT) (ANNUAL (CY and WY) ESTIMATES) --------
+# Flow Weighted Load Calculations Squamscott River (09-EXT) (ANNUAL ESTIMATES) --------
 #ANNUAL ESTIMATE (CY)
-#WATER YEAR ESTIMATE (WY)
-
 #Add Calendar Year
 union.SQR$CY <- year(union.SQR$datetime)
-#Add Water Year
-union.SQR$WY <- calcWaterYear(union.SQR$datetime)
 
 #Scale flow units to m3/day and correct with the flow_multiplier 
 
@@ -368,8 +323,8 @@ union.SQR$flow_l_day <- conv_unit(union.SQR$flow_m3_day_cor, "m3", "l")
 
 
 union.SQR <- union.SQR %>%
-  select(datetime, CY, WY, flow_l_day, TP_MGL:TSS_MGL) %>%
-  filter(WY > 2007 & WY < 2020) # have sampling data through annual year 2018 currently
+  select(datetime, CY, flow_l_day, TP_MGL:TSS_MGL) %>%
+  filter(CY > 2007 & CY < 2019) # have sampling data through annual year 2018 currently
 
 #Flow Weighted Concentrations Squamscott River
 #Flow Weighted Flux calculated by multiplying conc * daily average discharge of sampling day (corrected by flow multiplier).
@@ -387,7 +342,7 @@ SQR_FW_conc <- union.SQR %>%
          DON = DON_MGL * flow_l_day,
          DOC = DOC_MGL * flow_l_day,
          TSS = TSS_MGL * flow_l_day) %>%
-  select(datetime, CY, WY, flow_l_day, TP:TSS)
+  select(datetime, CY, flow_l_day, TP:TSS)
 
 #Remove empty columns and rows where solutes were not measured
 SQR_FW_conc <- SQR_FW_conc %>%
@@ -397,7 +352,7 @@ SQR_FW_conc <- SQR_FW_conc %>%
 SQR_FW_conc$Month <- month(SQR_FW_conc$datetime) #Extract month
 
 SQR_FW_conc <- SQR_FW_conc %>%
-  select(datetime, WY, CY, Month, flow_l_day, TP:TSS)
+  select(datetime, CY, Month, flow_l_day, TP:TSS)
 
 SQR_FW_conc$Empty <- NA 
 
@@ -416,7 +371,7 @@ SQR_FW_conc$TSS_flow <- ifelse(SQR_FW_conc$TSS, SQR_FW_conc$flow_l_day, SQR_FW_c
 #CY ANNUAL ESTIAMTE
 #Group by CY and sum
 SQR_FW_CY_Sums <- SQR_FW_conc %>%
-  select(-WY, -Month) %>%
+  select(-Month) %>%
   group_by(CY) %>%
   summarise_if(is.numeric, sum, na.rm =T)
 
@@ -445,40 +400,12 @@ for (i in 2:12) {
   SQR_FW_CY[,i] <-conv_unit(SQR_FW_CY[,i], "mg", "kg")
 }
 
-
-#WY ANNUAL ESTIMATE
-#Group by WY and sum
-SQR_FW_WY_Sums <- SQR_FW_conc %>%
-  select(-CY, -Month) %>%
-  group_by(WY) %>%
-  summarise_if(is.numeric, sum, na.rm =T)
-
-SQR_FW_WY <- SQR_FW_WY_Sums %>%
-  mutate(FW_TP = TP/TP_flow,
-         FW_PO4 = PO4/PO4_flow,
-         FW_PN = PN/PN_flow,
-         FW_TN = TN/TN_flow,
-         FW_TDN = TDN/TDN_flow,
-         FW_NH4 = NH4/NH4_flow,
-         FW_NO3_NO2 = NO3_NO2/NO3_NO2_flow,
-         FW_DIN = DIN/DIN_flow,
-         FW_DON = DON/DON_flow,
-         FW_DOC = DOC/DOC_flow,
-         FW_TSS = TSS/TSS_flow) %>%
-  select(WY, FW_TP:FW_TSS)
-
-
-for (i in 2:12) {
-  SQR_FW_WY[,i] <-conv_unit(SQR_FW_WY[,i], "mg", "kg")
-}
-
-#Take CY and WY Flow-Weighted Concentrations and multiply by annual flow (corrected with the flow-multiplier)
+#Take CY Flow-Weighted Concentrations and multiply by annual flow (corrected with the flow-multiplier)
 
 #Multiply CY Flow-Weighted Concentrations by Annual Flow (multiplied by flow-multiplier)
 #[kg/L] * [L/year]
 
 flow.SQR$CY <- year(flow.SQR$datetime)
-flow.SQR$WY <- calcWaterYear(flow.SQR$datetime)
 
 flow.SQR$flow <- conv_unit(flow.SQR$flow, "m3", "l") * SQR_Flow_Multiplier #l/s
 flow.SQR$flow_day <- flow.SQR$flow * 86400 #l/s to 86400s/day = l/day
@@ -487,27 +414,15 @@ CY.flow.SQR <- flow.SQR %>%
   group_by(CY) %>%
   summarize(Flow_l_year = sum(flow_day))
 
-WY.flow.SQR <- flow.SQR %>%
-  group_by(WY) %>%
-  summarize(Flow_l_year = sum(flow_day))
-
 #Join Flow-weighted concentrations with annual CY loads
 SQR_CY_Loads <- left_join(SQR_FW_CY, CY.flow.SQR)
 
 SQR_CY_Loads <- SQR_CY_Loads %>% #Loads are in kg/year
   mutate(across(FW_Solutes, ~.* Flow_l_year))
 
-#Join Flow-weighted concentrations with annual WY loads
-SQR_WY_Loads <- left_join(SQR_FW_WY, WY.flow.SQR)
-
-SQR_WY_Loads <- SQR_WY_Loads %>% #Loads are in kg/year
-  mutate(across(FW_Solutes, ~.* Flow_l_year))
-
 #Calendar Year Annual FW Load (uses annual discharge and concentrations March-December)
 write.csv(SQR_CY_Loads, "results/main_load_calc/FW_Loads/SQR_Annual_Loads.csv")
 
-#Water Year Annual FW Load (uses annual discharge and concentrations March-December)
-write.csv(SQR_WY_Loads, "results/main_load_calc/FW_Loads/SQR_Water_Year_Loads.csv")
 #________________________________________________________________________________________________
 #______________________________________________________________________________________________________________________
 #Monthly Loads for the Squamscott 
@@ -559,14 +474,11 @@ write.csv(SQR_M_Loads, "results/main_load_calc/FW_Loads/SQR_MLoads_kg_month.csv"
 #### end Squamscott Loads #### 
 
 
-# Flow Weighted Load Calculations Winnicut River (02-WNC) (ANNUAL (CY and WY) ESTIMATES)  --------
+# Flow Weighted Load Calculations Winnicut River (02-WNC) (ANNUAL ESTIMATES)  --------
 #ANNUAL ESTIMATE (CY)
-#WATER YEAR ESTIMATE (WY)
 
 #Add Calendar Year
 union.WNC$CY <- year(union.WNC$datetime)
-#Add Water Year
-union.WNC$WY <- calcWaterYear(union.WNC$datetime)
 
 #Scale flow units to m3/day and correct with the flow_multiplier 
 
@@ -580,8 +492,8 @@ union.WNC$flow_l_day <- conv_unit(union.WNC$flow_m3_day_cor, "m3", "l")
 
 
 union.WNC <- union.WNC %>%
-  select(datetime, CY, WY, flow_l_day, TP_MGL:TSS_MGL) %>%
-  filter(WY > 2007 & WY < 2020) # have sampling data through annual year 2018 currently
+  select(datetime, CY, flow_l_day, TP_MGL:TSS_MGL) %>%
+  filter(CY > 2007 & CY < 2019) # have sampling data through annual year 2018 currently
 
 #Flow Weighted Concentrations Squamscott River
 #Flow Weighted Flux calculated by multiplying conc * daily average discharge of sampling day (corrected by flow multiplier).
@@ -599,7 +511,7 @@ WNC_FW_conc <- union.WNC %>%
          DON = DON_MGL * flow_l_day,
          DOC = DOC_MGL * flow_l_day,
          TSS = TSS_MGL * flow_l_day) %>%
-  select(datetime, CY, WY, flow_l_day, TP:TSS)
+  select(datetime, CY, flow_l_day, TP:TSS)
 
 #Remove empty columns and rows where solutes were not measured
 WNC_FW_conc <- WNC_FW_conc %>%
@@ -609,7 +521,7 @@ WNC_FW_conc <- WNC_FW_conc %>%
 WNC_FW_conc$Month <- month(WNC_FW_conc$datetime) #Extract month
 
 WNC_FW_conc <- WNC_FW_conc %>%
-  select(datetime, WY, CY, Month, flow_l_day, TP:TSS)
+  select(datetime, CY, Month, flow_l_day, TP:TSS)
 
 WNC_FW_conc$Empty <- NA 
 
@@ -628,7 +540,7 @@ WNC_FW_conc$TSS_flow <- ifelse(WNC_FW_conc$TSS, WNC_FW_conc$flow_l_day, WNC_FW_c
 #CY ANNUAL ESTIAMTE
 #Group by CY and sum
 WNC_FW_CY_Sums <- WNC_FW_conc %>%
-  select(-WY, -Month) %>%
+  select(-Month) %>%
   group_by(CY) %>%
   summarise_if(is.numeric, sum, na.rm =T)
 
@@ -654,40 +566,12 @@ for (i in 2:12) {
   WNC_FW_CY[,i] <-conv_unit(WNC_FW_CY[,i], "mg", "kg")
 }
 
-
-#WY ANNUAL ESTIMATE
-#Group by WY and sum
-WNC_FW_WY_Sums <- WNC_FW_conc %>%
-  select(-CY, -Month) %>%
-  group_by(WY) %>%
-  summarise_if(is.numeric, sum, na.rm =T)
-
-WNC_FW_WY <- WNC_FW_WY_Sums %>%
-  mutate(FW_TP = TP/TP_flow,
-         FW_PO4 = PO4/PO4_flow,
-         FW_PN = PN/PN_flow,
-         FW_TN = TN/TN_flow,
-         FW_TDN = TDN/TDN_flow,
-         FW_NH4 = NH4/NH4_flow,
-         FW_NO3_NO2 = NO3_NO2/NO3_NO2_flow,
-         FW_DIN = DIN/DIN_flow,
-         FW_DON = DON/DON_flow,
-         FW_DOC = DOC/DOC_flow,
-         FW_TSS = TSS/TSS_flow) %>%
-  select(WY, FW_TP:FW_TSS)
-
-
-for (i in 2:12) {
-  WNC_FW_WY[,i] <-conv_unit(WNC_FW_WY[,i], "mg", "kg")
-}
-
-#Take CY and WY Flow-Weighted Concentrations and multiply by annual flow (corrected with the flow-multiplier)
+#Take CY Flow-Weighted Concentrations and multiply by annual flow (corrected with the flow-multiplier)
 
 #Multiply CY Flow-Weighted Concentrations by Annual Flow (multiplied by flow-multiplier)
 #[kg/L] * [L/year]
 
 flow.WNC$CY <- year(flow.WNC$datetime)
-flow.WNC$WY <- calcWaterYear(flow.WNC$datetime)
 
 flow.WNC$flow <- conv_unit(flow.WNC$flow, "m3", "l") * WNC_Flow_Multiplier #l/s
 flow.WNC$flow_day <- flow.WNC$flow * 86400 #l/s to 86400s/day = l/day
@@ -696,27 +580,15 @@ CY.flow.WNC <- flow.WNC %>%
   group_by(CY) %>%
   summarize(Flow_l_year = sum(flow_day))
 
-WY.flow.WNC <- flow.WNC %>%
-  group_by(WY) %>%
-  summarize(Flow_l_year = sum(flow_day))
-
 #Join Flow-weighted concentrations with annual CY loads
 WNC_CY_Loads <- left_join(WNC_FW_CY, CY.flow.WNC)
 
 WNC_CY_Loads <- WNC_CY_Loads %>% #Loads are in kg/year
   mutate(across(FW_Solutes, ~.* Flow_l_year))
 
-#Join Flow-weighted concentrations with annual WY loads
-WNC_WY_Loads <- left_join(WNC_FW_WY, WY.flow.WNC)
-
-WNC_WY_Loads <- WNC_WY_Loads %>% #Loads are in kg/year
-  mutate(across(FW_Solutes, ~.* Flow_l_year))
-
 #Calendar Year Annual FW Load (uses annual discharge and concentrations March-December)
 write.csv(WNC_CY_Loads, "results/main_load_calc/FW_Loads/WNC_Annual_Loads.csv")
 
-#Water Year Annual FW Load (uses annual discharge and concentrations March-December)
-write.csv(WNC_WY_Loads, "results/main_load_calc/FW_Loads/WNC_Water_Year_Loads.csv")
 #________________________________________________________________________________________________
 #______________________________________________________________________________________________________________________
 #Monthly Loads for the Winnicut
@@ -800,35 +672,6 @@ Tidal_Trib_Normalized_CY_Loads <- Tidal_Trib_CY_Loads %>%
 
 
 write.csv(Tidal_Trib_Normalized_CY_Loads, "results/main_load_calc/FW_Loads/Tidal_Trib_CY_Loads_kg_ha_yr.csv")
-
-
-#____________
-
-#Combine the three "annual"  WY load data frames into one
-LR_WY_Loads$Station_ID <- "Lamprey"
-SQR_WY_Loads$Station_ID <- "Squamscott"
-WNC_WY_Loads$Station_ID <- "Winnicut"
-
-Tidal_Trib_WY_Loads <- union(LR_WY_Loads, SQR_WY_Loads)
-Tidal_Trib_WY_Loads <- union(Tidal_Trib_WY_Loads, WNC_WY_Loads)
-
-Tidal_Trib_WY_Loads <- Tidal_Trib_WY_Loads %>%
-  select(Station_ID, WY, FW_TP:FW_TSS)
-
-#Calculate watershed area normalized load; start with areas from SOE
-Tidal_Trib_WY_Loads$Watershed_Area_km2 <- ifelse(Tidal_Trib_WY_Loads$Station_ID == "Lamprey", LMP_Area_km2,
-                                                 ifelse(Tidal_Trib_WY_Loads$Station_ID == "Squamscott",SQR_Area_km2,
-                                                        ifelse(Tidal_Trib_WY_Loads$Station_ID == "Winnicut", WNC_Area_km2, NA)))
-
-Tidal_Trib_WY_Loads$Watershed_Area_ha <- conv_unit(Tidal_Trib_WY_Loads$Watershed_Area_km2, "km2", "hectare")
-
-
-Tidal_Trib_Normalized_WY_Loads <- Tidal_Trib_WY_Loads %>%
-  mutate(across(FW_TP:FW_TSS, ~. / Watershed_Area_ha))
-
-#Save normalized loads
-write.csv(Tidal_Trib_Normalized_WY_Loads, "results/main_load_calc/FW_Loads/Tidal_Trib_WY_Loads_kg_ha_yr.csv")
-
 
 
 #Average annual river concentration across rivers (TABLE FOR MANUSCRIPT NUMBERS)
