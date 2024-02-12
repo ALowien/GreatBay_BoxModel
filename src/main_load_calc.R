@@ -33,8 +33,9 @@ count <- conc_sub %>%
   summarize(across(PO4_MGL:TSS_MGL, ~ sum(!is.na(.x)))) %>%
   pivot_longer(cols=c(PO4_MGL:TSS_MGL), names_to= "Parameter", values_to="Count") 
   
-ggplot(count, aes(Year, Count, color=STATION_ID)) + geom_bar(stat="identity", position="dodge") + facet_wrap(~Parameter) +
-  geom_hline(yintercept=7) + theme_bw()
+ggplot(count, aes(Year, Count, fill=STATION_ID)) + geom_bar(stat="identity", position="dodge") + facet_wrap(~Parameter) +
+  geom_hline(yintercept=7) + theme_bw() +
+  scale_x_continuous(limits=c(2007, 2019), breaks=seq(from=2007, to=2019, by=2))
 
 #make a table of years with insufficient concentration data
 years_to_omit <- count %>%
