@@ -2,14 +2,14 @@
 
 ### Author: Anna Mikulis, University of New Hampshire
 #### Date Created: August 6, 2021
-#### Last Modified: February 6, 2024
+#### Last Modified: February 26, 2024
 ##### Purpose: A respository of data and scripts necessary to create a box-model for solute loading to Great Bay Estuary, NH/ME. This respository is associated with the M.S. Thesis Work titled, "Biogeochemical Stressors and Ecological Reponse in Great Bay Estuary, NH/ME". Data was sourced from monitoring efforts of the UNH Water Quality Analyis Lab, the NH Department of Environmental Services, the Piscataqua Region Estuaries Partnership, and the Great Bay National Estuarine Research Reserve. 
 
 
 ### **Data**
 
 #### original_files/Original_EMD
-##### Contains water quality data for the head of tide river stations (05-LMP, 09-EXT, 02-WNC, GRBAP). Includes sample date, time, water quality data for each station. These data files have been unaltered & were downloaded from the publicly accessible NH Environmental Monitoring Database.
+##### Contains water quality data for the head of tide river stations (05-LMP, 09-EXT, 02-WNC, GRBAP). Includes sample date, time, water quality data for each station. These data files were downloaded via rqequest from the publicly accessible NH Environmental Monitoring Database. The only modifications were to make the column names the first row of the spreadsheet and to delete the database query from the bottom of the spreadsheet. 
 
 
 ### 
