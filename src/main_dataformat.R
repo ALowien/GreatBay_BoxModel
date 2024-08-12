@@ -2,7 +2,7 @@
 # Biogeochemical Stressors and Ecological Response in Great Bay Estuary
 
 # Author: Anna Mikulis, University of New Hampshire
-# Last Updated: 7/31/2024
+# Last Updated: 8/12/2024
 
 #R Version 4.3.2 (2023-10-31 ucrt) -- "Eye Holes"
 
@@ -52,7 +52,6 @@ names(df) <- gsub(" ", "_", names(df))
 names(df) <- gsub("/", "_", names(df))
 #Convert START_DATE column to date class
 df$START_DATE <- as.Date(df$START_DATE)
-
 #___________________________________________
 #Select for columns of interest; filter for sites of interest and time period of interest
 df <- df %>%
@@ -68,9 +67,7 @@ unique(df$STATION_ID) #check for correct site names
 ap_tide <- df %>%
   select(STATION_ID, START_DATE, START_TIME, PARAMETER_ANALYTE, QUALIFIER_AND_RESULTS, RESULT_COMMENTS) %>%
   filter(STATION_ID == "GRBAP") %>%
-  filter(PARAMETER_ANALYTE == "TIDE STAGE") # %>%
-  #filter(!is.na(QUALIFIER_AND_RESULTS)) originally did this way, but 2019 forward data has the tide stage in the result comment column
-
+  filter(PARAMETER_ANALYTE == "TIDE STAGE")
 
 #Pull high/low tide into the RESULTS from the comments. 
 ap_tide$QUALIFIER_AND_RESULTS <- ifelse(is.na(ap_tide$QUALIFIER_AND_RESULTS),
@@ -94,6 +91,12 @@ ap_tide <- ap_tide %>%
 #Rename Great Bay Adams Point (GRBAP) STATION ID based on high/low tide (GRBAPL indicates low tide sample; GRBAPH indicates high tide sample)
 ap_tide$STATION_ID <- ifelse(ap_tide$QUALIFIER_AND_RESULTS == "LOW", "GRBAPL", "GRBAPH")
 
+ap_tide[nrow(ap_tide) +1, 1] <- "GRBAPH"
+ap_tide[469, 2] <- as.Date("2009-06-29")
+ap_tide[469, 3] <- "08:31"
+ap_tide[469, 4] <- "High"
+
+
 #Remove duplicates of tide codes
 ap_tide <- ap_tide[!duplicated(ap_tide[,1:4]),]
 
@@ -103,6 +106,7 @@ ap_tide <- ap_tide %>%
 #Join df with deduped.APTIDE
 #Replace Station ID in AP data frame
 df <- left_join(df, ap_tide, by = c("START_DATE", "START_TIME"))
+
 #If "Station_ID.y" is not NA, (i.e says "GRBAPL" or "GRBAPH"), use STATION_ID.y as the STATION ID, else use the original station id from "Station_ID.x 
 df$STATION_ID <- ifelse(!is.na(df$STATION_ID.y), df$STATION_ID.y, df$STATION_ID.x) 
 
@@ -111,9 +115,10 @@ df <- df %>%
 
 #Couple of missing High and Low Tide IDS
 df$STATION_ID <- ifelse(df$START_DATE == "2008-06-11" & df$START_TIME == "09:35", "GRBAPH",
-                            ifelse(df$START_DATE == "2009-06-29" & df$START_TIME == "08:31", "GRBAPL", 
-                                   ifelse(df$START_DATE == "2009-07-13" & df$START_TIME == "14:17", "GRBAPH",
-                                          ifelse(df$START_DATE == "2011-08-22" & df$START_TIME == "07:10", "GRBAPH", df$STATION_ID))))
+                        ifelse(df$START_DATE == "2009-06-29" & df$START_TIME == "08:31", "GRBAPH", 
+                               ifelse(df$START_DATE == "2009-07-13" & df$START_TIME == "14:17", "GRBAPH",
+                                      ifelse(df$START_DATE == "2011-08-22" & df$START_TIME == "07:10", "GRBAPH", df$STATION_ID))))
+
 
 ### END Import DES Data ###
 #### Resolve Variable and Column Header Names ####
@@ -191,6 +196,7 @@ unique(df$PARAMETER)
 
 #How many values are valid vs invalid?
 df %>% count(RESULT_VALID)
+
 #Assess the 104 occurrences where results are flagged as not valid 
 df_invalid <- df %>%
   filter(RESULT_VALID == "N") 
@@ -204,7 +210,7 @@ ggplot(df_invalid, aes(x=PARAMETER)) +
                              t = 0.5)) +
   ylab("# of Samples & Field Replicates Marked as Not Valid")
 
-ggplot(df, aes(START_DATE, as.numeric(QUALIFIER_AND_RESULTS))) + geom_point(aes(color=STATION_ID)) +
+ggplot(df, aes(START_DATE, as.numeric(QUALIFIER_AND_RESULTS))) + geom_point(aes(color=STATION_ID, shape=RESULT_VALID)) +
   facet_wrap(~PARAMETER, scales="free_y")
 
 df_na <- df %>%
@@ -232,7 +238,7 @@ df <- df %>%
 #Activity Comments Review and Assessment
 unique(df$ACTIVITY_COMMENTS) 
 
-unique(df$ACTIVITY_TYPE) # Removing field duplicates, as they are for QC purposes only (after QC Done)
+unique(df$ACTIVITY_TYPE) # Eventually need to remove field duplicates, as they are for QC purposes only (after QC Done)
 
 #How many instances of each parameter being measured?
 df_count <- df%>% count(df$PARAMETER)
@@ -256,7 +262,7 @@ df$DETECTION_LIMIT<- ifelse(!is.na(df$DETECTION_LIMIT) & df$RESULTS_clean < df$R
 
 #df <- df %>%
  # unite("Result_DL", RDL:DETECTION_LIMIT_COMMENTS, na.rm=TRUE, sep = "_")
-#___________________
+#__________________________________________________________________________________________________
 #QC based on field duplicates and method detection limits
 #added today 5/14/2024
 test <- df 
@@ -310,6 +316,7 @@ unique_rows <- df_calculated_failures2 %>%
 #Remove the values that have been flagged as bad due to field duplicate failure
 df <- anti_join(df, unique_rows) #12003 - 74 should be 11929 rows remaining
 
+#results flagged in EMD as invalid
 df_invalid_v2 <- df %>%
   filter(RESULT_VALID == "N") 
 
@@ -322,19 +329,49 @@ ggplot(df_invalid_v2, aes(x=PARAMETER)) +
                              t = 0.5)) +
   ylab("# of Samples & Field Replicates Marked as Not Valid")
 
-#Now we fix the DOC for GRBAPH and GRBAPL
+#Why is GRBAP DOC all Not valid in 2011?
+grbap <- df %>%
+  filter(STATION_ID == "GRBAPH" | STATION_ID == "GRBAPL") %>%
+  select(STATION_ID:ACTIVITY_COMMENTS, PARAMETER, RESULTS_clean) %>%
+  pivot_wider(names_from="PARAMETER", values_from = "RESULTS_clean") %>%
+  filter(START_DATE < "2012-01-01") %>%
+  filter(START_DATE > "2010-12-31")
 
-# df <- df %>% filter(RESULT_VALID == "Y" | is.na(RESULT_VALID))
+#Lara's file
+l <- read_excel("./data/misc_data/120516_SWMP_Query_tg.xlsx") %>%
+  rename(UNH_ID = "UNH ID #",
+         START_DATE = "Collection Date", 
+         DOC = "NPOC (mg C/L)",
+         TDN = "TDN (mg N/L)") %>%
+  select(UNH_ID:`new TDN`, -Lab_Notes, -Project) %>%
+  filter(str_starts(`Sample Name`, "A")) %>% 
+  filter(!is.na(`New NPOC (mg C/L)`)) %>%
+  mutate(DOC = round(DOC, 2),
+         TDN = round(TDN, 3))
 
+docreplace <- left_join(l, grbap)
+#replace invalid DOC with the correct DOC from the "new column"
+#docreplace$DOC <- ifelse(!is.na(docreplace$`New NPOC (mg C/L)`), docreplace$`New NPOC (mg C/L)`, docreplace$DOC)
+#docreplace$TDN <- ifelse(!is.na(docreplace$`new TDN`), docreplace$`new TDN`, docreplace$TDN)
 
-#REMOVE FIELD DUPLICATES
-#df <- df %>%
-# select(-ACTIVITY_COMMENTS, - FRACTION_TYPE) %>%
-#  filter(ACTIVITY_TYPE == "SAMPLE - ROUTINE")
+df$QUALIFIER_AND_RESULTS <- ifelse(df$STATION_ID == "GRBAPH" & df$ACTIVITY_ID == "NER08221102" & df$PARAMETER == "DOC", 5.17, df$QUALIFIER_AND_RESULTS)
 
+df$QUALIFIER_AND_RESULTS <- ifelse(df$STATION_ID == "GRBAPH" & df$ACTIVITY_ID == "NER08221102" & df$PARAMETER == "TDN", 0.408, df$QUALIFIER_AND_RESULTS)
 
+df$QUALIFIER_AND_RESULTS <- ifelse(df$STATION_ID == "GRBAPL" & df$ACTIVITY_ID == "NER08221105" & df$PARAMETER == "DOC", 2.589, df$QUALIFIER_AND_RESULTS)
 
-###############################################################################################################
+df$QUALIFIER_AND_RESULTS <- ifelse(df$STATION_ID == "GRBAPH" & df$ACTIVITY_ID == "NER09261104" & df$PARAMETER == "DOC", 2.589, df$QUALIFIER_AND_RESULTS)
+
+df$QUALIFIER_AND_RESULTS <- ifelse(df$STATION_ID == "GRBAPL" & df$ACTIVITY_ID == "NER09261111" & df$PARAMETER == "DOC",3.110, df$QUALIFIER_AND_RESULTS)
+
+df$RESULT_VALID <- ifelse(df$STATION_ID == "GRBAPH" & df$ACTIVITY_ID == "NER08221102" & df$PARAMETER == "DOC", "Y", df$RESULT_VALID)
+df$RESULT_VALID <- ifelse(df$STATION_ID == "GRBAPH" & df$ACTIVITY_ID == "NER08221102" & df$PARAMETER == "TDN", "Y", df$RESULT_VALID)
+df$RESULT_VALID <- ifelse(df$STATION_ID == "GRBAPL" & df$ACTIVITY_ID == "NER08221105" & df$PARAMETER == "DOC", "Y", df$RESULT_VALID)
+df$RESULT_VALID <- ifelse(df$STATION_ID == "GRBAPH" & df$ACTIVITY_ID == "NER09261104" & df$PARAMETER == "DOC", "Y", df$RESULT_VALID)
+df$RESULT_VALID <- ifelse(df$STATION_ID == "GRBAPL" & df$ACTIVITY_ID == "NER09261111" & df$PARAMETER == "DOC", "Y", df$RESULT_VALID)
+
+#What remains invalid? 
+#####################################################################################
 ggplot(subset(df, STATION_ID == "02-WNC"), aes(START_DATE, RESULTS_clean)) +
   geom_point(aes(color=RESULT_VALID), size=2) +
   scale_x_date(date_breaks="1 year", date_labels = "%Y") +
@@ -357,45 +394,19 @@ ggplot(subset(df, STATION_ID == "GRBAPL"), aes(START_DATE, RESULTS_clean)) +
   facet_wrap(~PARAMETER, scales="free_y") +
   ggtitle("GRBAPL")
 
-
 ggplot(subset(df, STATION_ID == "GRBAPH"), aes(START_DATE, RESULTS_clean)) +
   geom_point(aes(color=RESULT_VALID), size=2) +
   scale_x_date(date_breaks="1 year", date_labels = "%Y") +
   facet_wrap(~PARAMETER, scales="free_y")
 
-
-#Why is GRBAP DOC all Not valid in 2011?
-grbap <- df %>%
-  filter(STATION_ID == "GRBAPH" | STATION_ID == "GRBAPL")
-
-ggplot(subset(grbap, PARAMETER == "DOC"), aes(START_DATE, RESULTS_clean)) +
-  geom_point(aes(color=RESULT_VALID), size=2) +
-  scale_x_date(date_breaks="1 year", date_labels = "%Y") +
-  scale_y_continuous(limits=c(0,10)) +
-  ylab("DOC mg-C/L at GRBAP") +
-  xlab("Sampling Date") +
-  theme_bw()
-
-ggplot(subset(grbap, PARAMETER == "DOC" & START_DATE < "2012-01-01" &  START_DATE > "2011-01-01"), 
-       aes(START_DATE, RESULTS_clean)) +
-  geom_point(aes(color=RESULT_VALID, shape=STATION_ID), size=2.5) +
-  scale_x_date(date_breaks="1 month", date_labels = "%Y-%m-%d") +
-  scale_y_continuous(limits=c(0,10)) +
-  ylab("DOC mg-C/L at GRBAP") +
-  xlab("Sampling Date") +
-  theme_bw() +
-  scale_shape_manual(labels=c("High Tide", "Low Tide"), values=c(19,17))
-
-
-
 #look through remaining not valid data
 invalid <- df %>%
   filter(RESULT_VALID == "N")
 
-#keep DOC, 2011
-invalid$NEW_RESULT_VALID <- ifelse(invalid$PARAMETER == "DOC" & invalid$START_DATE > 
+#keep DOC, 2011 from GRBAP
+invalid$NEW_RESULT_VALID<- ifelse(invalid$PARAMETER == "DOC" & invalid$START_DATE > 
                                      "2011-01-01" & invalid$START_DATE < "2011-12-30", 
-                              "Y", "N")
+                                   "Y", "N")
 
 #FAILED RPD, but mean of sample+duplicate <  10MDL
 invalid$NEW_RESULT_VALID <- ifelse(invalid$PARAMETER == "NH4" & invalid$ACTIVITY_ID ==
@@ -420,27 +431,15 @@ invalid <- invalid %>%
   select(-NEW_RESULT_VALID)
 
 #remove the invalid data rows from df
-
 df <- anti_join(df, invalid)
 
-#Look at concentrations over time at stations
-# Get unique STATION_IDs
-station_ids <- unique(df$STATION_ID)
+#df <- df %>% filter(RESULT_VALID == "Y" | is.na(RESULT_VALID)) NO LONGER USING THIS LINE BC KEEPING EMD "INVALID" DATA BECAUSE WE THINK IT IS VALID
 
-# Loop through each unique STATION_ID 
-for (station_id in station_ids) {
-  # Subset data for the current STATION_ID
-  station_data <- df[df$STATION_ID == station_id, ]
-  
-  # Plot for the current STATION_ID
-  plots <- ggplot(station_data, aes(START_DATE, RESULT)) +
-    geom_point() +
-    facet_wrap(~PARAMETER, scales = "free_y") +
-    ggtitle(paste("Station ID:", station_id))  
-  
-  # Print each plot
-  print(plots)
-}
+#REMOVE FIELD DUPLICATES Now that QC is done
+df <- df %>%
+ filter(ACTIVITY_TYPE == "SAMPLE - ROUTINE")
+#11881 to 9828 rows
+
 
 ### END TIDY RESULTS ###
 #_____________________________________________________________________________________________________________
@@ -506,10 +505,17 @@ summary(df)
 df$START_DATE <- as.Date(df$START_DATE)
 
 #___________________________________Make data frame wide instead of long __________________________________________________________
+df_unique <- df[!duplicated(df),]
+
+
+duplicates <- df %>%
+  group_by(STATION_ID, START_DATE, PARAMETER) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  filter(n > 1L)
 
 df <- df %>%
-  pivot_wider(names_from = PARAMETER, values_from = RESULT,
-              values_fn = mean)
+  pivot_wider(id_cols = c(STATION_ID, START_DATE), 
+              names_from = PARAMETER, values_from = RESULT)
 
 #Reorganize columns in df
 colnames(df)
@@ -525,6 +531,19 @@ df$NH4_MGL <- conv_unit(df$NH4_UGL, "ug", "mg")
 #remove UG/L concentration columns
 df <- df %>%
   select(STATION_ID, START_DATE, PO4_MGL, PN_MGL, TN_MGL, TDN_MGL, NH4_MGL, NO3_MGL, NO3_NO2_MGL, DIN_MGL, DON_MGL, DOC_MGL,  TSS_MGL:DO_sat, DO_MGL, SPC_UMHO_CM, SALINITY_PSS, TEMP_WATER_DEGC, CHLA_corr_pheo_UGL)
+
+#Plug in early DOC data
+DOC_data <- read.csv("./data/misc_data/DOC_tidaltribs_pre2010.csv") %>%
+  select(-X) %>%
+  rename(DOC_MGL.trib = DOC_MGL) 
+
+DOC_data$START_DATE <- as.Date(DOC_data$START_DATE)
+
+df <- full_join(df, DOC_data)
+
+df$DOC_MGL <- ifelse(is.na(df$DOC_MGL), df$DOC_MGL.trib, df$DOC_MGL)
+
+df <- df %>% select(-DOC_MGL.trib)
 
 #Summarize physicochemical parameter columns for Appendix Tables
 df_DO <- df %>%
@@ -624,8 +643,67 @@ Q$year <- year(Q$datetime)
 
 Q_summary <- Q %>%
   group_by(STATION_ID) %>%
-  filter(year > 2007 & year < 2019) %>%
+  filter(year > 2007 & year < 2024) %>%
   summarize(mean_flow_m3s = round(mean(flow, na.rm=T),2)) 
+
+#Plot a couple of parameters
+
+ggplot(df, aes(START_DATE, PO4_MGL)) + geom_point() +
+  scale_x_date(date_breaks="2 year", date_labels =  "%Y") +
+  facet_wrap(~STATION_ID)
+
+#ADD in winter tidal tribs data 2020 - 2022 
+#ADD tidal tribs 2022 and 2023 data from Michelle
+
+#Add ADAMS point 2023 data.
+update <- read.csv("./data/misc_data/updated_2023.csv") %>%
+  select(-X,-Project,-UNH_ID)
+
+update$START_DATE <- as.Date(update$START_DATE)
+colnames(update)
+colnames(df)
+
+update <- update %>%
+  rename(TSS_MGL = TSS)
+
+df <- full_join(df, update)
+df$TN_MGL <- ifelse(is.na(df$TN_MGL) & !is.na(df$TDN_MGL) & !is.na(df$PN_MGL), df$PN_MGL + df$TDN_MGL, df$TN_MGL)
+df$NO3_NO2_MGL <- ifelse(is.na(df$NO3_NO2_MGL), df$NO3_MGL, df$NO3_NO2_MGL)
+
+df$DIN_MGL <- ifelse(is.na(df$DIN_MGL) & !is.na(df$NO3_NO2_MGL) & !is.na(df$NH4_MGL), df$NH4_MGL + df$NO3_NO2_MGL, df$DIN_MGL)
+
+
+#Final QC
+#Tally of values (n)
+tally <- df %>%
+  mutate(Year = year(START_DATE)) %>%
+  select(STATION_ID, Year, PO4_MGL:NH4_MGL, NO3_NO2_MGL, DIN_MGL, DOC_MGL, TSS_MGL:DO_MGL, TEMP_WATER_DEGC) %>%
+  group_by(STATION_ID, Year) %>%
+  summarize(across(PO4_MGL:TEMP_WATER_DEGC,function(x) sum(!is.na(x))))
+
+tally_piv <- tally %>%
+  pivot_longer(cols=c(PO4_MGL:TEMP_WATER_DEGC), names_to="Parameter", values_to="count")
+
+ggplot(tally_piv, aes(Year, count)) +
+  geom_col(aes(fill=STATION_ID), position="dodge") +
+  facet_wrap(~Parameter) +
+  scale_x_continuous(breaks=seq(from=2008,to=2023, by=2))
+
+ggplot(df, aes(START_DATE, (PO4_MGL*1000), color=STATION_ID)) + geom_point() +
+  facet_wrap(~STATION_ID) +
+  ylab("PO4 ug/L") +
+  scale_x_date(date_breaks="1 year", date_labels = "%Y") +
+  theme(legend.position = "none")
+
+mean(df$PO4_MGL)
+
+#pull high PO4 values
+df$PO4_MGL <- ifelse(df$STATION_ID == "02-WNC" & df$START_DATE == "2022-08-24", NA, df$PO4_MGL)
+
+df$PO4_MGL <- ifelse(df$STATION_ID == "GRBAPH" & df$START_DATE == "2019-07-22", NA, df$PO4_MGL)
+
+df$PO4_MGL <- ifelse(df$STATION_ID == "GRBAPH" & df$START_DATE == "2021-08-10", NA, df$PO4_MGL)
+
 
 #Average + standard deviation of each solute for each river
 avg_conc <- df %>%
@@ -665,10 +743,5 @@ std_conc <- std_conc %>%
 
 write.csv(std_conc, "results/main_dataformat/std_solute_conc_site_2024.csv")
 
-#Tally of values (n)
-tally <- df %>%
-  select(STATION_ID, START_DATE, PO4_MGL:NH4_MGL, NO3_NO2_MGL, DIN_MGL, DOC_MGL, TSS_MGL:DO_MGL, TEMP_WATER_DEGC) %>%
-  group_by(STATION_ID) %>%
-  summarize(across(PO4_MGL:TEMP_WATER_DEGC,function(x) sum(!is.na(x))))
 #This data frame has final solute concentrations that can be used for further load analysis
 write.csv(df, "results/main_dataformat/df_conc.csv")
