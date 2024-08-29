@@ -412,7 +412,9 @@ ggplot(subset(df, STATION_ID == "GRBAPH" & PARAMETER== "DOC"), aes(START_DATE, R
   geom_point(aes(color=RESULT_VALID), size=2) +
   scale_x_date(date_breaks="1 year", date_labels = "%Y") 
 
-#Flag all of the high DOC in 2011
+#flag salinity on 7/20/2015 at low tide as invalid (way to low to be real)
+df$RESULT_VALID <- ifelse(df$ACTIVITY_ID == "JEL07201502" & df$PARAMETER == "SALINITY", 
+                          "N", df$RESULT_VALID)
 
 #look through remaining not valid data
 invalid <- df %>%
