@@ -194,6 +194,7 @@ df$PARAMETER <- ifelse(df$PARAMETER == "CHLOROPHYLL A, CORRECTED FOR PHEOPHYTIN"
 
 unique(df$PARAMETER)
 
+
 #How many values are valid vs invalid?
 df %>% count(RESULT_VALID)
 
@@ -212,6 +213,11 @@ ggplot(df_invalid, aes(x=PARAMETER)) +
 
 ggplot(df, aes(START_DATE, as.numeric(QUALIFIER_AND_RESULTS))) + geom_point(aes(color=STATION_ID, shape=RESULT_VALID)) +
   facet_wrap(~PARAMETER, scales="free_y")
+
+ggplot(subset(df, PARAMETER == "PO4"), 
+       aes(START_DATE, as.numeric(QUALIFIER_AND_RESULTS))) + geom_point() +
+  facet_wrap(~STATION_ID, nrow=2, scales="free_y")
+
 
 df_na <- df %>%
   filter(is.na(QUALIFIER_AND_RESULTS)) #NO NA values at the moment
@@ -337,6 +343,8 @@ grbap <- df %>%
   filter(START_DATE < "2012-01-01") %>%
   filter(START_DATE > "2010-12-31")
 
+ggplot(grbap, aes(START_DATE, DOC)) + geom_point(aes(color=STATION_ID))
+
 #Lara's file
 l <- read_excel("./data/misc_data/120516_SWMP_Query_tg.xlsx") %>%
   rename(UNH_ID = "UNH ID #",
@@ -354,15 +362,16 @@ docreplace <- left_join(l, grbap)
 #docreplace$DOC <- ifelse(!is.na(docreplace$`New NPOC (mg C/L)`), docreplace$`New NPOC (mg C/L)`, docreplace$DOC)
 #docreplace$TDN <- ifelse(!is.na(docreplace$`new TDN`), docreplace$`new TDN`, docreplace$TDN)
 
-df$QUALIFIER_AND_RESULTS <- ifelse(df$STATION_ID == "GRBAPH" & df$ACTIVITY_ID == "NER08221102" & df$PARAMETER == "DOC", 5.17, df$QUALIFIER_AND_RESULTS)
+df$RESULT <- ifelse(df$STATION_ID == "GRBAPH" & df$ACTIVITY_ID == "NER08221102" & df$PARAMETER == "DOC", 5.17, df$RESULT)
 
-df$QUALIFIER_AND_RESULTS <- ifelse(df$STATION_ID == "GRBAPH" & df$ACTIVITY_ID == "NER08221102" & df$PARAMETER == "TDN", 0.408, df$QUALIFIER_AND_RESULTS)
+df$RESULT <- ifelse(df$STATION_ID == "GRBAPH" & df$ACTIVITY_ID == "NER08221102" & df$PARAMETER == "TDN", 0.408, df$RESULT)
 
-df$QUALIFIER_AND_RESULTS <- ifelse(df$STATION_ID == "GRBAPL" & df$ACTIVITY_ID == "NER08221105" & df$PARAMETER == "DOC", 2.589, df$QUALIFIER_AND_RESULTS)
+df$RESULT<- ifelse(df$STATION_ID == "GRBAPL" & df$ACTIVITY_ID == "NER08221105" & df$PARAMETER == "DOC", 2.589, df$RESULT)
 
-df$QUALIFIER_AND_RESULTS <- ifelse(df$STATION_ID == "GRBAPH" & df$ACTIVITY_ID == "NER09261104" & df$PARAMETER == "DOC", 2.589, df$QUALIFIER_AND_RESULTS)
+df$RESULT<- ifelse(df$STATION_ID == "GRBAPH" & df$ACTIVITY_ID == "NER09261104" & df$PARAMETER == "DOC", 2.589, df$RESULT)
 
-df$QUALIFIER_AND_RESULTS <- ifelse(df$STATION_ID == "GRBAPL" & df$ACTIVITY_ID == "NER09261111" & df$PARAMETER == "DOC",3.110, df$QUALIFIER_AND_RESULTS)
+df$RESULT <- ifelse(df$STATION_ID == "GRBAPL" & df$ACTIVITY_ID == "NER09261111" & df$PARAMETER == "DOC",3.110, df$RESULT)
+
 
 df$RESULT_VALID <- ifelse(df$STATION_ID == "GRBAPH" & df$ACTIVITY_ID == "NER08221102" & df$PARAMETER == "DOC", "Y", df$RESULT_VALID)
 df$RESULT_VALID <- ifelse(df$STATION_ID == "GRBAPH" & df$ACTIVITY_ID == "NER08221102" & df$PARAMETER == "TDN", "Y", df$RESULT_VALID)
@@ -399,13 +408,19 @@ ggplot(subset(df, STATION_ID == "GRBAPH"), aes(START_DATE, RESULTS_clean)) +
   scale_x_date(date_breaks="1 year", date_labels = "%Y") +
   facet_wrap(~PARAMETER, scales="free_y")
 
+ggplot(subset(df, STATION_ID == "GRBAPH" & PARAMETER== "DOC"), aes(START_DATE, RESULT)) +
+  geom_point(aes(color=RESULT_VALID), size=2) +
+  scale_x_date(date_breaks="1 year", date_labels = "%Y") 
+
+#Flag all of the high DOC in 2011
+
 #look through remaining not valid data
 invalid <- df %>%
   filter(RESULT_VALID == "N")
 
 #keep DOC, 2011 from GRBAP
 invalid$NEW_RESULT_VALID<- ifelse(invalid$PARAMETER == "DOC" & invalid$START_DATE > 
-                                     "2011-01-01" & invalid$START_DATE < "2011-12-30", 
+                                     "2011-01-01" & invalid$START_DATE < "2011-12-30" & invalid$RESULT < 7.00, 
                                    "Y", "N")
 
 #FAILED RPD, but mean of sample+duplicate <  10MDL
@@ -438,8 +453,37 @@ df <- anti_join(df, invalid)
 #REMOVE FIELD DUPLICATES Now that QC is done
 df <- df %>%
  filter(ACTIVITY_TYPE == "SAMPLE - ROUTINE")
-#11881 to 9828 rows
+#11877 to 9825 rows
 
+#DON detection limit 0.05
+df$RESULT <- ifelse(df$PARAMETER == "DON" & df$RESULT < 0.05, 0.025, df$RESULT)
+
+#Salinity 
+salinity <- df %>%
+  filter(STATION_ID == "09-EXT" | STATION_ID == "GRBAPH") %>%
+  filter(PARAMETER == "SPC" | PARAMETER == "SALINITY")
+
+salinity$Salinity <- ifelse(salinity$PARAMETER == "SPC", 
+                                 salinity$RESULTS_clean* 0.00064, salinity$RESULTS_clean)
+
+salplot <- ggplot(salinity, aes(START_DATE, Salinity,color=STATION_ID)) +
+  geom_point() +
+  geom_line() +
+  geom_vline(xintercept = as.Date("2016-07-01"), linetype="dashed") +
+  scale_color_manual(values=c("black", "blue"), labels=c("Squamscott River", "Adams Point (High Tide)"), name="Monitoring Station") +
+  scale_y_log10() +
+  annotation_logticks() +
+  xlab("Year") +
+  ylab("Salinity (psu)") +
+  theme_bw() +
+  scale_x_date(date_breaks="1 year", date_labels = "%Y") +
+  theme(axis.title = element_text(size=14),
+        axis.text = element_text(size=11),
+        legend.title = element_text(size=12),
+        legend.text = element_text(size=11)
+        )
+salplot
+ggsave(salplot, file=paste0("./results/figures/supplemental/Salinity_ext.jpeg"), dpi=300, bg="white")
 
 ### END TIDY RESULTS ###
 #_____________________________________________________________________________________________________________
@@ -504,6 +548,9 @@ summary(df)
 #fix Date column class
 df$START_DATE <- as.Date(df$START_DATE)
 
+
+ggplot(subset(df, PARAMETER == "PO4_UGL"), aes(START_DATE, RESULT, color=STATION_ID)) + geom_point() +
+  facet_wrap(~STATION_ID)
 #___________________________________Make data frame wide instead of long __________________________________________________________
 df_unique <- df[!duplicated(df),]
 
@@ -584,8 +631,8 @@ df <- df %>%
 
 ### END Convert Dataframe from Long to Wide ###
 #assess normality of TSS values
-skewness(df$TSS_MGL, na.rm=T)
-kurtosis(df$TSS_MGL, na.rm=T)
+skewness(df$TSS_MGL)
+kurtosis(df$TSS_MGL)
 
 #Remove the three high TSS concentrations at Adams Point Low Tide due to anecdotal knowledge from Jackson Estuarine Laboratory that winter values are worse for TSS b/c dock is out of the water
 df <- df %>%
@@ -593,8 +640,8 @@ df <- df %>%
   mutate(TSS_MGL = ifelse(START_DATE == "2008-11-25" & STATION_ID == "GRBAPL", NA, TSS_MGL)) %>%
   mutate(TSS_MGL = ifelse(START_DATE == "2012-01-30" & STATION_ID == "GRBAPL", NA, TSS_MGL))
   
-skewness(df$TSS_MGL, na.rm=T) #notable improvement in skewness from 12.6 to 2.1
-kurtosis(df$TSS_MGL, na.rm=T) #notable improvement in kurtosis from 224 to 11
+skewness(df$TSS_MGL) #notable improvement in skewness from 13 to 2
+kurtosis(df$TSS_MGL) #notable improvement in kurtosis from 251 to 7
 
 #Count of concentration measurements
 #### Discharge Data Formatting ####
@@ -655,18 +702,17 @@ ggplot(df, aes(START_DATE, PO4_MGL)) + geom_point() +
 #ADD in winter tidal tribs data 2020 - 2022 
 #ADD tidal tribs 2022 and 2023 data from Michelle
 
-#Add ADAMS point 2023 data.
+#Add ADAMS point 2023 data and winter data.
 update <- read.csv("./data/misc_data/updated_2023.csv") %>%
   select(-X,-Project,-UNH_ID)
 
 update$START_DATE <- as.Date(update$START_DATE)
 colnames(update)
 colnames(df)
+update <- update %>% select(-CMass, -NMass)
 
-update <- update %>%
-  rename(TSS_MGL = TSS)
 
-df <- full_join(df, update)
+df1 <- full_join(df, update)
 df$TN_MGL <- ifelse(is.na(df$TN_MGL) & !is.na(df$TDN_MGL) & !is.na(df$PN_MGL), df$PN_MGL + df$TDN_MGL, df$TN_MGL)
 df$NO3_NO2_MGL <- ifelse(is.na(df$NO3_NO2_MGL), df$NO3_MGL, df$NO3_NO2_MGL)
 
@@ -695,7 +741,17 @@ ggplot(df, aes(START_DATE, (PO4_MGL*1000), color=STATION_ID)) + geom_point() +
   scale_x_date(date_breaks="1 year", date_labels = "%Y") +
   theme(legend.position = "none")
 
-mean(df$PO4_MGL)
+ggplot(df, aes(START_DATE, DOC_MGL, color=STATION_ID)) + geom_point() +
+  facet_wrap(~STATION_ID, scales="free") +
+  ylab("DOC mg/L") +
+  scale_x_date(date_breaks="1 year", date_labels = "%Y") +
+  theme(legend.position = "none")
+
+ggplot(df, aes(START_DATE, TSS_MGL, color=STATION_ID)) + geom_point() +
+  facet_wrap(~STATION_ID) +
+  ylab("TSS mg/L") +
+  scale_x_date(date_breaks="1 year", date_labels = "%Y") +
+  theme(legend.position = "none")
 
 #pull high PO4 values
 df$PO4_MGL <- ifelse(df$STATION_ID == "02-WNC" & df$START_DATE == "2022-08-24", NA, df$PO4_MGL)
@@ -705,16 +761,22 @@ df$PO4_MGL <- ifelse(df$STATION_ID == "GRBAPH" & df$START_DATE == "2019-07-22", 
 df$PO4_MGL <- ifelse(df$STATION_ID == "GRBAPH" & df$START_DATE == "2021-08-10", NA, df$PO4_MGL)
 
 
+ggplot(df, aes(START_DATE, PO4_MGL, color=STATION_ID)) + geom_point() +
+  facet_wrap(~STATION_ID)
+
+
 #Average + standard deviation of each solute for each river
+colnames(df)
+
 avg_conc <- df %>%
-  select(STATION_ID, START_DATE, PO4_MGL:NH4_MGL, NO3_NO2_MGL, DIN_MGL, DOC_MGL, TSS_MGL:DO_MGL, TEMP_WATER_DEGC) %>%
-  group_by(STATION_ID) %>%
-  summarize(across(PO4_MGL:TEMP_WATER_DEGC, mean, na.rm=T)) %>%
+  select(STATION_ID, START_DATE, PO4_MGL:DO_MGL, DO_sat) %>%
   mutate(PO4_UGL = conv_unit(PO4_MGL, "mg", "ug"),
          NH4_UGL = conv_unit(NH4_MGL, "mg", "ug")) %>%
-  select(-PO4_MGL, -NH4_MGL)
+  select(-PO4_MGL, -NH4_MGL) %>%  
+  group_by(STATION_ID) %>%
+  summarize(across(PN_MGL:NH4_UGL, mean, na.rm=T)) 
 
-avg_conc[,2:11] <- signif(avg_conc[,2:11], 3)
+avg_conc[,2:15] <- signif(avg_conc[,2:15], 3)
 
 avg_conc <- avg_conc %>%
   pivot_longer(cols=c(PN_MGL:NH4_UGL),names_to = "Solute", values_to = "Concentration")
@@ -725,15 +787,14 @@ avg_conc <- avg_conc %>%
 write.csv(avg_conc, "results/main_dataformat/avg_solute_conc_site_2024.csv")
 
 std_conc <- df %>%
-  select(STATION_ID, START_DATE, PO4_MGL:NH4_MGL, NO3_NO2_MGL, DIN_MGL, DOC_MGL, TSS_MGL:DO_MGL, TEMP_WATER_DEGC) %>%
-  group_by(STATION_ID) %>%
-  summarize(across(PO4_MGL:TEMP_WATER_DEGC, sd, na.rm=T))
-
-std_conc <- std_conc %>%
+  select(STATION_ID, START_DATE, PO4_MGL:DO_MGL, DO_sat) %>%
   mutate(PO4_UGL = conv_unit(PO4_MGL, "mg", "ug"),
          NH4_UGL = conv_unit(NH4_MGL, "mg", "ug")) %>%
-  select(-PO4_MGL, -NH4_MGL)
-std_conc[,2:11] <- signif(std_conc[,2:11], 3)
+  select(-PO4_MGL, -NH4_MGL) %>%  
+  group_by(STATION_ID) %>%
+  summarize(across(PN_MGL:NH4_UGL, sd, na.rm=T)) 
+
+std_conc[,2:15] <- signif(std_conc[,2:15], 3)
 
 std_conc <- std_conc %>%
   pivot_longer(cols=c(PN_MGL:NH4_UGL),names_to = "Solute", values_to = "Concentration")
@@ -742,6 +803,53 @@ std_conc <- std_conc %>%
   pivot_wider(names_from= "STATION_ID", values_from = "Concentration")
 
 write.csv(std_conc, "results/main_dataformat/std_solute_conc_site_2024.csv")
+
+
+summary_tally <- df %>%
+  select(STATION_ID, START_DATE, PO4_MGL:DO_MGL, DO_sat) %>%
+  group_by(STATION_ID) %>%
+  summarize(across(PO4_MGL:DO_sat, ~ sum(!is.na(.))))
+
+tally <- summary_tally %>%
+  pivot_longer(cols=c(PO4_MGL:DO_sat), names_to = "Parameter", values_to="Count") %>%
+  pivot_wider(names_from = STATION_ID,
+              values_from = Count)
+
+tally$Parameter <- ifelse(tally$Parameter == "NH4_MGL", "NH4_UGL", tally$Parameter)
+tally$Parameter <- ifelse(tally$Parameter == "PO4_MGL", "PO4_UGL", tally$Parameter)
+# Pivot avg_conc to long format
+avg_conc_long <- avg_conc %>%
+  pivot_longer(cols = -Solute, names_to = "Source", values_to = "Mean") %>%
+  rename(Parameter = Solute)
+
+# Pivot std_conc to long format
+std_conc_long <- std_conc %>%
+  pivot_longer(cols = -Solute, names_to = "Source", values_to = "SD") %>%
+  rename(Parameter = Solute)
+
+# Pivot tally to long format
+tally_long <- tally %>%
+  pivot_longer(cols = -Parameter, names_to = "Source", values_to = "Count")
+
+# Combine the dataframes
+combined_data <- avg_conc_long %>%
+  left_join(std_conc_long, by = c("Parameter", "Source")) %>%
+  left_join(tally_long, by = c("Parameter", "Source")) %>%
+  mutate(Result = paste0(signif(Mean, 2), " ± ", signif(SD, 2), " (", Count, ")")) %>%
+  select(Parameter, Source, Result) %>%
+  pivot_wider(names_from = Source, values_from = Result)
+
+combined_data <- combined_data %>% filter(Parameter != "NO3_MGL")
+
+#create levels
+custom_order <- c("DOC_MGL","PO4_UGL", "NH4_UGL", "NO3_NO2_MGL", "DIN_MGL", "DON_MGL", "TDN_MGL", "PN_MGL", "TN_MGL",  "TSS_MGL", "DO_MGL", "DO_sat"  ,"TEMP_WATER_DEGC")
+
+combined_data$name <- factor(combined_data$Parameter, levels = custom_order)
+
+combined_data <- combined_data %>%
+  arrange(name)
+
+write.csv(combined_data, file=paste0("./results/manuscript_figures/supplemental/table_s1/avg_concentrations_supplemental.csv")) 
 
 #This data frame has final solute concentrations that can be used for further load analysis
 write.csv(df, "results/main_dataformat/df_conc.csv")
