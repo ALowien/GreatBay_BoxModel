@@ -1,7 +1,7 @@
 #main_load_calc.R
 
 #Author: Anna Mikulis, University of New Hampshire
-#Last Updated: 8/12/2024
+#Last Updated: 8/28/2024
 
 #This script calculates annual (calendar year) and monthly loads for the three tidal tributaries (Lamprey, Squamscott, and Winnicut) to Great Bay.
 #This script pulls in products created in the main_dataformat.R script, including measured water quality concentrations and discharge readings. Start with an empty environment. 
@@ -123,10 +123,14 @@ union.WNC <- left_join(flow.WNC, conc.WNC)
 write.csv(union.WNC, "results/main_load_calc/union.WNC.csv") #Saving a file of discharge & WNC concentrations saved together
 
 #Flow_Multipliers to resolve difference in location b/t stream gauge and head-of-tide
-#These are calculated as the ratio of watershed area to watershed area at the stream gauge; multipliers sourced from PREP State of Our Estuary 2018 Report
-LMP_Flow_Multiplier <- 1.145435
-SQR_Flow_Multiplier <- 1.683529
-WNC_Flow_Multiplier <- 1.005443
+#These are calculated as the ratio of watershed area at head of tide to watershed area at the stream gauge
+LMP_Flow_Multiplier <- 1.156576
+SQR_Flow_Multiplier <- 1.689024
+WNC_Flow_Multiplier <- 1.005479
+#These are calculated as the ratio of watershed area to watershed area at the stream gauge
+LMP_Flow_Multiplier_v2 <- 1.156576
+SQR_Flow_Multiplier_v2 <- 2.012195
+WNC_Flow_Multiplier_v2 <- 1.235616
 
 # Flow Weighted Load Calculations Lamprey River (05-LMP) (ANNUAL ESTIMATES) ----------------------
 #ANNUAL ESTIMATE (CY)
@@ -139,16 +143,24 @@ union.LR$CY <- year(union.LR$datetime)
 union.LR$flow_m3_day <- union.LR$flow * 86400
 #Multiply the flow m3/day by the lamprey flow multiplier
 union.LR$flow_m3_day_cor <- union.LR$flow_m3_day * LMP_Flow_Multiplier
+union.LR$flow_m3_day_cor.v2 <- union.LR$flow_m3_day * LMP_Flow_Multiplier_v2
+
+ggplot(union.LR, aes(flow_m3_day_cor, flow_m3_day_cor.v2)) + 
+  geom_point() + 
+  xlab("Flow corrected to head of tide") + ylab("Flow corrected to full watershed size") + 
+  geom_abline(slope=1, intercept=0, color="red") + 
+  theme_bw() +
+  ggtitle("LMP")
 
 #convert units from m3 to liters
-union.LR$flow_l_day <- conv_unit(union.LR$flow_m3_day_cor, "m3", "l")
+union.LR$flow_l_day <- conv_unit(union.LR$flow_m3_day_cor.v2, "m3", "l")
 
 #Test m3 to L conversion
 conv_unit(1, "m3", "l") # good returns 1000L
 
 union.LR <- union.LR %>%
   select(datetime, CY, flow_l_day, PO4_MGL:TSS_MGL) %>%
-  filter(CY > 2007 & CY < 2024) # have sampling data through annual year 2018 currently
+  filter(CY > 2007 & CY < 2024)
 
 #Flow Weighted Concentrations Lamprey River
 #Flow Weighted Flux calculated by multiplying conc * daily average discharge of sampling day (corrected by flow multiplier)
@@ -230,7 +242,7 @@ conv_unit(1, "mg", "kg")
 
 flow.LR$CY <- year(flow.LR$datetime)
 
-flow.LR$flow <- conv_unit(flow.LR$flow, "m3", "l") * LMP_Flow_Multiplier #l/s
+flow.LR$flow <- conv_unit(flow.LR$flow, "m3", "l") * LMP_Flow_Multiplier_v2 #l/s
 flow.LR$flow_day <- flow.LR$flow * 86400 #L/s * 86400 s/day = L/day
 
 CY.flow.LR <- flow.LR %>%
@@ -308,14 +320,22 @@ union.SQR$CY <- year(union.SQR$datetime)
 union.SQR$flow_m3_day <- union.SQR$flow * 86400
 #Multiply the flow m3/day by the Squamscott River Flow Multiplier
 union.SQR$flow_m3_day_cor <- union.SQR$flow_m3_day * SQR_Flow_Multiplier
-
+union.SQR$flow_m3_day_cor.v2 <- union.SQR$flow_m3_day * SQR_Flow_Multiplier_v2
 #Convert from m3 to liters
-union.SQR$flow_l_day <- conv_unit(union.SQR$flow_m3_day_cor, "m3", "l")
+union.SQR$flow_l_day <- conv_unit(union.SQR$flow_m3_day_cor.v2, "m3", "l")
+
+
+ggplot(union.SQR, aes(flow_m3_day_cor, flow_m3_day_cor.v2)) + 
+  geom_point() + 
+  xlab("Flow corrected to head of tide") + ylab("Flow corrected to full watershed size") + 
+  geom_abline(slope=1, intercept=0, color="red") + 
+  theme_bw() +
+  ggtitle("SQR")
 
 
 union.SQR <- union.SQR %>%
   select(datetime, CY, flow_l_day, PO4_MGL:TSS_MGL) %>%
-  filter(CY > 2007 & CY < 2024) # have sampling data through annual year 2018 currently
+  filter(CY > 2007 & CY < 2024) 
 
 #Flow Weighted Concentrations Squamscott River
 #Flow Weighted Flux calculated by multiplying conc * daily average discharge of sampling day (corrected by flow multiplier).
@@ -395,7 +415,7 @@ for (i in 2:11) {
 
 flow.SQR$CY <- year(flow.SQR$datetime)
 
-flow.SQR$flow <- conv_unit(flow.SQR$flow, "m3", "l") * SQR_Flow_Multiplier #l/s
+flow.SQR$flow <- conv_unit(flow.SQR$flow, "m3", "l") * SQR_Flow_Multiplier_v2 #l/s
 flow.SQR$flow_day <- flow.SQR$flow * 86400 #l/s to 86400s/day = l/day
 
 CY.flow.SQR <- flow.SQR %>%
@@ -472,14 +492,21 @@ union.WNC$CY <- year(union.WNC$datetime)
 union.WNC$flow_m3_day <- union.WNC$flow * 86400
 #Multiply the flow m3/day by the Squamscott River Flow Multiplier
 union.WNC$flow_m3_day_cor <- union.WNC$flow_m3_day * WNC_Flow_Multiplier
-
+union.WNC$flow_m3_day_cor.v2 <- union.WNC$flow_m3_day * WNC_Flow_Multiplier_v2
 #Convert from m3 to liters
-union.WNC$flow_l_day <- conv_unit(union.WNC$flow_m3_day_cor, "m3", "l")
+union.WNC$flow_l_day <- conv_unit(union.WNC$flow_m3_day_cor.v2, "m3", "l")
+
+ggplot(union.WNC, aes(flow_m3_day_cor, flow_m3_day_cor.v2)) + 
+  geom_point() + 
+  xlab("Flow corrected to head of tide") + ylab("Flow corrected to full watershed size") + 
+  geom_abline(slope=1, intercept=0, color="red") + 
+  theme_bw() +
+  ggtitle("WNC")
 
 
 union.WNC <- union.WNC %>%
   select(datetime, CY, flow_l_day, PO4_MGL:TSS_MGL) %>%
-  filter(CY > 2007 & CY < 2024) # have sampling data through annual year 2018 currently
+  filter(CY > 2007 & CY < 2024) 
 
 #Flow Weighted Concentrations Squamscott River
 #Flow Weighted Flux calculated by multiplying conc * daily average discharge of sampling day (corrected by flow multiplier).
@@ -556,7 +583,7 @@ for (i in 2:11) {
 
 flow.WNC$CY <- year(flow.WNC$datetime)
 
-flow.WNC$flow <- conv_unit(flow.WNC$flow, "m3", "l") * WNC_Flow_Multiplier #l/s
+flow.WNC$flow <- conv_unit(flow.WNC$flow, "m3", "l") * WNC_Flow_Multiplier_v2 #l/s
 flow.WNC$flow_day <- flow.WNC$flow * 86400 #l/s to 86400s/day = l/day
 
 CY.flow.WNC <- flow.WNC %>%
@@ -632,14 +659,11 @@ Tidal_Trib_CY_Loads <- union(Tidal_Trib_CY_Loads, WNC_CY_Loads)
 Tidal_Trib_CY_Loads <- Tidal_Trib_CY_Loads %>%
   select(Station_ID, CY, FW_PO4:FW_TSS)
 
-#Calculate watershed area normalized load; start with areas from  PREP State of Our Estuary 2018
-#Lamprey 211.91 sq miles
-#Winnicut 14.18 sq miles
-#Squamscott 106.90 sq miles
+#Calculate watershed area normalized load; 
 
-LMP_Area_km2 <- conv_unit(211.91, "mi2", "km2")
-WNC_Area_km2 <- conv_unit(14.18, "mi2", "km2")
-SQR_Area_km2 <- conv_unit(106.90, "mi2", "km2")
+LMP_Area_km2 <- 554
+WNC_Area_km2 <- 45.1
+SQR_Area_km2 <- 330
 
 
 Tidal_Trib_CY_Loads$Watershed_Area_km2 <- ifelse(Tidal_Trib_CY_Loads$Station_ID == "Lamprey", LMP_Area_km2,
