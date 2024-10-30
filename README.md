@@ -1,24 +1,54 @@
-# GreatBay_BoxModel
+# **GreatBay_BoxModel**
 
-### Author: Anna Mikulis, University of New Hampshire
-#### Date Created: August 6, 2021
-#### Last Modified: October 24, 2024
-##### Purpose: A respository of data and scripts necessary to create a box-model for solute loading to Great Bay Estuary, NH/ME. This respository is associated with the M.S. Thesis Work titled, "Biogeochemical Stressors and Ecological Reponse in Great Bay Estuary, NH/ME". Data was sourced from monitoring efforts of the UNH Water Quality Analyis Lab, the NH Department of Environmental Services, the Piscataqua Region Estuaries Partnership, and the Great Bay National Estuarine Research Reserve. 
+## Table of Contents
 
+  - [Background](#background)
+  - [Install](#install)
+  - [Usage](#usage)
+  - [Contributing](#contributing)
+  - [License](#license)
 
-### **Data**
+## Background
 
-#### original_files/Original_EMD
-##### Contains water quality data for the head of tide river stations (05-LMP, 09-EXT, 02-WNC, GRBAP). Includes sample date, time, water quality data for each station. These data files were downloaded via rqequest from the publicly accessible NH Environmental Monitoring Database. The only modifications were to make the column names the first row of the spreadsheet and to delete the database query from the bottom of the spreadsheet. 
+Purpose: A repository of data and scripts necessary to create a box-model for solute loading to Great Bay Estuary, NH/ME. This repository is associated with the M.S. Thesis titled, "Biogeochemical Stressors and Ecological Response in Great Bay Estuary, NH/ME" & the related paper in preparation for submission. Data was sourced from the UNH Water Quality Analysis Lab, the NH Department of Environmental Services, the U.S. Geological Survey, the Piscataqua Region Estuaries Partnership, and the Great Bay National Estuarine Research Reserve. 
+ 
+## Install
 
-#### original_files/Updated_EMD
-##### Contains water quality data for the head of tide river stations (05-LMP, 09-EXT, 02-WNC, GRBAP). Includes sample date, time, water quality data for each station. These data files were downloaded via rqequest from the publicly accessible NH Environmental Monitoring Database. The only modifications were to make the column names the first row of the spreadsheet and to delete the database query from the bottom of the spreadsheet. These files are the same as the Original EMD folder, but have data through 2021.
+This repository assumes that users have registered a GitHub account, installed R and RStudio, and installed Git. The following link provides installation instructions for installing Git and connecting RStudio and GitHub: https://happygitwithr.com/rstudio-git-github
 
+Add this repository to your RStudio project space.
 
+  1. Navigate to the main page of the repository.
+  2. Click <> Code.
+  3. Copy the HTTPS URL for the repository.
+  4. Open the terminal shell or git bash.
+  5. Change current working directory to the locationw here you want the cloned directory.
+  6. Type "git clone", then paste the URL.
+  7. Hit Enter. 
 
-### 
+## Usage
 
-### **Source Scripts**
+This repository is organized into three main folders, with appropriate sub-folders.
+
+### **data**
+
+The data folder contain raw data products used to build the box model & manuscript figures.
+
+#### emd
+##### Contains water quality data for the head of tide river stations (05-LMP, 09-EXT, 02-WNC, GRBAP). Includes all site metadata, along with sample date, time, water quality data for each station. Each row is one water quality solute measured on a given day and site (long data). These data files were downloaded via request from the NH Environmental Monitoring Database (DES.EMD@des.nh.gov). The only modifications were to make the column names the first row of the spreadsheet and to delete the database query from the bottom of the spreadsheet. These files currently are up-to-date through the 2021 and/or 2022 calendar year. 
+
+#### discharge
+##### The daily mean discharge for the three rivers the drain to Great Bay. The csv files contain the site id, date, and mean daily discharge (units: cfs). The **text_files** subfolder has the .txt version of the .csv files. 
+
+#### precipitation
+##### The precipitation chemistry and rainfall volumes are located here.
+
+####
+
+### **src**
+
+The src folder contains all R scripts needed to complete the box model for Great Bay. They are described in the order that they should be run.
+
 #### main_dataformat.R
 ##### Purpose: Read in, process, and clean up water quality concentration data for tidal tributaries to Great Bay and for estuarine monitoring stations in Great Bay. 
 ###### Key results from main_dataformat.R saved in /results/main_dataformat 
@@ -53,6 +83,7 @@
 #### main_wwtf_format.R
 ##### Purpose: Combines wastewater treatment facility water flux with concentration data for TN, DIN, and TSS into wastewater treatment loads for facilities downstream of the tidal tributary monitoring stations. C and P fluxes were estimated using C:N:P ratios for the epping wastewater treatment facility.
 
+
 ###### Key final products:
 * "wwtf_annual_loads.csv" - wastewater treatment estimated loads
 
@@ -76,8 +107,20 @@
 #### main_plot_annual_budgets.R
 ##### Purpose: Plot annual solute budget inputs, outputs, and delta storage terms using the dataframes built in main_compile_inputs
 
+
+### **results**
+
 ### Sources
 * Trowbridge, P. Hydrological Parameters for New Hampshire’s Estuaries. PREP Reports & Publications (2007).
 
 #### Notes
 When running these scripts, keep track of where you are saving things. The scripts are organized in such a way that one can work within a project space. Within the project space, created products will be saved down into a "results" folder. 
+
+## Contributing
+
+## License
+
+### Author: Anna Mikulis, University of New Hampshire
+#### Date Created: August 6, 2021
+
+
