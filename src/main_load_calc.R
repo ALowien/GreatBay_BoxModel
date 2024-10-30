@@ -24,13 +24,13 @@ conc$Year <- year(conc$datetime)
 
 #Build data frame with site id, date of sample collection, and solutes concentrations (Ex. NH4_UGL, TDN_MGL)
 conc_sub <- conc %>%
-  select(STATION_ID:TSS_MGL, Month, Year) %>%
+  select(STATION_ID:TSS_MGL, TN_MGL, Month, Year) %>%
   select(-NO3_MGL) #delete NO3, SiO2, and PC columns b/c they are empty 
 
 count <- conc_sub %>%
   group_by(STATION_ID, Year) %>%
-  summarize(across(PO4_MGL:TSS_MGL, ~ sum(!is.na(.x)))) %>%
-  pivot_longer(cols=c(PO4_MGL:TSS_MGL), names_to= "Parameter", values_to="Count") 
+  summarize(across(PO4_MGL:TN_MGL, ~ sum(!is.na(.x)))) %>%
+  pivot_longer(cols=c(PO4_MGL:TN_MGL), names_to= "Parameter", values_to="Count") 
   
 ggplot(count, aes(Year, Count, fill=STATION_ID)) + geom_bar(stat="identity", position="dodge") + facet_wrap(~Parameter) +
   geom_hline(yintercept=7) + theme_bw() +
@@ -62,7 +62,7 @@ flow.LR <- Q %>% #Separates discharge for Lamprey
 #Split out concentrations to just Lamprey
 conc.LR <- conc_sub %>% #separates concentrations for Lamprey
   filter(STATION_ID == "05-LMP") %>%
-  select(datetime, PO4_MGL:TSS_MGL)
+  select(datetime, PO4_MGL:TN_MGL)
 
 #Date formatting for each dataframe
 flow.LR$datetime <- as.POSIXct(flow.LR$datetime, format = "%Y-%m-%d %H:%M:%S")
@@ -88,7 +88,7 @@ flow.SQR <- Q %>%
 #Split out concentrations to just Squamscott
 conc.SQR <- conc_sub %>%
   filter(STATION_ID == "09-EXT") %>%
-  select(datetime, PO4_MGL:TSS_MGL) 
+  select(datetime, PO4_MGL:TN_MGL) 
 
 #Date formatting
 flow.SQR$datetime <- as.POSIXct(flow.SQR$datetime, format = "%Y-%m-%d %H:%M:%S")
@@ -109,7 +109,7 @@ flow.WNC <- Q %>%
 #Split out conc to just Winnicut
 conc.WNC <- conc_sub %>%
   filter(STATION_ID == "02-WNC") %>%
-  select(datetime, PO4_MGL:TSS_MGL)
+  select(datetime, PO4_MGL:TN_MGL)
 
 #Date formatting
 flow.WNC$datetime <- as.POSIXct(flow.WNC$datetime, format = "%Y-%m-%d %H:%M:%S")
@@ -124,13 +124,13 @@ write.csv(union.WNC, "results/main_load_calc/union.WNC.csv") #Saving a file of d
 
 #Flow_Multipliers to resolve difference in location b/t stream gauge and head-of-tide
 #These are calculated as the ratio of watershed area at head of tide to watershed area at the stream gauge
-LMP_Flow_Multiplier <- 1.156576
-SQR_Flow_Multiplier <- 1.689024
-WNC_Flow_Multiplier <- 1.005479
-#These are calculated as the ratio of watershed area to watershed area at the stream gauge
-LMP_Flow_Multiplier_v2 <- 1.156576
-SQR_Flow_Multiplier_v2 <- 2.012195
-WNC_Flow_Multiplier_v2 <- 1.235616
+LMP_Flow_Multiplier <- 1.146138 #549km2/479km2
+SQR_Flow_Multiplier <- 1.689024 #277/164
+WNC_Flow_Multiplier <- 1.005479 #36.7/36.5
+#These are calculated as the ratioof  full watershed area to  watershed area at the stream gauge
+LMP_Flow_Multiplier_v2 <- 1.156576 #554/479
+SQR_Flow_Multiplier_v2 <- 2.012195 #330/164
+WNC_Flow_Multiplier_v2 <- 1.235616 #45.1/36.5
 
 # Flow Weighted Load Calculations Lamprey River (05-LMP) (ANNUAL ESTIMATES) ----------------------
 #ANNUAL ESTIMATE (CY)
@@ -159,7 +159,7 @@ union.LR$flow_l_day <- conv_unit(union.LR$flow_m3_day_cor.v2, "m3", "l")
 conv_unit(1, "m3", "l") # good returns 1000L
 
 union.LR <- union.LR %>%
-  select(datetime, CY, flow_l_day, PO4_MGL:TSS_MGL) %>%
+  select(datetime, CY, flow_l_day, PO4_MGL:TN_MGL) %>%
   filter(CY > 2007 & CY < 2024)
 
 #Flow Weighted Concentrations Lamprey River
@@ -334,7 +334,7 @@ ggplot(union.SQR, aes(flow_m3_day_cor, flow_m3_day_cor.v2)) +
 
 
 union.SQR <- union.SQR %>%
-  select(datetime, CY, flow_l_day, PO4_MGL:TSS_MGL) %>%
+  select(datetime, CY, flow_l_day, PO4_MGL:TN_MGL) %>%
   filter(CY > 2007 & CY < 2024) 
 
 #Flow Weighted Concentrations Squamscott River
@@ -505,7 +505,7 @@ ggplot(union.WNC, aes(flow_m3_day_cor, flow_m3_day_cor.v2)) +
 
 
 union.WNC <- union.WNC %>%
-  select(datetime, CY, flow_l_day, PO4_MGL:TSS_MGL) %>%
+  select(datetime, CY, flow_l_day, PO4_MGL:TN_MGL) %>%
   filter(CY > 2007 & CY < 2024) 
 
 #Flow Weighted Concentrations Squamscott River
