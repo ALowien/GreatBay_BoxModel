@@ -118,9 +118,13 @@ When running these scripts, keep track of where you are saving things. The scrip
 
 ## Contributing
 
-## License
-
 ### Author: Anna Mikulis, University of New Hampshire
 #### Date Created: August 6, 2021
+
+For questions or issues please contact Anna Mikulis: anna.mikulis@unh.edu
+
+
+## License
+
 
 
