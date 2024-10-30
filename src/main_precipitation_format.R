@@ -1,7 +1,7 @@
 #main_precipitation_format.R
 
 #Author: Anna Mikulis, University of New Hampshire
-#Last Updated: 1/26/2023
+#Last Updated: 10/25/2024
 
 #This script calculates the solute load from precipitation over Great Bay
 
@@ -16,13 +16,17 @@ precipitation <- read.csv("data/precipitation/QAQC_Precip2024.csv") #ALL solutes
 colnames(precipitation) 
 
 precip <- precipitation %>%
-   select(UNH_ID:TF2_Sum_P_wUNHfilled_mm, NH4_UGL = NH4_Comb, NO3_MGL = NO3_Comb, PO4_UGL = PO4_Final, TDN_MGL = TDN, DOC_MGL = NPOC,
+   select(UNH_ID:TF2_Sum_P_wUNHfilled_mm, NH4_UGL = NH4_Comb, NO3_MGL = NO3_Comb, PO4_UGL = PO4_Final, TDN_MGL = TDN, 
+          DOC_MGL = NPOC,
          DON_MGL = DON, Field_Notes, Lab_Notes, DONf, NH4f = NH4_Combf, NO3f = NO3_Combf, TDNf, NPOCf, PO4f = PO4_Combf) 
 
 colnames(precip)
 summary(precip)
 
 precip$Collection_Date <- as.Date(precip$Collection_Date)
+
+precip <- precip %>%
+  filter(Collection_Date > "2007-09-30")
 
 #Keep values only if they have a flag of 2 - which means they have been QC'd and determined to be valid
 precip$NH4_UGL <- ifelse(precip$NH4f != 2, NA, precip$NH4_UGL)
@@ -37,10 +41,15 @@ precip$DON_MGL_Final <- precip$TDN_MGL - (precip$NO3_MGL + (precip$NH4_UGL/1000)
 
 #DON method detection limit
 precip$DON_MDL <- (precip$TDN_MGL + precip$NO3_MGL + (precip$NH4_UGL/1000)) * 5/100
+DON_MDL_vs <- 0.01
 precip$DON_BMDL <- ifelse((abs(precip$DON_MGL_Final) - precip$DON_MDL) < 0 , "BDL", NA) 
 
+precip$DON_BMDL_v2 <- ifelse(precip$DON_MGL_Final < DON_MDL_vs, "BDL", NA)
+
 #Set Final DON concentration columns to be 1/2 of MDL if absolute value of DON < DON_MDL
-precip$DON_MGL_Final_MDL <- ifelse(abs(precip$DON_MGL_Final) < precip$DON_MDL, precip$DON_MDL/2, precip$DON_MGL_Final)
+#precip$DON_MGL_Final_MDL <- ifelse(abs(precip$DON_MGL_Final) < precip$DON_MDL, precip$DON_MDL/2, precip$DON_MGL_Final)
+precip$DON_MGL_Final_MDL <- ifelse(precip$DON_BMDL_v2 == "BDL", DON_MDL_vs/2, precip$DON_MGL_Final)
+precip$DON_MGL_Final_MDL <- ifelse(is.na(precip$DON_BMDL_v2), precip$DON_MGL_Final, 0.005)
 
 #Plot DON
 colnames(precip)
@@ -68,11 +77,27 @@ precip$DIN_MGL <- ifelse(!is.na(precip$NO3_MGL) & !is.na(precip$NH4_UGL),precip$
 #Remove flagging columns now
 precip <- precip %>%
   select(UNH_ID:Project, Rainfall_mm = TF2_Sum_P_wUNHfilled_mm, NH4_UGL:DOC_MGL, DON_MGL_Final_MDL, DIN_MGL)
+
 summary(precip)
+
+count_by_year <- precip %>%
+  group_by(Year) %>%
+  summarise(
+    NH4_count = sum(!is.na(NH4_UGL)),
+    NO3_count = sum(!is.na(NO3_MGL)),
+    PO4_count = sum(!is.na(PO4_UGL)),
+    TDN_count = sum(!is.na(TDN_MGL)),
+    DOC_count = sum(!is.na(DOC_MGL)),
+    DON_count = sum(!is.na(DON_MGL_Final_MDL))
+  )
 
 write.csv(precip, "results/main_precipitation_format/precip_concentrations.csv")
 
-#Calculate Precipitation-Weighted Concentrations for each solute by first multiplying each measured concentration by the rainfall for that ~weekly time period
+ggplot(subset(precip, Year > 2021), aes(Collection_Date, DOC_MGL)) + geom_point() + 
+  geom_line() +
+  scale_x_date(date_breaks = "1 month", date_labels="%b-%y")
+
+ #Calculate Precipitation-Weighted Concentrations for each solute by first multiplying each measured concentration by the rainfall for that ~weekly time period
 #Create a second column for rainfall totals on days a solute was measured - accounts for weeks where there wasn't enough sample to run all of the analyses 
 precip_fw <- precip %>%
   rename(CY= Year)
@@ -164,6 +189,7 @@ print(round(precip_fw_sd_annual[,],2))
 
 #CY: Calculate CY average concentration and compare to precip-weighted concentration 
 precip_cy_avg_conc <- precip_fw %>%
+  filter(CY > 2007 & CY < 2024) %>%
   group_by(CY) %>%
   summarize(across(NH4_UGL:DIN_MGL, \(x) mean(x, na.rm=TRUE)))
 
@@ -189,12 +215,13 @@ precip_cy_avg_conc <- precip_fw %>%
 
 #CY: Product of Precip-Weighted Annual Concentration (mg/L) and Annual rainfall (mm)
 #Calendar Year TF2 Rainfall Totals (mm rainfall)
-cy_rainfall <- read.csv("./data/precipitation/CY_Rainfalll_24update.csv") %>%
+cy_rainfall <- read.csv("./data/precipitation/CY_Rainfall_24update.csv") %>%
   select(CY= year, Rainfall_mm = total_rainfall_mm) %>%
   filter(CY >2007 & CY < 2024)
 
 #Plot Rainfall
-p_rainfall_cy <- ggplot(cy_rainfall, aes(CY, Rainfall_mm)) + geom_point() + 
+p_rainfall_cy <- ggplot(cy_rainfall, aes(CY, Rainfall_mm)) + geom_point(size=3) + 
+  geom_line() +
   scale_x_continuous(breaks=seq(from=2008,to=2023,by=1)) + 
   scale_y_continuous(limits=c(0,1800), breaks=seq(from=0,to=1800, by=200))+ 
   theme_cowplot()
@@ -287,7 +314,7 @@ conv_unit(1, "mm2", "hectare")
 #Add in Great Bay area
 #Google Earth Rough Area of Great Bay 1677.21 hectares
 
-GB_Area_ha <- 1677.21
+GB_Area_ha <- 1700
 
 #CY: Loads table
 colnames(precip_cy_loads)
@@ -348,25 +375,42 @@ plot_cy_loads
 #Average of each concentration over the decade long period of record
 
 avg_conc <- precip_fw %>%
-  select(CY, NH4_UGL:DOC_MGL, DON_MGL_Final_MDL, DIN_MGL) %>%
-  summarize_all(mean, na.rm=T)
+  select(NH4_UGL:DOC_MGL, DON_MGL_Final_MDL, DIN_MGL) %>%
+  summarize_all(mean, na.rm=T) %>%
+  pivot_longer(cols = c(NH4_UGL:DIN_MGL),
+               names_to = "Parameter",
+               values_to = "Mean")
+
+avg_conc[,2] <- signif(avg_conc[,2],3)
 
 sd_conc <- precip_fw %>%
-  select(CY, NH4_UGL:DOC_MGL, DON_MGL_Final_MDL, DIN_MGL) %>%
-  summarize_all(sd, na.rm=T)
-
-
+  select(NH4_UGL:DOC_MGL, DON_MGL_Final_MDL, DIN_MGL) %>%
+  summarize_all(sd, na.rm=T) %>%
+  pivot_longer(cols = c(NH4_UGL:DIN_MGL),
+               names_to = "Parameter",
+               values_to = "SD")
 
 count <- precip_fw %>%
   select(NH4_UGL:DOC_MGL, DON_MGL_Final_MDL, DIN_MGL) %>%
-  summarize(NH4_count = sum(!is.na(NH4_UGL)),
-            NO3_count = sum(!is.na(NO3_MGL)),
-            TDN_count = sum(!is.na(TDN_MGL)),
-            DOC_count = sum(!is.na(DOC_MGL)),
-            PO4_count = sum(!is.na(PO4_UGL)),
-            DON_count = sum(!is.na(DON_MGL_Final_MDL)),
-            DIN_count = sum(!is.na(DIN_MGL)))
-  
+  summarize(across(everything(), ~ sum(!is.na(.)))) %>%
+  pivot_longer(cols = c(NH4_UGL:DIN_MGL),
+               names_to = "Parameter",
+               values_to = "Count")
+
+combined_data <- avg_conc %>%
+  left_join(sd_conc, by = c("Parameter")) %>%
+  left_join(count, by = c("Parameter")) %>%
+  mutate(Result = paste0(signif(Mean, 2), " ± ", signif(SD, 2), " (", Count, ")")) %>%
+  select(Parameter, Result) 
+
+custom_order <- c("DOC_MGL","PO4_UGL", "NH4_UGL", "NO3_MGL", "DIN_MGL", "DON_MGL_Final_MDL", "TDN_MGL")
+combined_data$name <- factor(combined_data$Parameter, levels = custom_order)
+
+combined_data <- combined_data %>%
+  arrange(name)
+
+write.csv(combined_data, file=paste0("./results/manuscript_figures/supplemental/table_s1/avg_concentrations_supplemental_precip.csv")) #includes flow-weighted river data
+
 #___________________________________________
 #____________________________________________
 #_______________________________________________
@@ -375,11 +419,66 @@ count <- precip_fw %>%
 #___________________________________________________________________________________________________________________________________________________________________________
 #Month-by-month precipitation loads (within a calendar year)
 #Figure out how many samples per month
+precip_fw$Month_end <- month(precip_fw$Collection_Date)
+
+#Assign a DatetimeEnd (sample collect) DateTime begin (sample deploy)
+precip_fw$DateTime.end = precip_fw$Collection_Date
+precip_fw$DateTime.begin = lag(precip_fw$DateTime.end, 1)
+precip_fw$Month_start <- month(precip_fw$DateTime.begin)
+
+precip_fw <- precip_fw 
+
+
+# Function to check if a date is the last day of the month
+is_last_day_of_month <- function(date) {
+  month(date) != month(date + days(1))
+}
+
+# Function to check if a date is the first day of the month
+is_first_day_of_month <- function(date) {
+  month(date) != month(date - days(1))
+}
+
+precip_fw$Month_start_a <-ifelse(
+  is_last_day_of_month(precip_fw$DateTime.begin),
+  format(precip_fw$DateTime.begin+ months(1), "%m"),
+  NA
+)
+
+precip_fw$Month_end_a <- as.numeric(ifelse(
+  is_first_day_of_month(precip_fw$DateTime.end),
+  format(precip_fw$DateTime.end - months(1), "%m"),
+  NA
+))
+
+
+precip_fw$Month_START <- ifelse(!is.na(precip_fw$Month_start_a),
+                              precip_fw$Month_start_a, precip_fw$Month_start)
+
+precip_fw$Month_END <- ifelse(!is.na(precip_fw$Month_end_a),
+                                    precip_fw$Month_end_a, precip_fw$Month_end)
+
+precip_fw$Month_END <- as.numeric(precip_fw$Month_END)
+precip_fw$Month_START <- as.numeric(precip_fw$Month_START)
+
+precip_fw$interval <- ifelse(precip_fw$Month_start != precip_fw$Month_end, "2", "1")
+precip_fw$interval_rev <- ifelse(precip_fw$Month_START != precip_fw$Month_END, "2", "1")
+
+precip_fw$MONTH <- ifelse(precip_fw$Month_START == precip_fw$Month_END, precip_fw$Month_END, precip_fw$Month_end)
+
+
+precip_fw$MONTHCOMP <- ifelse(precip_fw$MONTH == precip_fw$Month_end, "SAME","DIFFERENT")
+
+ggplot(subset(precip_fw, !is.na(MONTH) & CY > 2007), aes(MONTH, Rainfall_mm, color=as.factor(Month_end))) +
+  geom_point(position=position_jitter(width=0.15), aes(shape=MONTHCOMP)) +
+  scale_x_continuous(limits=c(0,12), breaks=seq(from=1,to=12,by=1)) +
+  facet_wrap(~CY, scales="free")
+
 precip_fw$Month <- month(precip_fw$Collection_Date)
 
 precip_monthly_count <- precip_fw %>%
   select(CY, Month, Rainfall_mm, NH4_UGL:DOC_MGL, DON_MGL_Final_MDL, DIN_MGL) %>%
-  filter(CY < 2019 & CY > 2007) %>%
+  filter(CY < 2024 & CY > 2007) %>%
   group_by(CY, Month) %>%
   summarize(NH4_count = sum(!is.na(NH4_UGL)),
             NO3_count = sum(!is.na(NO3_MGL)),
@@ -391,7 +490,7 @@ precip_monthly_count <- precip_fw %>%
 
 #Monthly Loads: Group by CY and Month and sum  
 precip_month_fwc <- precip_fw %>%
-  filter(CY > 2007 & CY < 2019) %>%
+  filter(CY > 2007 & CY < 2024) %>%
   group_by(CY, Month) %>%
   summarise_if(is.numeric, sum, na.rm =T) %>%
   select(CY, Month, Rainfall_mm, TDN_MGL_mm:DIN_mm)
@@ -405,6 +504,11 @@ precip_month_fwc_final <- precip_month_fwc %>%
          FW_PO4_UGL = PO4_UGL_mm/PO4_mm,
          FW_DON_MGL = DON_MGL_mm/DON_mm,
          FW_DIN_MGL = DIN_MGL_mm/DIN_mm)
+
+average_monthly_fwc <- precip_month_fwc_final %>%
+ filter(CY < 2024) 
+
+summary(average_monthly_fwc)
 
 #Month: Convert concentrations from mg/L or ug/L to kg/L
 precip_month_loads <- precip_month_fwc_final %>%
