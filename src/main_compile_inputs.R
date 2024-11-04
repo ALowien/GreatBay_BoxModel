@@ -5,7 +5,7 @@
 
 #Purpose: Compile calendar year fluxes for budget calculations
 Packages <- c("readr", "dplyr", "tidyr", "cowplot", "viridis", "ggplot2",
-              "plotly", "measurements")
+              "plotly", "measurements", "stringr")
 
 lapply(Packages, library, character.only = TRUE)
 
@@ -14,27 +14,27 @@ lapply(Packages, library, character.only = TRUE)
 #Annual Load Estimates
 #Values in kg X solute/year
 
-LMP_Annual_Loads <- read.csv("results/main_load_calc/FW_Loads/LR_Annual_Loads.csv")
+LMP_Annual_Loads <- read.csv("results/main_load_calc/FW_Loads/LR_Annual_Loads24.csv")
 
-SQR_Annual_Loads <- read.csv("results/main_load_calc/FW_Loads/SQR_Annual_Loads.csv")
+SQR_Annual_Loads <- read.csv("results/main_load_calc/FW_Loads/SQR_Annual_Loads24.csv")
 
-WNC_Annual_Loads <- read.csv("results/main_load_calc/FW_Loads/WNC_Annual_Loads.csv")
+WNC_Annual_Loads <- read.csv("results/main_load_calc/FW_Loads/WNC_Annual_Loads24.csv")
 
 #Thin load estimates based on QAQC (exclude years with <8 WQ samples)
 
 #Lamprey River
 LMP_Annual_Loads <- LMP_Annual_Loads %>%
-  select(-X, -Flow_l_year, TP = FW_TP, PO4 = FW_PO4, PN=FW_PN, TN=FW_TN, TDN=FW_TDN, NH4 = FW_NH4, NO3_NO2 = FW_NO3_NO2, 
+  select(-X, -Flow_l_year, PO4 = FW_PO4, PN=FW_PN, TN=FW_TN, TDN=FW_TDN, NH4 = FW_NH4, NO3_NO2 = FW_NO3_NO2, 
          DIN=FW_DIN, DON=FW_DON, DOC=FW_DOC, TSS=FW_TSS)
 
 #Squamscott River
 SQR_Annual_Loads <- SQR_Annual_Loads %>%
-  select(-X, -Flow_l_year, TP = FW_TP, PO4 = FW_PO4, PN=FW_PN, TN=FW_TN, TDN=FW_TDN, NH4 = FW_NH4, NO3_NO2 = FW_NO3_NO2, 
+  select(-X, -Flow_l_year, PO4 = FW_PO4, PN=FW_PN, TN=FW_TN, TDN=FW_TDN, NH4 = FW_NH4, NO3_NO2 = FW_NO3_NO2, 
          DIN=FW_DIN, DON=FW_DON, DOC=FW_DOC, TSS=FW_TSS)
 
 #Winnicut River
 WNC_Annual_Loads <- WNC_Annual_Loads %>%
-  select(-X, -Flow_l_year, TP = FW_TP, PO4 = FW_PO4, PN=FW_PN, TN=FW_TN, TDN=FW_TDN, NH4 = FW_NH4, NO3_NO2 = FW_NO3_NO2, 
+  select(-X, -Flow_l_year, PO4 = FW_PO4, PN=FW_PN, TN=FW_TN, TDN=FW_TDN, NH4 = FW_NH4, NO3_NO2 = FW_NO3_NO2, 
          DIN=FW_DIN, DON=FW_DON, DOC=FW_DOC, TSS=FW_TSS)
 
 #Combine into one tidal tributary dataframe of annual loads
@@ -46,11 +46,11 @@ Tidal_Tribs <- union(LMP_Annual_Loads, SQR_Annual_Loads)
 Tidal_Tribs <- union(Tidal_Tribs, WNC_Annual_Loads)
 
 Tidal_Tribs_long <- Tidal_Tribs %>%
-  select(Year = CY, Site, TP:TSS) %>%
-  pivot_longer(cols= c(TP:TSS), names_to = "Solute", values_to = "Load_kgyr")
+  select(Year = CY, Site, PO4:TSS) %>%
+  pivot_longer(cols= c(PO4:TSS), names_to = "Solute", values_to = "Load_kgyr")
 
 #Precipitation 
-Precip <- read.csv("results/main_precipitation_format/cy_precip_loads.csv")
+Precip <- read.csv("results/main_precipitation_format/cy_precip_loads24.csv")
 
 Precip$Site <- "Precipitation"
 
@@ -70,10 +70,11 @@ Precip_long <- Precip %>%
                values_to = "Load_kgyr")
 
 #Waste water Treatment Plants
-WWTF <- read.csv("results/main_wwtf_loads/redone/wwtf_annual_loads.csv")
+WWTF <- read.csv("results/main_wwtf_loads/redone/wwtf_annual_loads24.csv")
 
 WWTF <- WWTF %>%
-  select(Site = WWTF, Year = year, TN = TN_kgyr, DIN = DIN_kgyr, TDN=TDN_kgyr, TSS=TSS_kgyr, DOC=DOCkgyr, PO4=P04kgyr)
+  select(Site = WWTF, Year = year, TN = TN_kgyr, DIN = DIN_kgyr, TDN=TDN_kgyr, TSS=TSS_kgyr, DOC=DOCkgyr, PO4=PO4kgyr)
+
 
 WWTF$Site <- ifelse(WWTF$Site == "Exeter", "Exeter WWTF",
                     ifelse(WWTF$Site == "Newmarket", "Newmarket WWTF",
@@ -86,11 +87,10 @@ WWTF_long <- WWTF %>%
                values_to = "Load_kgyr")
 
 #Adams Point Estuarine Flux
-AP_Flux <- read.csv("results/main_estuarine_load_calc/AP_Flux_kgyr.csv")
+AP_Flux <- read.csv("results/main_estuarine_load_calc/AP_Flux_kgyr24.csv")
 
 AP_Flux <- AP_Flux %>%
-  select(Year, Site = STATION_ID, PO4:NH4, NO3_NO2 = NO32, DIN:TSS, - PC, - SIO2) %>%
-  filter(Year < 2019)
+  select(Year, Site = STATION_ID, PO4:NH4, NO3_NO2 = NO32, DIN:TSS) 
 
 AP_Flux_long <- AP_Flux %>%
   pivot_longer(cols=c(PO4:TSS),
@@ -99,7 +99,7 @@ AP_Flux_long <- AP_Flux %>%
 
 
 #Coastal runoff
-Runoff <- read.csv("results/main_runoff/runoff_estimate_kgyr.csv") %>%
+Runoff <- read.csv("results/main_runoff/runoff_estimate_kgyr24.csv") %>%
   select(Year = CY, PO4 = FW_PO4, PN=FW_PN, TN=FW_TN, TDN=FW_TDN, NH4 = FW_NH4, NO3_NO2 = FW_NO3_NO2, 
          DIN=FW_DIN, DON=FW_DON, DOC=FW_DOC, TSS=FW_TSS)
 
@@ -112,7 +112,7 @@ Runoff_long <- Runoff %>%
 
 #Groundwater loads are in kg/year
 Groundwater <- data.frame(Site = "Groundwater",
-                          Year = c(2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018),
+                          Year = c(2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023),
                           DIN = 6800)
 
 #Assume DIN = TDN = TN for groundwater
@@ -155,6 +155,7 @@ yearstoomit$STATION_ID <- ifelse(yearstoomit$STATION_ID == "02-WNC", "Winnicut",
 colnames(yearstoomit)[colnames(yearstoomit) == "STATION_ID"] <- "Site"
 
 colnames(yearstoomit)[colnames(yearstoomit) == "Parameter"] <- "Solute"
+
 yearstoomit$Solute <- str_sub(yearstoomit$Solute, 1, str_length(yearstoomit$Solute)-4)
 
 yearstoomit <- yearstoomit %>% select(-X, -Count) 
@@ -173,7 +174,7 @@ Budget_wide <- Budget %>%
   pivot_wider(id_cols = c(Year, Site),
               names_from = "Solute",
               values_from = "Load_kgyr") %>%
-  select(-TP, -DON) #only measured at Tidal Tribs and/or Adams Point
+  select(-DON) #only measured at Tidal Tribs and/or Adams Point
 
 #kg/yr
 Budget_wide$Component <- ifelse(Budget_wide$Site == "GRBAPL", "Output" ,"Input")
@@ -183,14 +184,14 @@ Budget_wide_siteavg <- Budget_wide %>%
   group_by(Site) %>%
   summarize(across(PO4:TSS, mean,na.rm=T))
 
-write.csv(Budget_wide_siteavg, "results/main_compile_inputs/Avg.Load.Site.kgyr.csv")
+write.csv(Budget_wide_siteavg, "results/main_compile_inputs/Avg.Load.Site.kgyr24.csv")
 
 #Site standard deviation
 Budget_wide_sitesd <- Budget_wide %>%
   group_by(Site) %>%
   summarize(across(PO4:TSS, sd,na.rm=T))
 
-write.csv(Budget_wide_sitesd, "results/main_compile_inputs/Stdev.Load.Site.kgyr.csv")
+write.csv(Budget_wide_sitesd, "results/main_compile_inputs/Stdev.Load.Site.kgyr24.csv")
 
 #calculate standard error
 library(plotrix)
@@ -240,14 +241,13 @@ unique(Budget$Site)
 unique(Budget$Type)
 
 #Grouped by Type and Year
-
 Budget_Components <- Budget %>%
   group_by(Type, Year, Solute) %>%
   summarize(Load_kgyr = sum(Load_kgyr, na.rm=F))
 
 #Write an Input/Output Column
 Budget_Components$Balance <- ifelse(Budget_Components$Type == "APL", "Output", "Input")
-
+#total load as input and output for each solute and year
 Budget_Components_Summary <- Budget_Components %>%
   group_by(Balance, Solute, Year) %>%
   summarize(Loadkgyr = sum(Load_kgyr, na.rm=F))
@@ -255,12 +255,12 @@ Budget_Components_Summary <- Budget_Components %>%
 Plot_Summary <- ggplot(Budget_Components_Summary, aes(Year, Loadkgyr, colour = Balance)) + geom_point() +
   geom_line() +
   scale_color_viridis_d() +
-  scale_x_continuous(limits=c(2008,2018),breaks=seq(from=2008, to=2018, by=2)) +
+  scale_x_continuous(limits=c(2008,2024),breaks=seq(from=2008, to=2023, by=2)) +
   facet_wrap(~Solute, scales="free")+ theme_cowplot()
 
 Plot_Summary
 
-write.csv(Budget_Components, "results/main_compile_inputs/Budget_Components.csv")
+write.csv(Budget_Components, "results/main_compile_inputs/Budget_Components24.csv")
 
 
 #Table of each input as a % of total input
@@ -271,32 +271,129 @@ Budget_Components_Percent <- Budget_Components %>%
 Budget_Components_Summary_wide <- Budget_Components_Summary %>%
   pivot_wider(names_from = "Solute",
               values_from = "Loadkgyr") %>%
-  filter(Year < 2019) %>%
-  select(Balance, Year, DIN_annual = DIN, DOC_annual = DOC, DON_annual=DON, NH4_annual = NH4, NO3_NO2_annual = NO3_NO2, PN_annual = PN,
-         PO4_annual = PO4, TDN_annual = TDN, TN_annual = TN, TSS_annual = TSS)
+  filter(Year < 2024) %>%
+  select(Balance, Year, DIN_annual_input = DIN, DOC_annual_input = DOC, NH4_annual_input = NH4, NO3_NO2_annual_input = NO3_NO2, PN_annual_input = PN, PO4_annual_input = PO4, TDN_annual_input = TDN, TN_annual_input = TN, TSS_annual_input = TSS)
 
 
 #Join Annual Inputs to the site inputs in order to calculate percentage
-
-Budget_Components_Percent2 <- full_join(Budget_Components_Percent, Budget_Components_Summary_wide, by = c("Year", "Balance"))
-
-
-
+Budget_Components_Percent <- full_join(Budget_Components_Percent, Budget_Components_Summary_wide, by = c("Year", "Balance"))
 #Summarize as % of the total input for each type of input and year
 
-Inputs_Percent <- Budget_Components_Percent2 %>%
+Inputs_Percent <- Budget_Components_Percent %>%
   filter(Balance == "Input") %>%
-  mutate(DIN_per = DIN/DIN_annual * 100,
-         TN_per = TN/TN_annual * 100,
-         DOC_per = DOC/DOC_annual * 100, 
-         PN_per = PN/PN_annual * 100,
-         PO4_per = PO4/PO4_annual * 100,
-         TSS_per = TSS/TSS_annual * 100) %>%
+  mutate(DIN_per = DIN/DIN_annual_input * 100,
+         TN_per = TN/TN_annual_input * 100,
+         DOC_per = DOC/DOC_annual_input * 100, 
+         PN_per = PN/PN_annual_input * 100,
+         PO4_per = PO4/PO4_annual_input * 100,
+         TSS_per = TSS/TSS_annual_input * 100) %>%
   select(Balance, Type, Year, DIN_per:TSS_per)
 
+Inputs_Percent_Summary <- Inputs_Percent %>%
+  group_by(Type) %>%
+  summarize(across(DIN_per:TSS_per, mean, na.rm=T))
 
-Inputs_Percent$DIN_per <- ifelse(Inputs_Percent$Year == 2008, NA, Inputs_Percent$DIN_per)
-Inputs_Percent$DOC_per <- ifelse(Inputs_Percent$Year == 2011, NA,
-                                 ifelse(Inputs_Percent$Year < 2010, NA, Inputs_Percent$DOC_per))  
+Inputs_Percent_std <- Inputs_Percent %>%
+  group_by(Type) %>%
+  summarize(across(DIN_per:TSS_per, sd, na.rm=T))
 
-write.csv(Inputs_Percent, "results/main_compile_inputs/inputsaspercentage.csv")
+
+Inputs_Percent_Summary_long <- Inputs_Percent_Summary %>%
+  pivot_longer(cols = c(DIN_per:TSS_per), names_to="Solute", values_to = "Percent")
+
+Inputs_Percent_Summary_long$Solute <- sapply(strsplit(as.character(Inputs_Percent_Summary_long$Solute), "_"), `[`,1)
+
+Inputs_Percent_Summary_long$InputType <- ifelse(Inputs_Percent_Summary_long$Type == "APH", "Flood (High) Tide", "Freshwater")
+
+Inputs_Percent_Summary_long$Type <- ifelse(Inputs_Percent_Summary_long$Type == "Precip", "Precipitation",
+                                           ifelse(Inputs_Percent_Summary_long$Type == "WWTF", "Wastewater Effluent", 
+                                                  Inputs_Percent_Summary_long$Type))
+
+
+
+#Table of Average Freshwater Input
+FreshwaterInputs <- Budget_Components %>%
+  filter(Balance == "Input") %>%
+  filter(Type != "APH" & Type != "APL") %>%
+  group_by(Type, Solute) %>%
+  summarize(mean= signif(mean(Load_kgyr, na.rm=T),2),
+            sd = signif(sd(Load_kgyr, na.rm=T),2))
+
+
+#
+FreshwaterInputsPlot <- Budget_Components %>%
+  filter(Balance == "Input") %>%
+  filter(Type != "APH" & Type != "APL" & Type != "Groundwater" & Type != "Runoff") %>%
+  filter(Solute == "DIN" | Solute == "DOC" | Solute == "PN" |
+           Solute == "PO4" | Solute =="TN" | Solute == "TSS")
+
+ggplot(FreshwaterInputsPlot, aes(Year, (Load_kgyr/1700), color=Type)) +
+  geom_point(size=2) +
+  scale_x_continuous(limits=c(2008,2023), breaks = seq(from=2008,to=2023,by=2)) +
+  geom_line() +
+  scale_color_viridis_d(option="plasma", end=0.86) +
+  facet_wrap(~Solute, scales = "free_y") +
+  theme_bw() +
+  ylab("Load kg/ha/yr") +
+  theme(axis.title.x = element_blank(), 
+        axis.text=element_text(size=15, color="black"),
+        axis.title = element_text(size=18),
+        strip.background = element_blank(),
+        strip.text = element_text(size=14, face="bold", hjust=0, vjust=-1),
+        legend.text = element_text(size=12),
+        legend.title = element_text(size=18))
+
+#
+AP_Plot <- Budget_Components %>%
+  filter(Type == "APH" | Type == "APL") %>%
+  filter(Solute == "DIN" | Solute == "DOC" | Solute == "PN" |
+           Solute == "PO4" | Solute =="TN" | Solute == "TSS")
+
+ggplot(AP_Plot , aes(Year, (Load_kgyr/1700), color=Balance)) +
+  geom_point(size=2) +
+  scale_x_continuous(limits=c(2008,2023), breaks = seq(from=2008,to=2023,by=2)) +
+  geom_line() +
+  scale_color_viridis_d(option="plasma", end=0.86, labels = c("High Tide Input", "Low Tide Output")) +
+  facet_wrap(~Solute, scales = "free_y") +
+  theme_bw() +
+  ylab("Load (kg/ha/yr)") +
+  theme(axis.title.x = element_blank(), 
+        axis.text=element_text(size=15, color="black"),
+        axis.title = element_text(size=18),
+        strip.background = element_blank(),
+        strip.text = element_text(size=14, face="bold", hjust=0, vjust=-1),
+        legend.text = element_text(size=12),
+        legend.title = element_blank())
+
+result <- AP_Plot %>%
+  group_by(Year, Solute) %>%
+  summarize(
+    Input = sum(Load_kgyr[Balance == "Input"], na.rm = F),
+    Output = sum(Load_kgyr[Balance == "Output"], na.rm = F),
+    Difference = (Input - Output)/1700
+  ) %>%
+  ungroup()
+
+# View the result
+print(result)
+
+result$Net <- ifelse(result$Difference < 0, "Net Export", "Net Retention")
+
+result <- result %>%
+  filter(!is.na(Net))
+
+ggplot(result, aes(Year, Difference)) + geom_point(aes(color=Net),size=2.5) +
+  geom_line(size=0.5, alpha=0.75) +
+  geom_hline(yintercept = 0, linetype="dashed") +
+  scale_x_continuous(limits=c(2008,2023), breaks = seq(from=2008,to=2023,by=2)) +
+  ylab("Net Difference Tidal Input - Tidal Output (kg/ha/yr)") +
+  theme_bw() +
+  facet_wrap(~Solute, scales = "free_y") +
+  theme(axis.title.x = element_blank(), 
+        axis.text=element_text(size=15, color="black"),
+        axis.title = element_text(size=16),
+        strip.background = element_blank(),
+        strip.text = element_text(size=14, face="bold", hjust=0, vjust=-1),
+        legend.text = element_text(size=12),
+        legend.title = element_blank())
+
