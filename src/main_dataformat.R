@@ -132,6 +132,11 @@ df$STATION_ID <- ifelse(df$STATION_ID == "09-EXT-DAMMED", "09-EXT", df$STATION_I
 df <- df %>%
   select(STATION_ID, WATERBODY_ID, ACTIVITY_ID, ACTIVITY_TYPE, START_DATE:FRACTION_TYPE)
 
+ggplot(subset(df, PARAMETER_ANALYTE == "TURBIDITY"), aes(START_DATE, as.numeric(QUALIFIER_AND_RESULTS))) +
+  geom_point(aes(color=STATION_ID)) +
+  geom_line(aes(color=STATION_ID)) +
+  scale_x_date(date_breaks = "1 years", date_labels = "%Y")
+
 #Filter out unnecessary parameters for the box model
 remove_parms <- c("CLOSTRIDIUM PERFRINGENS", "ENTEROCOCCUS", "ESCHERICHIA COLI","TOTAL FECAL COLIFORM", "WIND DIRECTION", "WIND VELOCITY", "SECCHI DISK TRANSPARENCY","COLORED DISSOLVED ORGANIC MATTER (CDOM)", "TURBIDITY","DEPTH", "TIDE STAGE", "LIGHT ATTENUATION COEFFICIENT", "SILICA AS SIO2", "PHEOPHYTIN-A", "CARBON, SUSPENDED", "NITROGEN, NITRITE (NO2) AS N")
 
@@ -674,7 +679,7 @@ for (station in unique(df$STATION_ID)) {
 }
 
 # Display a plot (for example, for the first station)
-print(plots_list[[5]]) #change number sequentially and rerun (1-5) to get all 5 station id plots
+print(plots_list[[1]]) #change number sequentially and rerun (1-5) to get all 5 station id plots
 
 #Make data frame wide instead of long 
 df <- df %>%
@@ -781,36 +786,53 @@ df <- df %>%
 #Calculate TN as PN + TDN, as we stopped measuring TN directly around ~2015
 ggplot(df, aes(START_DATE, TN_MGL)) + geom_point(aes(color=STATION_ID))
 
-#Incorporate this test into this section of code
-#Use calculated TN wherever possible
-#df$TN_CALC_MGL <- df$TDN_MGL + df$PN_MGL
-#df$TN_combo <- ifelse(!is.na(df$TN_CALC_MGL), df$TN_CALC_MGL, df$TN_MGL)
-#df$TN_combo_notes <- ifelse(!is.na(df$TN_CALC_MGL) & !is.na(df$TN_combo), "calc", "measure")
 
-#ggplot(df, aes(START_DATE, TN_combo, color=TN_combo_notes)) + geom_point() +
-  #facet_wrap(~STATION_ID)
+df$TN_MGL_calc <- ifelse(!is.na(df$PN_MGL) & !is.na(df$TDN_MGL), df$PN_MGL + df$TDN_MGL, NA)
+df$TN_combo <- ifelse(!is.na(df$TN_MGL_calc), df$TN_MGL_calc, df$TN_MGL)
+df$TN_combo_notes <- ifelse(!is.na(df$TN_MGL_calc) & !is.na(df$TN_combo), "calc", "measure")
 
-#summary_TN_combo <- df %>%
- # group_by(STATION_ID,TN_combo_notes) %>%
- # summarise(count = n())
+ggplot(df, aes(TN_MGL, TN_MGL_calc)) + geom_point(aes(color=year(START_DATE))) +
+  geom_abline(slope=1, intercept = 0, color="black", alpha=0.5) +
+  scale_color_viridis() +
+  scale_y_continuous(limits=c(0, 2.5)) +
+  scale_x_continuous(limits=c(0, 2.6)) 
 
-#summary_TN_combo
+ggplot(df, aes(START_DATE, TN_combo, color=TN_combo_notes)) + geom_point() +
+  facet_wrap(~STATION_ID)
 
-df$TN_MGL_calc <- ifelse(!is.na(df$PN_MGL) & !is.na(df$TDN_MGL), df$PN_MGL + df$TDN_MGL, df$TN_MGL)
-
-ggplot(df, aes(TN_MGL, TN_MGL_calc)) + geom_point() +
-  geom_abline(slope=1, intercept = 0, color="black", alpha=0.5)
 
 ggplot(df, aes(START_DATE, TN_MGL_calc)) + geom_point(aes(color=STATION_ID))
 
-df$TN_MGL <- df$TN_MGL_calc
+summary_TN_combo <- df %>%
+  group_by(STATION_ID,TN_combo_notes) %>%
+  summarise(count = n())
+
+summary_TN_combo
+
+df$TDN_TN <- df$TDN_MGL / df$TN_combo * 100
+
+ggplot(df, aes(START_DATE, TDN_TN)) + geom_point() +
+  scale_y_continuous(limits=c(0,200)) +
+  geom_hline(yintercept = 100) +
+   facet_wrap(~STATION_ID)
+
+df$TN_MGL <- df$TN_combo
+
+df$DIN_greater <- df$DIN_MGL > df$TDN_MGL #there are a few above but all within rounding error - to close to flag as invalid
 
 df <- df %>%
-  select(-TN_MGL_calc)
+  select(-TN_MGL_calc, -TDN_TN, -TN_combo, -TN_combo_notes, -DIN_greater)
+
+#Remove TN outliers and TN values that exceed TDN
+df$TN_MGL <- ifelse(df$STATION_ID == "02-WNC" & df$START_DATE == "2009-11-04", NA, df$TN_MGL) #outlier
+df$TN_MGL  <- ifelse(df$STATION_ID == "09-EXT" & df$START_DATE == "2008-09-17", NA, df$TN_MGL) #outlier
+
+df$TN_MGL  <- ifelse(df$STATION_ID == "09-LMP" & df$START_DATE == "2009-03-25", NA, df$TN_MGL) #TDN > TDN
+df$TN_MGL  <- ifelse(df$STATION_ID == "02-WNC" & df$START_DATE == "2010-09-22", NA, df$TN_MGL)
 
 #assess normality of TSS values
-skewness(df$TSS_MGL, na.rm=T)
-kurtosis(df$TSS_MGL, na.rm=T)
+skewness(df$TSS_MGL)
+kurtosis(df$TSS_MGL)
 
 #Remove the three high TSS concentrations at Adams Point Low Tide due to anecdotal knowledge from Jackson Estuarine Laboratory that winter values are worse for TSS b/c dock is out of the water
 df <- df %>%
@@ -818,9 +840,12 @@ df <- df %>%
   mutate(TSS_MGL = ifelse(START_DATE == "2008-11-25" & STATION_ID == "GRBAPL", NA, TSS_MGL)) %>%
   mutate(TSS_MGL = ifelse(START_DATE == "2012-01-30" & STATION_ID == "GRBAPL", NA, TSS_MGL))
   
-skewness(df$TSS_MGL, na.rm=T) #notable improvement in skewness from 13 to 2
-kurtosis(df$TSS_MGL, na.rm=T) #notable improvement in kurtosis from 251 to 9
+skewness(df$TSS_MGL) #notable improvement in skewness from 13 to 2
+kurtosis(df$TSS_MGL) #notable improvement in kurtosis from 251 to 9
 
+ggplot(df, aes(START_DATE, TSS_MGL)) + geom_point() +
+  scale_x_date(date_breaks="2 year", date_labels =  "%Y") +
+  facet_wrap(~STATION_ID)
 
 #Plot a couple of parameters
 ggplot(df, aes(START_DATE, PO4_MGL)) + geom_point() +
@@ -863,7 +888,7 @@ ggplot(df, aes(START_DATE, (PO4_MGL*1000), color=STATION_ID)) + geom_point() +
   theme(legend.position = "none")
 
 ggplot(df, aes(START_DATE, DOC_MGL, color=STATION_ID)) + geom_point() +
-  facet_wrap(~STATION_ID, scales="free") +
+  facet_wrap(~STATION_ID) +
   ylab("DOC mg/L") +
   scale_x_date(date_breaks="1 year", date_labels = "%Y") +
   theme(legend.position = "none")
@@ -874,40 +899,13 @@ ggplot(df, aes(START_DATE, TSS_MGL, color=STATION_ID)) + geom_point() +
   scale_x_date(date_breaks="1 year", date_labels = "%Y") +
   theme(legend.position = "none")
 
+ggplot(df, aes(START_DATE, DIN_MGL, color=STATION_ID)) + geom_point() +
+  facet_wrap(~STATION_ID) +
+  ylab("DIN mg/L") +
+  scale_x_date(date_breaks="1 year", date_labels = "%Y") +
+  theme(legend.position = "none")
 
-qa_df <- df %>%
-  filter(STATION_ID != "GRBAPH" & STATION_ID != "GRBAPL")
-
-#TN values
-qa_df$TN_CALC_MGL <- qa_df$TDN_MGL + qa_df$PN_MGL
-
-qa_df$TN_combo <- ifelse(!is.na(qa_df$TN_CALC_MGL), qa_df$TN_CALC_MGL, qa_df$TN_MGL)
-qa_df$TN_combo_notes <- ifelse(!is.na(qa_df$TN_CALC_MGL), "calc", "measure")
-
-ggplot(qa_df, aes(START_DATE, TN_combo, color=TN_combo_notes)) + 
-  geom_point(aes(y=TN_MGL), color="black", size=3) +
-  geom_point(size=3) +
-  facet_wrap(~STATION_ID)
-
-ggplot(qa_df, 
-       aes(TN_MGL, TN_CALC_MGL, color=TSS_MGL)) +
-  geom_point(size=3) +
-  scale_color_viridis() +
-  geom_abline(slope=1, intercept=0) +
-  facet_wrap(~STATION_ID, scales = "free") +
-  xlab("TN mg/L (Analytical Measure)") +
-  ylab("TN mg/L (Calculated)")
-
-
-
-df <- df %>%
-  select(-TN_MGL, - TN_CALC_MGL, TN_combo_notes) %>%
-  rename(TN_MGL = TN_combo)
-
-df$DIN_greater <- df$DIN_MGL > df$TDN_MGL
-
-
-
+### END Final QC ###
 #### Discharge Data Formatting ------------------------------------------------
 #Format Discharge Data from USGS Gauges
 #Read in discharge data from the three USGS gauges
@@ -954,7 +952,6 @@ Q_summary <- Q %>%
   summarize(mean_flow_m3s = round(mean(flow, na.rm=T),2)) 
 Q_summary #for study sites section in methods
 
-
 #02-WNC
 wnc <- df %>%
   filter(STATION_ID == "02-WNC")
@@ -964,7 +961,13 @@ WNC_Q$START_DATE <- as.Date(WNC_Q$START_DATE)
 wnc <- full_join(wnc, WNC_Q) %>%
   filter(START_DATE > "2008-01-01")
 
-ggplot(wnc, aes(Q_mean_cfs, TSS_MGL)) + geom_point()
+wnc$year<- year(wnc$START_DATE)
+
+ggplot(wnc, aes(Q_mean_cfs, TSS_MGL)) + geom_point(aes(color=year)) +
+  scale_x_continuous(limits=c(0,250)) +
+  scale_color_viridis() +
+  theme(axis.text = element_text(size=15)) +
+  ggtitle("02-WNC TSS vs Discharge")
 
 ggplot(wnc, aes(Q_mean_cfs, TN_MGL)) + geom_point()
 
@@ -979,34 +982,8 @@ ggplot(wnc, aes(Q_mean_cfs, TN_MGL, color=year(START_DATE))) + geom_point() +
   labs(color="Year") +
   theme(axis.text = element_text(size=15),
         axis.title = element_text(size=20))
-  
-ggplot(wnc, aes(START_DATE, Q_mean_cfs)) +  geom_point(color="blue", size=2) + 
-  geom_line(color="blue") + 
-  geom_point(aes(y=TSS_MGL*10), color="black", size=3) +
-  scale_y_continuous(limits=c(0,856),
-                     sec.axis = sec_axis(~./10 , name = "TSS mgL")) +
-  ggtitle("02-WNC Discharge and TSS data")
 
-ggplot(wnc, aes(START_DATE, Q_mean_cfs)) + geom_point(color="blue", size=2) + 
-  geom_line(color="blue") + 
-  geom_point(aes(y=TN_MGL*332), color="black", size=3) +
-  scale_x_date(date_breaks = "1 year", date_labels = "%Y") +  # Show each year as x-axis label
-  scale_y_continuous(limits=c(0,855),
-                     sec.axis = sec_axis(~./332 , name = "TN mgL")) +
-  ggtitle("02-WNC Discharge and TN data") +
-  theme(axis.text = element_text(size=15),
-        axis.title = element_text(size=15)) +
-  ylab("Discharge (cfs)") +
-  xlab("Time")
-
-ggplot(wnc, aes(START_DATE, Q_mean_cfs)) + geom_point(color="blue", size=2) + 
-  geom_line(color="blue") + 
-  geom_point(aes(y=PN_MGL*2898), color="black", size=3) +
-  scale_x_date(date_breaks = "1 year", date_labels = "%Y") +  # Show each year as x-axis label
-  scale_y_continuous(limits=c(0,855),
-                     sec.axis = sec_axis(~./2898 , name = "PN mgL")) +
-  ggtitle("02-WNC Discharge and PN data")
-
+#Lamprey
 lmp <- df %>%
   filter(STATION_ID == "05-LMP")
 
@@ -1016,40 +993,13 @@ lmp <- full_join(lmp, LR_Q) %>%
   filter(START_DATE > "2008-01-01")
 
 ggplot(lmp, aes(Q_mean_cfs, TSS_MGL)) + geom_point() +
-  scale_x_continuous(limits=c(0,5000)) +
+  scale_x_continuous(limits=c(0,4000)) +
   scale_y_continuous(limits=c(0,15)) +
   ggtitle("05-LMP")
 
 ggplot(lmp, aes(Q_mean_cfs, TN_MGL)) + geom_point()
 
-
-ggplot(lmp, aes(START_DATE, Q_mean_cfs)) +  geom_point(color="blue", size=2) + 
-  geom_line(color="blue") + 
-  geom_point(aes(y=TSS_MGL*506), color="black", size=3) +
-  scale_x_date(date_breaks = "1 year", date_labels = "%Y") +  # Show each year as x-axis label
-  scale_y_continuous(limits=c(0,6550),
-                     sec.axis = sec_axis(~./506 , name = "TSS mgL")) +
-  ggtitle("05 LMP Discharge and TSS data")
-
-
-ggplot(lmp, aes(START_DATE, Q_mean_cfs)) +  geom_point(color="blue", size=2) + 
-  geom_line(color="blue") + 
-  geom_point(aes(y=DOC_MGL*500), color="black", size=3) +
-  scale_x_date(date_breaks = "1 year", date_labels = "%Y") +  # Show each year as x-axis label
-  scale_y_continuous(limits=c(0,6550),
-                     sec.axis = sec_axis(~./500 , name = "DOC mgL")) +
-  ggtitle("05 LMP Discharge and DOC data")
-
-
-ggplot(lmp, aes(START_DATE, Q_mean_cfs)) +  geom_point(color="blue", size=2) + 
-  geom_line(color="blue") + 
-  geom_point(aes(y=PO4_MGL*214516), color="black", size=3) +
-  scale_x_date(date_breaks = "1 year", date_labels = "%Y") +  # Show each year as x-axis label
-  scale_y_continuous(limits=c(0,6550),
-                     sec.axis = sec_axis(~./214516 , name = "PO4 mgL")) +
-  ggtitle("05 LMP Discharge and PO4 data")
-
-
+#Exeter
 ext <- df %>%
   filter(STATION_ID == "09-EXT")
 
@@ -1061,17 +1011,9 @@ ext <- full_join(ext, SQR_Q) %>%
 ggplot(ext, aes(Q_mean_cfs, TSS_MGL)) + geom_point() +
   ggtitle("09-EXT")
 
-ggplot(ext, aes(START_DATE, Q_mean_cfs)) +  geom_point(color="blue", size=2) + 
-  geom_line(color="blue") + 
-  geom_point(aes(y=TSS_MGL*210), color="black", size=3) +
-  scale_x_date(date_breaks = "1 year", date_labels = "%Y") +  # Show each year as x-axis label
-  scale_y_continuous(limits=c(0,2700),
-                     sec.axis = sec_axis(~./210, name = "TSS mgL")) +
-  ggtitle("09 EXT Discharge and TSS data")
-
 #Final QAQC ROUND
 columns_of_interest <- c("PO4_MGL", "PN_MGL", "TN_MGL", "TDN_MGL", "NH4_MGL", 
-                         "NO3_MGL", "NO3_NO2_MGL", "DIN_MGL", "DON_MGL", 
+                         "NO3_NO2_MGL", "DIN_MGL", "DON_MGL", 
                          "DOC_MGL", "TSS_MGL", "TEMP_WATER_DEGC", "DO_MGL", 
                          "SPC_UMHO_CM", "DO_sat", "SALINITY_PSS", "CHLA_corr_pheo_UGL", 
                          "Turbidity")
@@ -1104,7 +1046,7 @@ for (param in columns_of_interest) {
 }
 
 # Access individual plots using plot_list
-plot_list[["NO3_NO2_MGL"]]
+plot_list[["TSS_MGL"]]
 
 
 #SUMMARIZE FINAL DATAFRAME AND SAVE IT
@@ -1120,7 +1062,7 @@ avg_conc <- df %>%
   group_by(STATION_ID) %>%
   summarize(across(TN_MGL:NH4_UGL,  \(x) mean(x, na.rm=T)) )
 
-avg_conc[,2:15] <- signif(avg_conc[,2:15], 3)
+avg_conc[,2:14] <- signif(avg_conc[,2:14], 3)
 
 avg_conc <- avg_conc %>%
   tidyr::pivot_longer(cols=c(TN_MGL:NH4_UGL),names_to = "Solute", values_to = "Concentration")
@@ -1138,7 +1080,7 @@ std_conc <- df %>%
   group_by(STATION_ID) %>%
   summarize(across(TN_MGL:NH4_UGL, \(x) sd(x, na.rm=T)))
 
-std_conc[,2:15] <- signif(std_conc[,2:15], 3)
+std_conc[,2:14] <- signif(std_conc[,2:14], 3)
 
 std_conc <- std_conc %>%
   tidyr::pivot_longer(cols=c(TN_MGL:NH4_UGL),names_to = "Solute", values_to = "Concentration")
@@ -1217,7 +1159,4 @@ df_temp <- df %>%
   group_by(STATION_ID) %>%
   summarize(mean_temp = mean(TEMP_WATER_DEGC, na.rm=T), sd_temp = sd(TEMP_WATER_DEGC, na.rm=T), count = n())
 
-#Metadata version
-#Combine metadata back in with the QC'd df dataframe
-metadata
-df
+
