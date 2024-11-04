@@ -29,14 +29,14 @@ GB_Prism_m3_year <- GB_Prism_m3day * 365
 
 #Load formatted data frame "df6" and filter for Adams Point Stations
 AP <- read.csv("results/main_dataformat/df_conc.csv") %>%
-  select(-X, -SPC_UMHO_CM,  -NO3_MGL) %>% #
+  select(-X, -SPC_UMHO_CM) %>% #
   filter(STATION_ID == "GRBAPH" | STATION_ID == "GRBAPL")
 #Tide Stage was used to rename GRBAP to High or Low Tide
 AP$START_DATE <- as.POSIXct(AP$START_DATE)
 
 #plot concentrations over time
 AP_piv <- AP %>%
-  select(STATION_ID:TSS_MGL, CHLA_corr_pheo_UGL) %>%
+  select(STATION_ID:TSS_MGL, TN_MGL, CHLA_corr_pheo_UGL) %>%
   pivot_longer(cols=c(PO4_MGL:CHLA_corr_pheo_UGL), names_to = "Solute", values_to = "Measure") 
 
 ggplot(AP_piv, aes(START_DATE, Measure, color=STATION_ID)) + geom_point() +
@@ -47,8 +47,8 @@ AP_summary <- AP
 AP_summary$year <- year(AP$START_DATE)
 
 AP_summary <- AP_summary %>%
-  select(STATION_ID, year, PO4_MGL:TSS_MGL)%>%
-  pivot_longer(cols= PO4_MGL:TSS_MGL, names_to = "Solute", values_to="Concentration") %>%
+  select(STATION_ID, year, PO4_MGL:TSS_MGL, TN_MGL)%>%
+  pivot_longer(cols= PO4_MGL:TN_MGL, names_to = "Solute", values_to="Concentration") %>%
   group_by(STATION_ID, Solute) %>%
   summarize(mean= mean(Concentration, na.rm=T),
             sd = sd(Concentration, na.rm=T))
@@ -138,7 +138,7 @@ ncvTest(LT_lm) #suggests homoskedasticity p < 0.05
 
 #Plot Low Tide Adams Point Solute Concentrations Against Freshwater Input
 AP_Solutes <- AP %>%
-  select(Site = STATION_ID, START_DATE:TSS_MGL)
+  select(Site = STATION_ID, START_DATE:TSS_MGL, TN_MGL)
 
 AP_All <- full_join(AP_Solutes, Q_daily)
 
@@ -146,7 +146,7 @@ AP_All_LT <- AP_All %>%
   filter(Site == "GRBAPL")
 
 AP_All_LT_long <- AP_All_LT %>%
-  pivot_longer(cols=PO4_MGL:TSS_MGL, values_to = "Concentration", names_to = "Solute") %>%
+  pivot_longer(cols=PO4_MGL:TN_MGL, values_to = "Concentration", names_to = "Solute") %>%
   filter(Solute != "NO3_NO2_MGL" & Solute != "NH4_MGL") #%>%
   #filter(Solute != "DON_MGL") %>%
   #filter(Solute != "TDN_MGL") 
@@ -171,51 +171,78 @@ stats_AP_LT
 
 cor(AP_LT_wide[,3:10], use="na.or.complete")
 
-#Solutes for regression log(C) ~ log(Q)
-solute_vars <- c("DIN_MGL", "DOC_MGL", "DON_MGL",  "TDN_MGL", "TN_MGL", 
+solute_vars <- c("DIN_MGL", "DOC_MGL", "DON_MGL", "TDN_MGL", "TN_MGL", 
                  "PN_MGL", "TSS_MGL", "PO4_MGL")
 
-# dataframe for solute ~ Q regression outputs
+# Initialize a list to store results
+results <- data.frame(Solute = character(),
+                      Slope = numeric(),
+                      Intercept = numeric(),
+                      R2 = numeric(),
+                      P_value = numeric(),
+                      stringsAsFactors = FALSE)
+
+# Loop over each solute variable, perform regression, and store results
+for (solute in solute_vars) {
+  # Perform linear regression
+  formula <- as.formula(paste(solute, "~ m3_day"))
+  model <- lm(formula, data = AP_All_LT)
+  
+  # Extract relevant statistics
+  slope <- coef(model)[["m3_day"]]
+  intercept <- coef(model)[["(Intercept)"]]
+  r2 <- round(summary(model)$r.squared, 2)
+  p_value <- formatC(summary(model)$coefficients[2, 4], format = "f", digits = 3)
+  
+  # Add to results table
+  results <- rbind(results, data.frame(Solute = solute,
+                                       Slope = slope,
+                                       Intercept = intercept,
+                                       R2 = r2,
+                                       P_value = p_value,
+                                       stringsAsFactors = FALSE))
+}
+
+# Print the results
+print(results)   
+
 cq_results <- data.frame(Solute = character(),
                       Slope = numeric(),
                       Intercept = numeric(),
                       R2 = numeric(),
                       P_value = numeric(),
-                      ncv_pvalue = numeric(),
                       stringsAsFactors = FALSE)
 
+AP_All_LT$m3_day_log <- log10(AP_All_LT$m3_day)
 
-AP_All_LT$m3_day_log <- log10(AP_All_LT$m3_day) #log transform discharge
-
-# Loop over each solute variable, perform regression
 for (solute in solute_vars) {
-  log_solute_name <- paste0(solute, "_log")
-  AP_All_LT[[log_solute_name]] <- log10(AP_All_LT[[solute]][!is.na(AP_All_LT[[solute]])])
-  
-  # Perform linear regression
-  formula <- as.formula(paste(log_solute_name, "~ m3_day_log"))
-  model <- lm(formula, data = AP_All_LT)
-  ncv_result <- ncvTest(model)
-  
-  # Extract relevant statistics from regression: slope (b), intercept (a), r2 and p value
-  slope <- coef(model)[["m3_day_log"]]
-  intercept <- coef(model)[["(Intercept)"]]
-  r2 <- round(summary(model)$r.squared, 2)
-  p_value <- formatC(summary(model)$coefficients[2, 4], format = "f", digits = 4)
-  ncv_test_pvalue <- formatC(ncv_result$p, format = "f", digits = 4)
-  
-  # Add to results table
-  cq_results <- rbind(cq_results, data.frame(Solute = solute,
-                                       Slope = slope,
-                                       Intercept = intercept,
-                                       R2 = r2,
-                                       P_value = p_value,
-                                       ncv_pvalue=ncv_test_pvalue,
-                                       stringsAsFactors = FALSE))
-}
+     log_solute_name <- paste0(solute, "_log")
+     AP_All_LT[[log_solute_name]] <- log10(AP_All_LT[[solute]])
+     
+       # Perform linear regression
+       formula <- as.formula(paste(log_solute_name, "~ m3_day_log"))
+       model <- lm(formula, data = AP_All_LT)
+       ncv_result <- ncvTest(model)
+       
+        # Extract relevant statistics from regression: slope (b), intercept (a), r2 and p value
+         slope <- coef(model)[["m3_day_log"]]
+         intercept <- coef(model)[["(Intercept)"]]
+         r2 <- round(summary(model)$r.squared, 2)
+         p_value <- formatC(summary(model)$coefficients[2, 4], format = "f", digits = 4)
+         ncv_test_pvalue <- formatC(ncv_result$p, format = "f", digits = 4)
+         
+           # Add to results table
+           cq_results <- rbind(cq_results, data.frame(Solute = solute,
+                                                      Slope = slope,
+                                                      Intercept = intercept,
+                                                      R2 = r2,
+                                                      P_value = p_value,
+                                                      ncv_pvalue=ncv_test_pvalue,
+                                                      stringsAsFactors = FALSE))
+           }
 
+# Print the results
 print(cq_results)
-
 #are p values below signficance threshold?
 cq_results$signif_ncvTest <- cq_results$ncv_pvalue < 0.05
 
@@ -228,7 +255,6 @@ print(cq_results)
 library(flextable)
 flextable(cq_results)
 #CVc/CVq
-# Loop over each solute variable, perform regression
 
 #DOC 
 mean_c <- mean(AP_All_LT$DOC_MGL_log, na.rm=T)
@@ -347,6 +373,7 @@ AP_Annual <- AP
 AP_Annual$Year <- year(AP_Annual$START_DATE)
 
 AP_Annual <- AP_Annual %>%
+  select(Year, STATION_ID, PO4_MGL,TN_MGL, PN_MGL:TSS_MGL) %>%
   group_by(Year, STATION_ID) %>%
   summarize(across(PO4_MGL:TSS_MGL, \(x) mean(x, na.rm=T)))
 
@@ -414,6 +441,7 @@ AP_Monthly$Month <- month(AP_Monthly$START_DATE)
 AP_Monthly$Year <- year(AP_Monthly$START_DATE)
 
 AP_Monthly <- AP_Monthly %>%
+  select(Year, Month, STATION_ID, PO4_MGL,TN_MGL, PN_MGL:TSS_MGL) %>%
   group_by(Year, Month, STATION_ID) %>%
   summarize(across(PO4_MGL:TSS_MGL, mean, na.rm=T))
 
