@@ -13,7 +13,9 @@ lapply(Packages, library, character.only = TRUE)
 #Precipitation file has been QAQC'd, correctd for MDLs, and had correct NCDC rainfall volumes matched
 precipitation <- read.csv("data/precipitation/QAQC_Precip2024.csv") #ALL solutes corrected for method detection limits except DON
 
+summary(precipitation)
 colnames(precipitation) 
+
 
 precip <- precipitation %>%
    select(UNH_ID:TF2_Sum_P_wUNHfilled_mm, NH4_UGL = NH4_Comb, NO3_MGL = NO3_Comb, PO4_UGL = PO4_Final, TDN_MGL = TDN, 
@@ -36,43 +38,85 @@ precip$DON_MGL <- ifelse(precip$DONf != 2, NA, precip$DON_MGL)
 precip$NO3_MGL <- ifelse(precip$NO3f != 2, NA, precip$NO3_MGL)
 precip$DOC_MGL <- ifelse(precip$NPOCf != 2, NA, precip$DOC_MGL)
 
+mean(precip$DON_MGL_Final, na.rm=T)
+
+#Calculate DIN
+precip$DIN_MGL <- ifelse(!is.na(precip$NO3_MGL) & !is.na(precip$NH4_UGL), precip$NO3_MGL + (precip$NH4_UGL/1000), NA)
+
 #Recalculate DON after removing other flags
-precip$DON_MGL_Final <- precip$TDN_MGL - (precip$NO3_MGL + (precip$NH4_UGL/1000))
+precip$DON_MGL_Final <- ifelse(!is.na(precip$TDN_MGL) & !is.na(precip$NO3_MGL) & !is.na(precip$NH4_UGL),
+                               precip$TDN_MGL - (precip$NO3_MGL + (precip$NH4_UGL/1000)),
+                              NA)
+
+p <- ggplot(precip, aes(DON_MGL, DON_MGL_Final)) + geom_point(aes(text=UNH_ID, color=TDN_MGL)) 
+p
+
+ggplotly(p)
+
+don <- precip %>%
+  filter(round(DON_MGL,2) != round(DON_MGL_Final,2)) #all because TDN set to 1/2 of detection limit
+
+precip$DIN_TDN <- (precip$DIN_MGL/precip$TDN_MGL)
+
+ggplot(precip, aes(DIN_TDN, DON_MGL_Final)) + geom_point() 
+
+sum(precip$DIN_TDN > 1.00, na.rm=T) #207 out of 919, 22% of samples had DIN > TDN
+
+sum(precip$DIN_TDN > 1.00 & precip$DIN_TDN < 1.1, na.rm=T) #129/207 are really close to equal (62% of the 207)
 
 #DON method detection limit
-precip$DON_MDL <- (precip$TDN_MGL + precip$NO3_MGL + (precip$NH4_UGL/1000)) * 5/100
-DON_MDL_vs <- 0.01
+precip$DON_MDL <- (precip$TDN_MGL + precip$NO3_MGL + (precip$NH4_UGL/1000)) * 5/100 #Michelle's method
+max(precip$DON_MDL, na.rm=T)
+
+#detection limit based on mdls for TDN, NO3, and NH4
+dl <- 0.05 - ((5/1000) + 0.004) #(TDN MDL - NH4 MDL + NO3 MDL)
+
+#what about 0.01 - basically dl of No3 and Nh4 summed? 
+
 precip$DON_BMDL <- ifelse((abs(precip$DON_MGL_Final) - precip$DON_MDL) < 0 , "BDL", NA) 
 
-precip$DON_BMDL_v2 <- ifelse(precip$DON_MGL_Final < DON_MDL_vs, "BDL", NA)
+precip$DON_BMDL_v2 <- ifelse(precip$DON_MGL_Final < precip$DON_MDL, "BDL", NA) 
+
+precip$DON_BMDL_v3 <- ifelse(precip$DON_MGL_Final < dl, "BDL", NA)
+
+ggplot(precip, aes(Collection_Date, DON_MGL_Final, color=DON_BMDL)) + geom_point()
+sum(!is.na(precip$DON_BMDL))
+
+ggplot(precip, aes(Collection_Date, DON_MGL_Final, color=DON_BMDL_v2)) + geom_point()
+sum(!is.na(precip$DON_BMDL_v2))
+
+ggplot(precip, aes(Collection_Date, DON_MGL_Final, color=DON_BMDL_v3)) + geom_point()
+sum(!is.na(precip$DON_BMDL_v3))
+
+ggplot(precip, aes(DIN_TDN, DON_MGL_Final)) + geom_point(aes(color=DON_BMDL))
+ggplot(precip, aes(DIN_TDN, DON_MGL_Final)) + geom_point(aes(color=DON_BMDL_v2))
+ggplot(precip, aes(DIN_TDN, DON_MGL_Final)) + geom_point(aes(color=DON_BMDL_v3))
 
 #Set Final DON concentration columns to be 1/2 of MDL if absolute value of DON < DON_MDL
 #precip$DON_MGL_Final_MDL <- ifelse(abs(precip$DON_MGL_Final) < precip$DON_MDL, precip$DON_MDL/2, precip$DON_MGL_Final)
-precip$DON_MGL_Final_MDL <- ifelse(precip$DON_BMDL_v2 == "BDL", DON_MDL_vs/2, precip$DON_MGL_Final)
-precip$DON_MGL_Final_MDL <- ifelse(is.na(precip$DON_BMDL_v2), precip$DON_MGL_Final, 0.005)
+#precip$DON_MGL_Final_MDL <- ifelse(precip$DON_BMDL_v2 == "BDL", DON_MDL_vs/2, precip$DON_MGL_Final)
+#precip$DON_MGL_Final_MDL <- ifelse(is.na(precip$DON_BMDL_v2), precip$DON_MGL_Final, 0.005)
+
+#Going with 5% MDL
+precip$DON_MGL_Final_MDL <- ifelse(precip$DON_MGL_Final < precip$DON_MDL, precip$DON_MDL/2, precip$DON_MGL_Final)
+
+ggplot(precip, aes(Collection_Date, DON_MGL_Final)) + geom_point(size=2) +
+  geom_point(aes(y=DON_MGL_Final_MDL), color="blue")
+
+sum(precip$DON_MGL_Final < 0, na.rm=T) #207 DON samples that are below zero
+sum(precip$DON_MGL_Final < 0.01, na.rm=T) #261 below 0.01
+sum(precip$DON_MGL_Final < 0.041, na.rm=T) #431 below 0.041
 
 #Plot DON
 colnames(precip)
 
 DON_comp <- ggplot(precip, aes(Collection_Date, DON_MGL_Final)) + 
   geom_point(color="red") +
-  geom_point(aes(y=DON_MGL_Final_MDL), color="blue")
+  geom_point(aes(y=DON_MGL_Final_MDL), color="blue") +
+  scale_y_continuous(breaks=seq(from=-1, to=1, by=0.10))
 DON_comp
 
 ggplotly(DON_comp)
-
-hist(precip$DON_MGL_Final)
-hist(precip$DON_MGL_Final_MDL)
-
-skewness(precip$DON_MGL_Final)
-kurtosis(precip$DON_MGL_Final)
-
-skewness(precip$DON_MGL_Final_MDL)
-kurtosis(precip$DON_MGL_Final_MDL)
-
-#Calculate DIN
-
-precip$DIN_MGL <- ifelse(!is.na(precip$NO3_MGL) & !is.na(precip$NH4_UGL),precip$NO3_MGL + (precip$NH4_UGL/1000), NA)
 
 #Remove flagging columns now
 precip <- precip %>%
@@ -93,11 +137,11 @@ count_by_year <- precip %>%
 
 write.csv(precip, "results/main_precipitation_format/precip_concentrations.csv")
 
-ggplot(subset(precip, Year > 2021), aes(Collection_Date, DOC_MGL)) + geom_point() + 
+ggplot(precip, aes(Collection_Date, DOC_MGL)) + geom_point() + 
   geom_line() +
-  scale_x_date(date_breaks = "1 month", date_labels="%b-%y")
+  scale_x_date(date_breaks = "2 year", date_labels="%b-%y")
 
- #Calculate Precipitation-Weighted Concentrations for each solute by first multiplying each measured concentration by the rainfall for that ~weekly time period
+#Calculate Precipitation-Weighted Concentrations for each solute by first multiplying each measured concentration by the rainfall for that ~weekly time period
 #Create a second column for rainfall totals on days a solute was measured - accounts for weeks where there wasn't enough sample to run all of the analyses 
 precip_fw <- precip %>%
   rename(CY= Year)
@@ -360,7 +404,8 @@ cy_loads_final_long <- precip_cy_loads_final %>%
 plot_cy_loads <- ggplot(cy_loads_final_long, aes(CY, Load_kg_yr)) + geom_point(aes(color=Solute), size = 3) +
   scale_x_continuous(limits=c(2008,2023), breaks=seq(from=2008, to=2024, by= 1)) + 
   scale_color_viridis_d() +
-  facet_wrap(~Solute, scales="free") + theme_cowplot()
+  facet_wrap(~Solute, scales="free") + theme_cowplot() +
+  theme(axis.text.x = element_text(angle=90, hjust=1))
 plot_cy_loads
 
 #Pivot the WY Loads table to be long
