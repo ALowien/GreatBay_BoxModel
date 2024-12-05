@@ -49,70 +49,64 @@ Q <- Q %>% #flow is daily mean Q in m^3/s
 
 Q$datetime <- as.POSIXct(Q$datetime) #fix class of date column
 #______________________________________________________________________
-#Separate concentration and flow data by Station IDs to facilitate correct union of conc and flow
-#Separate out Lamprey River Flow and Solute Concentrations 
-flow.LR <- Q %>% #Separates discharge for Lamprey
+#Separate concentration and flow data by Station IDs to facilitate correct union of concentrations and flow by date
+
+# List of unique station IDs
+station_ids <- unique(Q$STATION_ID)
+
+# Initialize an empty list to store results for each station
+results_list <- list()
+
+# Loop through each station ID
+for (station in station_ids) {
+  # Filter flow data for the current station
+  flow <- Q %>%
+    filter(STATION_ID == station) %>%
+    select(datetime, flow)
+  
+  # Filter concentration data for the current station
+  conc <- conc_sub %>%
+    filter(STATION_ID == station) %>%
+    select(datetime, PO4_MGL:TSS_MGL)
+  
+  # Ensure datetime is in POSIXct format
+  flow$datetime <- as.POSIXct(flow$datetime, format = "%Y-%m-%d %H:%M:%S")
+  conc$datetime <- as.POSIXct(conc$datetime, format = "%Y-%m-%d %H:%M:%S")
+  
+  # Add arbitrary timestamp to dates for matching
+  flow$datetime <- ymd_hm(paste(flow$datetime, "18:00"))
+  conc$datetime <- ymd_hm(paste(conc$datetime, "18:00"))
+  
+  # Merge flow and conc data for each station
+  union <- left_join(flow, conc, by = "datetime")
+  #Add station name back in 
+  union$STATION_ID <- station
+  
+  # Store the combined dataaframe in the list
+  results_list[[station]] <- union
+}
+
+# Combine all results into a single dataframe
+combined_df <- bind_rows(results_list)
+
+union.LR <- combined_df %>%
   filter(STATION_ID == "05-LMP") %>%
-  select(datetime, flow)
+  select(STATION_ID, datetime, flow, PO4_MGL:TSS_MGL)
 
-#Split out concentrations to just Lamprey
-conc.LR <- conc_sub %>% #separates concentrations for Lamprey
-  filter(STATION_ID == "05-LMP") %>%
-  select(datetime, PO4_MGL:TSS_MGL)
-
-#Date formatting for each dataframe
-flow.LR$datetime <- as.POSIXct(flow.LR$datetime, format = "%Y-%m-%d %H:%M:%S")
-conc.LR$datetime <- as.POSIXct(conc.LR$datetime, format = "%Y-%m-%d %H:%M:%S")
-
-#Add arbitrary time stamp to dates to make date matching easier
-flow.LR$datetime <-lubridate::ymd_hm(paste(flow.LR$datetime, "6:00 PM"))
-
-conc.LR$datetime <-lubridate::ymd_hm(paste(conc.LR$datetime, "6:00 PM"))
-union.LR <- left_join(flow.LR, conc.LR)
-write.csv(union.LR, "results/main_load_calc/union.LR.csv") #Saving a file of discharge & LMP concentrations saved together
-#- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#Repeat for Squamscott River
-#Separate out Squamscott River Flow and Solute Concentrations 
-flow.SQR <- Q %>%
+union.SQR <- combined_df %>%
   filter(STATION_ID == "09-EXT") %>%
-  select(datetime, flow) 
+  select(STATION_ID, datetime, flow, PO4_MGL:TSS_MGL)
 
-#Split out concentrations to just Squamscott
-conc.SQR <- conc_sub %>%
-  filter(STATION_ID == "09-EXT") %>%
-  select(datetime, PO4_MGL:TSS_MGL) 
-
-#Date formatting
-flow.SQR$datetime <- as.POSIXct(flow.SQR$datetime, format = "%Y-%m-%d %H:%M:%S")
-conc.SQR$datetime <- as.POSIXct(conc.SQR$datetime, format = "%Y-%m-%d %H:%M:%S")
-
-#Add arbitrary time stamp to dates
-flow.SQR$datetime <-lubridate::ymd_hm(paste(flow.SQR$datetime, "6:00 PM"))
-conc.SQR$datetime <-lubridate::ymd_hm(paste(conc.SQR$datetime, "6:00 PM"))
-
-union.SQR <- left_join(flow.SQR, conc.SQR)
-write.csv(union.SQR, "results/main_load_calc/union.SQR.csv") #Saving a file of discharge & SQR concentrations saved together
-#- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-#Repeat this for Winnicut River
-flow.WNC <- Q %>%
+union.WNC <- combined_df %>%
   filter(STATION_ID == "02-WNC") %>%
-  select(datetime, flow)        
+  select(STATION_ID, datetime, flow, PO4_MGL:TSS_MGL)
 
-#Split out conc to just Winnicut
-conc.WNC <- conc_sub %>%
-  filter(STATION_ID == "02-WNC") %>%
-  select(datetime, PO4_MGL:TSS_MGL)
+#Save intermediary files (combined discharge and concentrations by tributary station)
+write.csv(union.LR, "results/main_load_calc/union.LR.csv") 
 
-#Date formatting
-flow.WNC$datetime <- as.POSIXct(flow.WNC$datetime, format = "%Y-%m-%d %H:%M:%S")
-conc.WNC$datetime <- as.POSIXct(conc.WNC$datetime, format = "%Y-%m-%d %H:%M:%S")
+write.csv(union.SQR, "results/main_load_calc/union.SQR.csv") 
 
-#Add arbitrary time stamp to dates
-flow.WNC$datetime <-lubridate::ymd_hm(paste(flow.WNC$datetime, "6:00 PM"))
-conc.WNC$datetime <-lubridate::ymd_hm(paste(conc.WNC$datetime, "6:00 PM"))
-
-union.WNC <- left_join(flow.WNC, conc.WNC)
-write.csv(union.WNC, "results/main_load_calc/union.WNC.csv") #Saving a file of discharge & WNC concentrations saved together
+write.csv(union.WNC, "results/main_load_calc/union.WNC.csv") 
 
 #Flow_Multipliers to resolve difference in location b/t stream gauge and head-of-tide
 #These are calculated as the ratio of watershed area at head of tide to watershed area at the stream gauge
