@@ -242,7 +242,7 @@ LR_CY_Loads <- LR_CY_Loads %>% #Loads are in kg/year
   mutate(across(all_of(FW_Solutes), ~ . * Flow_l_year))
 
 #Calendar Year Annual FW Load (uses annual discharge and concentrations March-December)
-write.csv(LR_CY_Loads, "results/main_load_calc/FW_Loads/LR_Annual_Loads24.csv")
+write.csv(LR_CY_Loads, "results/main_load_calc/FW_Loads/LR_Annual_Loads.csv")
 
 #_______________________________________________________________________________________________
 #________________________________________________________________________________________________________________________
@@ -408,7 +408,7 @@ SQR_CY_Loads <- left_join(SQR_FW_CY, CY.flow.SQR)
 SQR_CY_Loads <- SQR_CY_Loads %>% #Loads are in kg/year
   mutate(across(all_of(FW_Solutes), ~ . * Flow_l_year))
 #Calendar Year Annual FW Load (uses annual discharge and concentrations March-December)
-write.csv(SQR_CY_Loads, "results/main_load_calc/FW_Loads/SQR_Annual_Loads24.csv")
+write.csv(SQR_CY_Loads, "results/main_load_calc/FW_Loads/SQR_Annual_Loads.csv")
 
 #________________________________________________________________________________________________
 #______________________________________________________________________________________________________________________
@@ -573,7 +573,7 @@ WNC_CY_Loads <- WNC_CY_Loads %>% #Loads are in kg/year
   mutate(across(all_of(FW_Solutes), ~ . * Flow_l_year))
 
 #Calendar Year Annual FW Load (uses annual discharge and concentrations March-December)
-write.csv(WNC_CY_Loads, "results/main_load_calc/FW_Loads/WNC_Annual_Loads24.csv")
+write.csv(WNC_CY_Loads, "results/main_load_calc/FW_Loads/WNC_Annual_Loads.csv")
 
 #________________________________________________________________________________________________
 #______________________________________________________________________________________________________________________
@@ -653,7 +653,7 @@ Tidal_Trib_Normalized_CY_Loads <- Tidal_Trib_CY_Loads %>%
   mutate(across(FW_PO4:FW_TSS, ~. / Watershed_Area_ha))
 
 
-write.csv(Tidal_Trib_Normalized_CY_Loads, "results/main_load_calc/FW_Loads/Tidal_Trib_CY_Loads_kg_ha_yr24.csv")
+write.csv(Tidal_Trib_Normalized_CY_Loads, "results/main_load_calc/FW_Loads/Tidal_Trib_CY_Loads_kg_ha_yr.csv")
 
 
 #Average annual river concentration across rivers (TABLE FOR MANUSCRIPT NUMBERS)
