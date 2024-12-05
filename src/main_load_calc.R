@@ -48,6 +48,7 @@ Q <- Q %>% #flow is daily mean Q in m^3/s
   select(STATION_ID, datetime, flow)
 
 Q$datetime <- as.POSIXct(Q$datetime) #fix class of date column
+
 #______________________________________________________________________
 #Separate concentration and flow data by Station IDs to facilitate correct union of concentrations and flow by date
 
@@ -226,15 +227,11 @@ conv_unit(1, "mg", "kg")
 #Multiply CY Flow_Weighted Concentrations by Annual Flow (multiplied by flow-multiplier)
 #[kg/L] * L/year
 
-flow.LR$CY <- year(flow.LR$datetime)
-
-flow.LR$flow <- conv_unit(flow.LR$flow, "m3", "l") * LMP_Flow_Multiplier_v2 #l/s
-flow.LR$flow_day <- flow.LR$flow * 86400 #L/s * 86400 s/day = L/day
+flow.LR <- union.LR
 
 CY.flow.LR <- flow.LR %>%
   group_by(CY) %>%
-  summarize(Flow_l_year = sum(flow_day))
-
+  summarize(Flow_l_year = sum(flow_l_day))
 
 #Join Flow-weighted concentrations with annual CY loads
 FW_Solutes <- c("FW_PO4", "FW_PN", "FW_TN", "FW_TDN", "FW_NH4", "FW_NO3_NO2", "FW_DIN", "FW_DON", "FW_DOC", "FW_TSS")
@@ -277,9 +274,9 @@ flow.LR.m$Month <- month(flow.LR.m$datetime)
 summary(flow.LR.m)
 
 flow.LR.m <- flow.LR.m %>%
-  select(datetime, Month, CY, flow_day) %>%
+  select(datetime, Month, CY, flow_l_day) %>%
   group_by(Month, CY) %>%
-  summarize(flow_month = sum(flow_day)) #L/month
+  summarize(flow_month = sum(flow_l_day)) #L/month
 
 LR_M_Loads <- left_join(LR_FW_M, flow.LR.m)
 
@@ -399,14 +396,11 @@ for (i in 2:11) {
 #Multiply CY Flow-Weighted Concentrations by Annual Flow (multiplied by flow-multiplier)
 #[kg/L] * [L/year]
 
-flow.SQR$CY <- year(flow.SQR$datetime)
-
-flow.SQR$flow <- conv_unit(flow.SQR$flow, "m3", "l") * SQR_Flow_Multiplier_v2 #l/s
-flow.SQR$flow_day <- flow.SQR$flow * 86400 #l/s to 86400s/day = l/day
+flow.SQR <- union.SQR
 
 CY.flow.SQR <- flow.SQR %>%
   group_by(CY) %>%
-  summarize(Flow_l_year = sum(flow_day))
+  summarize(Flow_l_year = sum(flow_l_day))
 
 #Join Flow-weighted concentrations with annual CY loads
 SQR_CY_Loads <- left_join(SQR_FW_CY, CY.flow.SQR)
@@ -446,9 +440,9 @@ flow.SQR.m$Month <- month(flow.SQR.m$datetime)
 summary(flow.SQR.m)
 
 flow.SQR.m <- flow.SQR.m %>%
-  select(datetime, Month, CY, flow_day) %>%
+  select(datetime, Month, CY, flow_l_day) %>%
   group_by(Month, CY) %>%
-  summarize(flow_month = sum(flow_day)) #L/month
+  summarize(flow_month = sum(flow_l_day)) #L/month
 
 SQR_M_Loads <- left_join(SQR_FW_M, flow.SQR.m)
 
@@ -464,7 +458,6 @@ SQR_M_Loads_CY_Test <- SQR_M_Loads %>%
 write.csv(SQR_M_Loads, "results/main_load_calc/FW_Loads/SQR_MLoads_kg_month.csv")
 
 #### end Squamscott Loads #### 
-
 
 # Flow Weighted Load Calculations Winnicut River (02-WNC) (ANNUAL ESTIMATES)  --------
 #ANNUAL ESTIMATE (CY)
@@ -567,14 +560,11 @@ for (i in 2:11) {
 #Multiply CY Flow-Weighted Concentrations by Annual Flow (multiplied by flow-multiplier)
 #[kg/L] * [L/year]
 
-flow.WNC$CY <- year(flow.WNC$datetime)
-
-flow.WNC$flow <- conv_unit(flow.WNC$flow, "m3", "l") * WNC_Flow_Multiplier_v2 #l/s
-flow.WNC$flow_day <- flow.WNC$flow * 86400 #l/s to 86400s/day = l/day
+flow.WNC <- union.WNC
 
 CY.flow.WNC <- flow.WNC %>%
   group_by(CY) %>%
-  summarize(Flow_l_year = sum(flow_day))
+  summarize(Flow_l_year = sum(flow_l_day))
 
 #Join Flow-weighted concentrations with annual CY loads
 WNC_CY_Loads <- left_join(WNC_FW_CY, CY.flow.WNC)
@@ -615,9 +605,9 @@ flow.WNC.m$Month <- month(flow.WNC.m$datetime)
 summary(flow.WNC.m)
 
 flow.WNC.m <- flow.WNC.m %>%
-  select(datetime, Month, CY, flow_day) %>%
+  select(datetime, Month, CY, flow_l_day) %>%
   group_by(Month, CY) %>%
-  summarize(flow_month = sum(flow_day)) #L/month
+  summarize(flow_month = sum(flow_l_day)) #L/month
 
 WNC_M_Loads <- left_join(WNC_FW_M, flow.WNC.m)
 
