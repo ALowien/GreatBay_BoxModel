@@ -1,7 +1,7 @@
 #main_load_calc.R
 
 #Author: Anna Mikulis, University of New Hampshire
-#Last Updated: 8/28/2024
+#Last Updated: 12/2/2024
 
 #This script calculates annual (calendar year) and monthly loads for the three tidal tributaries (Lamprey, Squamscott, and Winnicut) to Great Bay.
 #This script pulls in products created in the main_dataformat.R script, including measured water quality concentrations and discharge readings. Start with an empty environment. 
@@ -35,12 +35,11 @@ ggplot(count, aes(Year, Count, fill=STATION_ID)) + geom_bar(stat="identity", pos
   geom_hline(yintercept=7) + theme_bw() +
   scale_x_continuous(limits=c(2007, 2024), breaks=seq(from=2007, to=2024, by=2))
 
-#make a table of years with insufficient concentration data
+#make a table of years with insufficient concentration data for budget and load calculations (will be used in later scripts)
 years_to_omit <- count %>%
   filter(Count < 7)
 
 write.csv(years_to_omit, "./results/main_load_calc/years_to_omit.csv")
-#___________________________________________________________________
 #______________________________________________________________________
 #Read in discharge data frame created in main_dataformat.R
 Q <- read.csv("results/main_dataformat/Q_tidal_tribs.csv")
@@ -49,9 +48,7 @@ Q <- Q %>% #flow is daily mean Q in m^3/s
   select(STATION_ID, datetime, flow)
 
 Q$datetime <- as.POSIXct(Q$datetime) #fix class of date column
-#_________________________________________________________________________________________________________________________
-#___________________________________________________________________________________________________________________________
-
+#______________________________________________________________________
 #Separate concentration and flow data by Station IDs to facilitate correct union of conc and flow
 #Separate out Lamprey River Flow and Solute Concentrations 
 flow.LR <- Q %>% #Separates discharge for Lamprey
@@ -71,10 +68,6 @@ conc.LR$datetime <- as.POSIXct(conc.LR$datetime, format = "%Y-%m-%d %H:%M:%S")
 flow.LR$datetime <-lubridate::ymd_hm(paste(flow.LR$datetime, "6:00 PM"))
 
 conc.LR$datetime <-lubridate::ymd_hm(paste(conc.LR$datetime, "6:00 PM"))
-
-head(flow.LR)
-head(conc.LR)
-
 union.LR <- left_join(flow.LR, conc.LR)
 write.csv(union.LR, "results/main_load_calc/union.LR.csv") #Saving a file of discharge & LMP concentrations saved together
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
