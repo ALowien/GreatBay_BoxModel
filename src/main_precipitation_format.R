@@ -1,141 +1,20 @@
 #main_precipitation_format.R
 
 #Author: Anna Mikulis, University of New Hampshire
-#Last Updated: 10/25/2024
+#Last Updated: 12/05/2024
 
-#This script calculates the solute load from precipitation over Great Bay
-
+#Load packages
 Packages <- c("readxl", "dplyr", "ggplot2", "measurements", "plotly", "lubridate", 
               "cowplot", "viridis", "agricolae", "tidyr")
 
 lapply(Packages, library, character.only = TRUE)
 
-#Precipitation file has been QAQC'd, correctd for MDLs, and had correct NCDC rainfall volumes matched
-precipitation <- read.csv("data/precipitation/QAQC_Precip2024.csv") #ALL solutes corrected for method detection limits except DON
-
-summary(precipitation)
-colnames(precipitation) 
-
-
-precip <- precipitation %>%
-   select(UNH_ID:TF2_Sum_P_wUNHfilled_mm, NH4_UGL = NH4_Comb, NO3_MGL = NO3_Comb, PO4_UGL = PO4_Final, TDN_MGL = TDN, 
-          DOC_MGL = NPOC,
-         DON_MGL = DON, Field_Notes, Lab_Notes, DONf, NH4f = NH4_Combf, NO3f = NO3_Combf, TDNf, NPOCf, PO4f = PO4_Combf) 
-
-colnames(precip)
-summary(precip)
-
-precip$Collection_Date <- as.Date(precip$Collection_Date)
+#Load QC'd precipitation concentrations
+precip <- read.csv("data/precipitation/qc_precipitation/precip_concentrations.csv")
 
 precip <- precip %>%
-  filter(Collection_Date > "2007-09-30")
-
-#Keep values only if they have a flag of 2 - which means they have been QC'd and determined to be valid
-precip$NH4_UGL <- ifelse(precip$NH4f != 2, NA, precip$NH4_UGL)
-precip$PO4_UGL <- ifelse(precip$PO4f != 2, NA, precip$PO4_UGL)
-precip$TDN_MGL <- ifelse(precip$TDNf != 2, NA, precip$TDN_MGL)
-precip$DON_MGL <- ifelse(precip$DONf != 2, NA, precip$DON_MGL)
-precip$NO3_MGL <- ifelse(precip$NO3f != 2, NA, precip$NO3_MGL)
-precip$DOC_MGL <- ifelse(precip$NPOCf != 2, NA, precip$DOC_MGL)
-
-mean(precip$DON_MGL_Final, na.rm=T)
-
-#Calculate DIN
-precip$DIN_MGL <- ifelse(!is.na(precip$NO3_MGL) & !is.na(precip$NH4_UGL), precip$NO3_MGL + (precip$NH4_UGL/1000), NA)
-
-#Recalculate DON after removing other flags
-precip$DON_MGL_Final <- ifelse(!is.na(precip$TDN_MGL) & !is.na(precip$NO3_MGL) & !is.na(precip$NH4_UGL),
-                               precip$TDN_MGL - (precip$NO3_MGL + (precip$NH4_UGL/1000)),
-                              NA)
-
-p <- ggplot(precip, aes(DON_MGL, DON_MGL_Final)) + geom_point(aes(text=UNH_ID, color=TDN_MGL)) 
-p
-
-ggplotly(p)
-
-don <- precip %>%
-  filter(round(DON_MGL,2) != round(DON_MGL_Final,2)) #all because TDN set to 1/2 of detection limit
-
-precip$DIN_TDN <- (precip$DIN_MGL/precip$TDN_MGL)
-
-ggplot(precip, aes(DIN_TDN, DON_MGL_Final)) + geom_point() 
-
-sum(precip$DIN_TDN > 1.00, na.rm=T) #207 out of 919, 22% of samples had DIN > TDN
-
-sum(precip$DIN_TDN > 1.00 & precip$DIN_TDN < 1.1, na.rm=T) #129/207 are really close to equal (62% of the 207)
-
-#DON method detection limit
-precip$DON_MDL <- (precip$TDN_MGL + precip$NO3_MGL + (precip$NH4_UGL/1000)) * 5/100 #Michelle's method
-max(precip$DON_MDL, na.rm=T)
-
-#detection limit based on mdls for TDN, NO3, and NH4
-dl <- 0.05 - ((5/1000) + 0.004) #(TDN MDL - NH4 MDL + NO3 MDL)
-
-#what about 0.01 - basically dl of No3 and Nh4 summed? 
-
-precip$DON_BMDL <- ifelse((abs(precip$DON_MGL_Final) - precip$DON_MDL) < 0 , "BDL", NA) 
-
-precip$DON_BMDL_v2 <- ifelse(precip$DON_MGL_Final < precip$DON_MDL, "BDL", NA) 
-
-precip$DON_BMDL_v3 <- ifelse(precip$DON_MGL_Final < dl, "BDL", NA)
-
-ggplot(precip, aes(Collection_Date, DON_MGL_Final, color=DON_BMDL)) + geom_point()
-sum(!is.na(precip$DON_BMDL))
-
-ggplot(precip, aes(Collection_Date, DON_MGL_Final, color=DON_BMDL_v2)) + geom_point()
-sum(!is.na(precip$DON_BMDL_v2))
-
-ggplot(precip, aes(Collection_Date, DON_MGL_Final, color=DON_BMDL_v3)) + geom_point()
-sum(!is.na(precip$DON_BMDL_v3))
-
-ggplot(precip, aes(DIN_TDN, DON_MGL_Final)) + geom_point(aes(color=DON_BMDL))
-ggplot(precip, aes(DIN_TDN, DON_MGL_Final)) + geom_point(aes(color=DON_BMDL_v2))
-ggplot(precip, aes(DIN_TDN, DON_MGL_Final)) + geom_point(aes(color=DON_BMDL_v3))
-
-#Set Final DON concentration columns to be 1/2 of MDL if absolute value of DON < DON_MDL
-#precip$DON_MGL_Final_MDL <- ifelse(abs(precip$DON_MGL_Final) < precip$DON_MDL, precip$DON_MDL/2, precip$DON_MGL_Final)
-#precip$DON_MGL_Final_MDL <- ifelse(precip$DON_BMDL_v2 == "BDL", DON_MDL_vs/2, precip$DON_MGL_Final)
-#precip$DON_MGL_Final_MDL <- ifelse(is.na(precip$DON_BMDL_v2), precip$DON_MGL_Final, 0.005)
-
-#Going with 5% MDL
-precip$DON_MGL_Final_MDL <- ifelse(precip$DON_MGL_Final < precip$DON_MDL, precip$DON_MDL/2, precip$DON_MGL_Final)
-
-ggplot(precip, aes(Collection_Date, DON_MGL_Final)) + geom_point(size=2) +
-  geom_point(aes(y=DON_MGL_Final_MDL), color="blue")
-
-sum(precip$DON_MGL_Final < 0, na.rm=T) #207 DON samples that are below zero
-sum(precip$DON_MGL_Final < 0.01, na.rm=T) #261 below 0.01
-sum(precip$DON_MGL_Final < 0.041, na.rm=T) #431 below 0.041
-
-#Plot DON
-colnames(precip)
-
-DON_comp <- ggplot(precip, aes(Collection_Date, DON_MGL_Final)) + 
-  geom_point(color="red") +
-  geom_point(aes(y=DON_MGL_Final_MDL), color="blue") +
-  scale_y_continuous(breaks=seq(from=-1, to=1, by=0.10))
-DON_comp
-
-ggplotly(DON_comp)
-
-#Remove flagging columns now
-precip <- precip %>%
-  select(UNH_ID:Project, Rainfall_mm = TF2_Sum_P_wUNHfilled_mm, NH4_UGL:DOC_MGL, DON_MGL_Final_MDL, DIN_MGL)
-
-summary(precip)
-
-count_by_year <- precip %>%
-  group_by(Year) %>%
-  summarise(
-    NH4_count = sum(!is.na(NH4_UGL)),
-    NO3_count = sum(!is.na(NO3_MGL)),
-    PO4_count = sum(!is.na(PO4_UGL)),
-    TDN_count = sum(!is.na(TDN_MGL)),
-    DOC_count = sum(!is.na(DOC_MGL)),
-    DON_count = sum(!is.na(DON_MGL_Final_MDL))
-  )
-
-write.csv(precip, "results/main_precipitation_format/precip_concentrations.csv")
+  select(-X) %>%
+  mutate(Collection_Date = as.Date(Collection_Date))
 
 ggplot(precip, aes(Collection_Date, DOC_MGL)) + geom_point() + 
   geom_line() +
@@ -649,7 +528,6 @@ precip_month_loads_final$TN_kg_ha_month <- precip_month_loads_final$TDN_kg_ha_mo
 write.csv(precip_cy_loads_final, "results/main_precipitation_format/cy_precip_loads24.csv")
 #write.csv(precip_wy_loads_final, "results/main_precipitation_format/wy_precip_loads.csv")
 write.csv(precip_month_loads_final, "results/main_precipitation_format/month_precip_loads24.csv")
-
 
 write.csv(cy_rainfall, "results/main_precipitation_format/CY_Rainfall.csv")
 
