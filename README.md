@@ -110,6 +110,12 @@ The src folder contains all R scripts needed to complete the box model for Great
 
 ### **results**
 
+The results folder is organized by "src" script, with a corresponding folder for each script to hold interim products like datatables or figures.
+
+#### manuscript_figures
+
+This folder holds final figures associated with the manuscript. 
+
 ### Sources
 * Trowbridge, P. Hydrological Parameters for New Hampshire’s Estuaries. PREP Reports & Publications (2007).
 
