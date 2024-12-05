@@ -1,7 +1,7 @@
 # main_dataformat.R
 
 # Author: Anna Mikulis, University of New Hampshire
-# Last Updated: 10/29/2024
+# Last Updated: 12/02/2024
 
 #R Version 4.4.1 (2024-06-14 ucrt) -- "Race for Your Life"
 
@@ -55,7 +55,7 @@ metadata <- df %>%
   select(STATION_ID, TOWN, STATE, LATITUDE_DECIMAL_DEGREE, LONGITUDE_DECIMAL_DEGREE, LOCATION_DATUM, WATERBODY_NAME, WATERBODY_ID, HUC_12_CODE) %>%
   distinct()
 
-#Select for columns of interest; filter for sites of interest and time period of interest
+#Select for columns of interest for box model; filter for sites of interest and time period of interest
 df <- df %>%
   select(STATION_ID:SAMPLE_SIZE) %>%
   filter(STATION_ID == "05-LMP" | STATION_ID == "02-WNC" | STATION_ID == "09-EXT" | STATION_ID == "09-EXT-DAMMED" |
@@ -76,15 +76,9 @@ ap_tide$QUALIFIER_AND_RESULTS <- ifelse(is.na(ap_tide$QUALIFIER_AND_RESULTS),
                                         str_extract(ap_tide$RESULT_COMMENTS, "(?i)LOW|HIGH"),
                                         ap_tide$QUALIFIER_AND_RESULTS)
 
-# If you want to extract only the first occurrence of LOW or HIGH from RESULT_COMMENTS
-#ap_tide$QUALIFIER_AND_RESULTS <- ifelse(is.na(ap_tide$QUALIFIER_AND_RESULTS), str_extract(ap_tide$RESULT_COMMENTS, "(?i)LOW|HIGH")[1], ap_tide$QUALIFIER_AND_RESULTS)
-
 #Categorize "Tide Stage" PARAMETER To be either High or Low Tide (e.x. ebb tides are re-classified as low tide samples)
 ap_tide$QUALIFIER_AND_RESULTS <- ifelse(ap_tide$PARAMETER_ANALYTE == "TIDE STAGE" & ap_tide$QUALIFIER_AND_RESULTS == "EBB", "LOW", ap_tide$QUALIFIER_AND_RESULTS)
 ap_tide$QUALIFIER_AND_RESULTS <- ifelse(ap_tide$PARAMETER_ANALYTE == "TIDE STAGE" & ap_tide$QUALIFIER_AND_RESULTS == "FLOOD", "HIGH", ap_tide$QUALIFIER_AND_RESULTS)
-
-ap_tide <- ap_tide %>%
-  select(-PARAMETER_ANALYTE, -RESULT_COMMENTS)
 
 #Rename Great Bay Adams Point (GRBAP) STATION ID based on high/low tide (GRBAPL indicates low tide sample; GRBAPH indicates high tide sample)
 ap_tide$STATION_ID <- ifelse(ap_tide$QUALIFIER_AND_RESULTS == "LOW", "GRBAPL", 
@@ -101,7 +95,7 @@ ap_tide[469, 4] <- "High"
 ap_tide <- ap_tide[!duplicated(ap_tide[,1:4]),]
 
 ap_tide <- ap_tide %>%
-  select(-QUALIFIER_AND_RESULTS)
+  select(-QUALIFIER_AND_RESULTS, -PARAMETER_ANALYTE, -RESULT_COMMENTS)
 
 #Join df with deduped.APTIDE
 #Replace Station ID in AP data frame
@@ -110,10 +104,11 @@ df <- left_join(df, ap_tide, by = c("START_DATE", "START_TIME"))
 #If "Station_ID.y" is not NA, (i.e says "GRBAPL" or "GRBAPH"), use STATION_ID.y as the STATION ID, else use the original station id from "Station_ID.x 
 df$STATION_ID <- ifelse(!is.na(df$STATION_ID.y), df$STATION_ID.y, df$STATION_ID.x) 
 
+#remove extra Station ID columns now that everything has been combined into one column
 df <- df %>%
-  select(-STATION_ID.x, -STATION_ID.y) #remove extra Station ID columns now that everything has been combined into one column
+  select(-STATION_ID.x, -STATION_ID.y) 
 
-# Add the missing High and Low Tide IDS
+# Add the missing High and Low Tide IDS 
 df$STATION_ID <- ifelse(df$START_DATE == "2008-06-11" & df$START_TIME == "09:35", "GRBAPH",
                         ifelse(df$START_DATE == "2009-06-29" & df$START_TIME == "08:31", "GRBAPH", 
                                ifelse(df$START_DATE == "2009-07-13" & df$START_TIME == "14:17", "GRBAPH",
@@ -132,11 +127,6 @@ df$STATION_ID <- ifelse(df$STATION_ID == "09-EXT-DAMMED", "09-EXT", df$STATION_I
 df <- df %>%
   select(STATION_ID, WATERBODY_ID, ACTIVITY_ID, ACTIVITY_TYPE, START_DATE:FRACTION_TYPE)
 
-ggplot(subset(df, PARAMETER_ANALYTE == "TURBIDITY"), aes(START_DATE, as.numeric(QUALIFIER_AND_RESULTS))) +
-  geom_point(aes(color=STATION_ID)) +
-  geom_line(aes(color=STATION_ID)) +
-  scale_x_date(date_breaks = "1 years", date_labels = "%Y")
-
 #Filter out unnecessary parameters for the box model
 remove_parms <- c("CLOSTRIDIUM PERFRINGENS", "ENTEROCOCCUS", "ESCHERICHIA COLI","TOTAL FECAL COLIFORM", "WIND DIRECTION", "WIND VELOCITY", "SECCHI DISK TRANSPARENCY","COLORED DISSOLVED ORGANIC MATTER (CDOM)", "TURBIDITY","DEPTH", "TIDE STAGE", "LIGHT ATTENUATION COEFFICIENT", "SILICA AS SIO2", "PHEOPHYTIN-A", "CARBON, SUSPENDED", "NITROGEN, NITRITE (NO2) AS N")
 
@@ -145,7 +135,7 @@ df <- subset(df, !(PARAMETER_ANALYTE %in% remove_parms))
 df <- df %>%
   select(STATION_ID:ACTIVITY_COMMENTS, PARAMETER = PARAMETER_ANALYTE, QUALIFIER_AND_RESULTS:FRACTION_TYPE)
 #_____________________________________________________
-#Clarify Parameter Methods by Renaming
+#Clarify Parameter Methods by Renaming (only parameters of interest)
 
 #PHOSPHORUS AS P, fraction type is "Total"; which means PHOSPHORUS samples are TOTAL PHOSPHORUS ("TP")
 df$PARAMETER <- ifelse(df$PARAMETER == "PHOSPHORUS AS P", "TP", df$PARAMETER)
@@ -159,8 +149,7 @@ df$PARAMETER <- ifelse(df$PARAMETER == "NITROGEN", "TN", df$PARAMETER)
 #NITROGEN, DISSOLVED is "TOTAL DISSOLVED NITROGEN" (TDN)
 df$PARAMETER <- ifelse(df$PARAMETER == "NITROGEN, DISSOLVED", "TDN", df$PARAMETER)
 
-#NITROGEN, AMMONIA as N - is technically ammonium (the method measures ammonia, but there isn't ammonia in streams really)
-#Per conversation with Jody over Slack July 2020
+#NITROGEN, AMMONIA as N - is technically ammonium
 df$PARAMETER <- ifelse(df$PARAMETER == "NITROGEN, AMMONIA AS N", "NH4", df$PARAMETER)
 
 #NITROGEN, INORGANIC (AMMONIA, NITRATE AND NITRITE) is Dissolved Inorganic Nitrogen (DIN)
@@ -177,9 +166,6 @@ df$PARAMETER <- ifelse(df$PARAMETER == "NITROGEN, ORGANIC", "DON", df$PARAMETER)
 
 #NITROGEN, SUSPENDED is Particulate N
 df$PARAMETER <- ifelse(df$PARAMETER == "NITROGEN, SUSPENDED", "PN", df$PARAMETER)
-
-#Carbon, SUSPENDED is Particulate Carbon
-#df$PARAMETER <- ifelse(df$PARAMETER == "CARBON, SUSPENDED", "PC", df$PARAMETER)
 
 #CARBON, ORGANIC is Dissolved Organic Carbon
 df$PARAMETER <- ifelse(df$PARAMETER == "CARBON, ORGANIC", "DOC", df$PARAMETER)
@@ -237,6 +223,7 @@ summary(df)
 df_below <- df %>%
   filter(DETECTION_LIMIT == "BELOW")
 
+#plot number of values by site that are below respective detection limits
 ggplot(df_below, aes(year(START_DATE))) + 
   geom_histogram(stat="count", aes(fill=PARAMETER)) +
   facet_wrap(~STATION_ID) +
@@ -244,12 +231,20 @@ ggplot(df_below, aes(year(START_DATE))) +
   xlab("year") +
   scale_x_continuous(breaks=seq(from=2008,to=2022,by=2))
 
-df_below$RDL_vs_Qualifer <- df_below$RDL == df_below$RESULTS_clean
+#Determining if solute is below detection limit that the detection limit was put as the result (instead of 1/2 of the detection limit)
+df_below$RDL_vs_Qualifer <- df_below$RDL == df_below$RESULTS_clean #all true, so all set to detection limit
+
+#summarize the solutes below detection 
+df_below <- df_below %>%
+  filter(PARAMETER != "TP") %>%
+  group_by(STATION_ID, PARAMETER) %>%
+  tally(!is.na(RDL))
+
 #If result is below detection limit, set to 1/2 of detection limit
-#296 results that are below detection limit as noted by EMD already
 df$RESULT <- ifelse(df$DETECTION_LIMIT == "BELOW", df$RESULTS_clean / 2, df$RESULTS_clean)
 
 df$DETECTION_LIMIT_v2<- ifelse(df$RESULTS_clean < df$RDL, "BELOW RDL", "NA") #5 additional BDLs
+
 #4 out of 5 actual BDL, NH4 at GRBAPH 7/16/2020 rounds to exactly the detection limit, so leave it there to round up
 df$RESULTS_clean <- ifelse(df$ACTIVITY_ID == "JEL07162001" & df$PARAMETER == "NH4", signif(df$RESULT, 1), df$RESULTS_clean) #rounding the one that is at detection limit
 
@@ -262,18 +257,18 @@ summary(df)
 
 #### QC ------------------------------------------------
 # QC based on existing invalid flags, field duplicates, and method detection limits
-test <- df 
+df_qc <- df 
 #Group by STATION_ID, START_DATE, and PARAMETER
-df_grouped <- test %>%
+df_qc <- df_qc %>%
   group_by(STATION_ID, START_DATE, PARAMETER) %>%
   mutate(duplicate_count = n()) %>%
   ungroup()
 
 # Filter rows with duplicate_count > 1 
-df_duplicates <- df_grouped %>%
+df_qc <- df_qc %>%
   filter(duplicate_count > 1)
 
-df_calculated <- df_duplicates %>%
+df_calculated <- df_qc %>%
   group_by(STATION_ID, START_DATE, PARAMETER) %>%
   #separate(Result_DL, into = c("dl", "unit"), sep = "_")  %>%
   mutate(
