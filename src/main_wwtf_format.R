@@ -240,11 +240,11 @@ wwtf_avg_combined <- wwtf_avg_byperiod %>%
     NO3_NO2 = paste0(NO3_NO2_mgL_mean, " ± ", NO3_NO2_mgL_sd, " (", NO3_n, ")"),
     TN = paste0(TN_mgL_mean, " ± ", TN_mgL_sd, " (", TN_n, ")")
   ) %>%
-  select(WWTF, period, TSS, NH4, NO3_NO2, TN) %>% # Keep only relevant columns
-  pivot_longer(cols = TSS:TN, names_to = "Variable",values_to = "Value") %>%
-  pivot_wider(names_from = WWTF,values_from = Value)
+  select(WWTF, period, TSS, NH4, NO3_NO2, TN) #%>% # Keep only relevant columns
+  #pivot_longer(cols = TSS:TN, names_to = "Variable",values_to = "Value") %>%
+  #pivot_wider(names_from = c(WWTF, period),values_from = Value)
 
-
+write.csv(wwtf_avg_combined, file=paste0("./results/manuscript_figures/supplemental/wwtf_pre_postupgrades.csv"))
 
 wwtf_piv$Final_TN_mgL <- ifelse(wwtf_piv$WWTF == "Newfields" & wwtf_piv$year >= 2017 &
                           is.na(wwtf_piv$Final_TN_mgL), 20.0, wwtf_piv$Final_TN_mgL)
@@ -279,15 +279,14 @@ exeter_monthly <- exeter_monthly %>%
   rename(Final_TN_mgL.ex = TN_mgL,
          Flow_MGD.ex = MonthlyAverageFlowmgd)
 
-exeter_monthly$Date <- as.Date(paste(exeter_monthly$year, exeter_monthly$month,  "01", sep="-"),
-                               format = "%Y-%m-%d"
-)
-
+exeter_monthly$Date <- as.Date(paste(exeter_monthly$year, exeter_monthly$month,  "01", sep="-"), 
+                               format = "%Y-%m-%d")
+                          
 exeter_monthly$day <- days_in_month(exeter_monthly$Date)
 
 exeter_monthly <- exeter_monthly %>% select(-Date)
 
-
+#add in the monthly exeter values to the main dataframe
 monthlyloads <- full_join(wwtf_piv, exeter_monthly)
 
 monthlyloads$Final_TN_mgL <- ifelse(is.na(monthlyloads$Final_TN_mgL) & !is.na(monthlyloads$Final_TN_mgL.ex),
@@ -302,6 +301,20 @@ ggplot(monthlyloads, aes(year, Final_TN_mgL, color="month")) + geom_point() +
 ggplot(monthlyloads, aes(year, TSS_mgL, color="month")) + geom_point() +
   facet_wrap(~WWTF)
 
+#Discrete samples of effluent for DOC, PO4, etc. 
+Lit_WWTF <- read_excel("data/wwtf/Literature_WWTF_Values.xlsx", sheet=2)
+
+Lit_WWTF$year <- year(Lit_WWTF$Date)
+Lit_WWTF$month <- month(Lit_WWTF$Date)
+#pull out TN 2008 data and join to main dataframe
+tn_2008 <- Lit_WWTF %>%
+  select(WWTF, year, month, TN_MGL) %>%
+  filter(!is.na(TN_MGL))
+
+monthlyloads <- full_join(monthlyloads, tn_2008)
+
+monthlyloads$Final_TN_mgL <- ifelse(is.na(monthlyloads$Final_TN_mgL) & !is.na(monthlyloads$TN_MGL), monthlyloads$TN_MGL, monthlyloads$Final_TN_mgL)
+
 df_summary <- monthlyloads %>%
   select(WWTF, Monitoring.Period.Date, year, month, period, Final_TN_mgL, TSS_mgL, Flow_MGD) %>%
   filter(year < 2024) %>%
@@ -315,6 +328,29 @@ df_summary$day <- days_in_month(df_summary$Monitoring.Period.Date)
 df_summary$TN_kgmonth <- df_summary$TN_kgL * df_summary$FLOW_lday * df_summary$day
 df_summary$TSS_kgmonth <- df_summary$TSS_kgL * df_summary$FLOW_lday * df_summary$day
 
+ggplot(subset(df_summary, year == 2008 & WWTF != "Newfields"), 
+       aes(month, TN_kgmonth)) + geom_point() +
+  facet_wrap(~WWTF, nrow = 3) +
+  scale_x_continuous(limits=c(1,12), breaks=seq(from=1,to=12,by=1))
+
+
+
+df_annual_2008 <- df_summary %>%
+  filter(year < 2009) %>%
+  group_by(WWTF) %>%
+  summarize(mean_TN = mean(TN_kgmonth, na.rm=T))
+
+#patch in missing 2008 months as average of months we have 
+
+df_summary$TN_kgmonth <- ifelse(df_summary$year == 2008 & df_summary$WWTF == "Exeter" & is.na(df_summary$TN_kgmonth),
+                                3174, df_summary$TN_kgmonth)
+
+
+df_summary$TN_kgmonth <- ifelse(df_summary$year == 2008 & df_summary$WWTF == "Newmarket" & is.na(df_summary$TN_kgmonth),
+                                2215, df_summary$TN_kgmonth)
+
+
+
 df_annual <- df_summary %>%
   group_by(WWTF, year) %>%
   summarise(TN_kgyr = sum(TN_kgmonth),
@@ -322,8 +358,8 @@ df_annual <- df_summary %>%
 
 #Pre-2014 Annual Loads Need Exeter 2008 - 2011; Newmarket 2008 - 2013
 annual <- read.csv("./data/wwtf/WWTF_AnnualReportData.csv") 
-annual$TN_kgyr.x <- conv_unit(annual$TN_tonsyr, "metric_ton", "kg")
-annual$DIN_kgyr <- conv_unit(annual$DIN_tonyrs, "metric_ton", "kg")
+annual$TN_kgyr.x <- annual$TN_tonsyr *907.185 #us tons to kg
+annual$DIN_kgyr <- annual$DIN_tonyrs * 907.185
 annual <- annual %>% select(-TN_tonsyr, - DIN_tonyrs, -URL, -Data.Source, -NPDES.Permit.Number)
 
 colnames(df_annual)
@@ -345,14 +381,13 @@ wwtf_annual <- wwtf_annual %>% select(-TN_kgyr.x)
 ggplot(wwtf_annual, aes(year, TN_kgyr, color=WWTF)) + geom_point() +
   facet_wrap(~WWTF, scales = "free_y")
 
-
 ggplot(wwtf_annual, aes(year, DIN_kgyr, color=WWTF)) + geom_point() +
   facet_wrap(~WWTF, scales = "free_y")
 
-#Discrete samples of effluent for DOC, PO4, etc. 
-Lit_WWTF <- read_excel("data/wwtf/Literature_WWTF_Values.xlsx")
 
-Lit_WWTF$DINcheck <- Lit_WWTF$DIN_MGL > Lit_WWTF$TDN_MGL
+#ESTIMATE DOC and PO4 Loads based on molar ratios
+#Ratio of TDN to TN
+Lit_WWTF$TDN_TN <- Lit_WWTF$TDN_MGL / Lit_WWTF$TN_MGL
 
 #Calculate molar concentrations
 Lit_WWTF$DOC_gL <- conv_unit(Lit_WWTF$DOC_MGL, "mg", "g")
