@@ -41,7 +41,7 @@ The data folder contain raw data products used to build the box model & manuscri
 ##### The daily mean discharge for the three rivers the drain to Great Bay. The csv files contain the site id, date, and mean daily discharge (units: cfs). The **text_files** subfolder has the .txt version of the .csv files. 
 
 #### precipitation
-##### The precipitation chemistry and rainfall volumes are located here.
+##### The precipitation chemistry and rainfall volumes are located here. Hourly precipitation was downloaded from the NCDC U.S. Climate Reference Network for the Durham, NH SSW station. Gaps were filled using UNH weather statistics. 
 
 ####
 
@@ -92,9 +92,7 @@ The src folder contains all R scripts needed to complete the box model for Great
 
 #### main_compile_inputs.R
 ##### Purpose: Combine input loads and output loads into one dataframe, calculate delta storage terms. Requires loading of products saved in results files, including:
-* LR_Annual_Loads.csv
-* SQR_Annual_Loads.csv
-* WNC_Annual_Loads.csv
+* Tidal_Trib_CY_Loads_kg_yr.csv
 * cy_precip_loads.csv
 * wwtf_annual_loads.csv
 * AP_Flux_kgyr.csv
@@ -102,7 +100,6 @@ The src folder contains all R scripts needed to complete the box model for Great
 
 ###### Key final products:
 * Budget_Components.csv - dataframe of each budget component solute flux, categorized as input or output
-* inputsaspercentage.csv - dataframe that considers inputs as percentage of the total input for the year
 
 #### main_plot_annual_budgets.R
 ##### Purpose: Plot annual solute budget inputs, outputs, and delta storage terms using the dataframes built in main_compile_inputs
