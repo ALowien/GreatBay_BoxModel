@@ -1,7 +1,7 @@
 #main_load_calc.R
 
 #Author: Anna Mikulis, University of New Hampshire
-#Last Updated: 12/2/2024
+#Last Updated: 2/13/2025
 
 #This script calculates annual (calendar year) and monthly loads for the three tidal tributaries (Lamprey, Squamscott, and Winnicut) to Great Bay.
 #This script pulls in products created in the main_dataformat.R script, including measured water quality concentrations and discharge readings. Start with an empty environment. 
@@ -11,7 +11,6 @@ Packages <- c("readxl", "dplyr", "ggplot2", "measurements", "plotly", "lubridate
 lapply(Packages, library, character.only = TRUE)
 
 #Read in cleaned up concentration data frame (df_conc.csv) from the main_dataformat.R script
-  #Saved in results/main_dataformat
 #the dataframe is tidal tributary solute concentrations over time and includes site id, sample collection date, solute concentrations, and water chemistry (pH, DO)
 conc <- read.csv("results/main_dataformat/df_conc.csv")
 
@@ -30,12 +29,12 @@ count <- conc_sub %>%
   group_by(STATION_ID, Year) %>%
   summarize(across(PO4_MGL:TSS_MGL, ~ sum(!is.na(.x)))) %>%
   pivot_longer(cols=c(PO4_MGL:TSS_MGL), names_to= "Parameter", values_to="Count") 
-  
+
+#Determine years with insufficient concentration data for budget and load calculations (will be used in later scripts)
 ggplot(count, aes(Year, Count, fill=STATION_ID)) + geom_bar(stat="identity", position="dodge") + facet_wrap(~Parameter) +
   geom_hline(yintercept=7) + theme_bw() +
   scale_x_continuous(limits=c(2007, 2024), breaks=seq(from=2007, to=2024, by=2))
 
-#make a table of years with insufficient concentration data for budget and load calculations (will be used in later scripts)
 years_to_omit <- count %>%
   filter(Count < 7)
 
@@ -114,7 +113,7 @@ write.csv(union.WNC, "results/main_load_calc/union.WNC.csv")
 LMP_Flow_Multiplier <- 1.146138 #549km2/479km2
 SQR_Flow_Multiplier <- 1.689024 #277/164
 WNC_Flow_Multiplier <- 1.005479 #36.7/36.5
-#These are calculated as the ratioof  full watershed area to  watershed area at the stream gauge
+#These are calculated as the ratio of  full watershed area to  watershed area at the stream gauge
 LMP_Flow_Multiplier_v2 <- 1.156576 #554/479
 SQR_Flow_Multiplier_v2 <- 2.012195 #330/164
 WNC_Flow_Multiplier_v2 <- 1.235616 #45.1/36.5
@@ -242,7 +241,7 @@ LR_CY_Loads <- LR_CY_Loads %>% #Loads are in kg/year
   mutate(across(all_of(FW_Solutes), ~ . * Flow_l_year))
 
 #Calendar Year Annual FW Load (uses annual discharge and concentrations March-December)
-write.csv(LR_CY_Loads, "results/main_load_calc/FW_Loads/LR_Annual_Loads.csv")
+write.csv(LR_CY_Loads, "results/main_load_calc/FW_Loads/Annual/LR_Annual_Loads.csv")
 
 #_______________________________________________________________________________________________
 #________________________________________________________________________________________________________________________
@@ -408,7 +407,7 @@ SQR_CY_Loads <- left_join(SQR_FW_CY, CY.flow.SQR)
 SQR_CY_Loads <- SQR_CY_Loads %>% #Loads are in kg/year
   mutate(across(all_of(FW_Solutes), ~ . * Flow_l_year))
 #Calendar Year Annual FW Load (uses annual discharge and concentrations March-December)
-write.csv(SQR_CY_Loads, "results/main_load_calc/FW_Loads/SQR_Annual_Loads.csv")
+write.csv(SQR_CY_Loads, "results/main_load_calc/FW_Loads/Annual/SQR_Annual_Loads.csv")
 
 #________________________________________________________________________________________________
 #______________________________________________________________________________________________________________________
@@ -573,7 +572,7 @@ WNC_CY_Loads <- WNC_CY_Loads %>% #Loads are in kg/year
   mutate(across(all_of(FW_Solutes), ~ . * Flow_l_year))
 
 #Calendar Year Annual FW Load (uses annual discharge and concentrations March-December)
-write.csv(WNC_CY_Loads, "results/main_load_calc/FW_Loads/WNC_Annual_Loads.csv")
+write.csv(WNC_CY_Loads, "results/main_load_calc/FW_Loads/Annual/WNC_Annual_Loads.csv")
 
 #________________________________________________________________________________________________
 #______________________________________________________________________________________________________________________
@@ -654,9 +653,10 @@ Tidal_Trib_Normalized_CY_Loads <- Tidal_Trib_CY_Loads %>%
 
 
 write.csv(Tidal_Trib_Normalized_CY_Loads, "results/main_load_calc/FW_Loads/Tidal_Trib_CY_Loads_kg_ha_yr.csv")
+write.csv(Tidal_Trib_CY_Loads, "results/main_load_calc/FW_Loads/Tidal_Trib_CY_Loads_kg_yr.csv")
 
 
-#Average annual river concentration across rivers (TABLE FOR MANUSCRIPT NUMBERS)
+#Average annual river concentration across rivers (Table 2 in Manuscript)
 #Combine river flow-weighted concentrations into one table
 LR_FW_CY$River <- "Lamprey"
 SQR_FW_CY$River <- "Squamscott"
@@ -665,15 +665,23 @@ FY_combinedtable <- full_join(LR_FW_CY, SQR_FW_CY)
 FY_combinedtable <- full_join(FY_combinedtable, WNC_FW_CY)
 
 FY_combinedtable <- FY_combinedtable %>%
-  mutate(across(FW_PO4:FW_TSS,  ~conv_unit(., "kg","mg")))
+  mutate(across(FW_PO4:FW_TSS,  ~conv_unit(., "kg","mg"))) 
 
-avg_river_fw_conc <- FY_combinedtable %>%
-  summarize(across(FW_PO4:FW_TSS, ~mean(., na.rm=T)))
+colnames(FY_combinedtable)
 
-print(round(avg_river_fw_conc[,], 3))
+avg_river_summary <- FY_combinedtable %>%
+  summarize(across(FW_PO4:FW_TSS, 
+                   list(mean = ~mean(., na.rm = TRUE), 
+                        sd = ~sd(., na.rm = TRUE)))) %>%
+  pivot_longer(cols = everything(), 
+               names_to = c("Parameter", "Stat"), 
+               names_pattern = "(.*)_(mean|sd)") %>%
+  pivot_wider(names_from = Stat, values_from = value) %>%
+  mutate(summary = paste0(signif(mean, 2), " ± ", signif(sd, 2))) %>%
+  select(Parameter, summary)
+avg_river_summary 
 
-avg_river_sd_conc <- FY_combinedtable %>%
-  summarize(across(FW_PO4:FW_TSS, ~sd(., na.rm=T)))
-
-print(round(avg_river_sd_conc[,], 3))
-
+tally <- FY_combinedtable %>%
+  summarize(across(FW_PO4:FW_TSS, ~sum(!is.na(.))))
+tally
+            
