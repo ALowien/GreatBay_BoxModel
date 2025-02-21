@@ -22,7 +22,7 @@ Add this repository to your RStudio project space.
   2. Click <> Code.
   3. Copy the HTTPS URL for the repository.
   4. Open the terminal shell or git bash.
-  5. Change current working directory to the locationw here you want the cloned directory.
+  5. Change current working directory to the location where you want the cloned directory.
   6. Type "git clone", then paste the URL.
   7. Hit Enter. 
 
@@ -38,7 +38,7 @@ The data folder contain raw data products used to build the box model & manuscri
 ##### Contains water quality data for the head of tide river stations (05-LMP, 09-EXT, 02-WNC, GRBAP). Includes all site metadata, along with sample date, time, water quality data for each station. Each row is one water quality solute measured on a given day and site (long data). These data files were downloaded via request from the NH Environmental Monitoring Database (DES.EMD@des.nh.gov). The only modifications were to make the column names the first row of the spreadsheet and to delete the database query from the bottom of the spreadsheet. These files currently are up-to-date through the 2021 and/or 2022 calendar year. 
 
 #### discharge
-##### The daily mean discharge for the three rivers the drain to Great Bay. The csv files contain the site id, date, and mean daily discharge (units: cfs). The **text_files** subfolder has the .txt version of the .csv files. 
+##### The daily mean discharge for the three rivers the drain to Great Bay. The csv files contain the site id, date, and mean daily discharge (units: cfs). The **text_files** subfolder has the .txt version of the .csv files. Tributary discharge data are available from the USGS National Water Information System (https://waterdata.usgs.gov). 
 
 #### precipitation
 ##### The precipitation chemistry and rainfall volumes are located here. Hourly precipitation was downloaded from the NCDC U.S. Climate Reference Network for the Durham, NH SSW station. Gaps were filled using UNH weather statistics. 
@@ -52,7 +52,7 @@ The src folder contains all R scripts needed to complete the box model for Great
 #### main_dataformat.R
 ##### Purpose: Read in, process, and clean up water quality concentration data for tidal tributaries to Great Bay and for estuarine monitoring stations in Great Bay. 
 ###### Key results from main_dataformat.R saved in /results/main_dataformat 
-* "df_conc.csv" - data frame of organized solute concentrations by date and site, corrected for method detection limits (except for DON concentrations)
+* "df_conc.csv" - data frame of organized solute concentrations by date and site, corrected for method detection limits
 * "Q_tidal_tribs" - combined discharge dataframe for Lamprey, Squamscott, and Winnicut Rivers
 
 #### main_load_calc.R
