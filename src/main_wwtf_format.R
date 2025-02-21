@@ -94,7 +94,6 @@ wwtf$Parameter <- paste(wwtf$Parameter.Description, wwtf$DMR.Value.Unit, sep = "
 unique(wwtf$Parameter)
 
 #clean up parameter names 
-
 wwtf$Parameter <- ifelse(wwtf$Parameter ==  "Nitrogen total (as N)_lb_d", "TN_lbday",
                          ifelse(wwtf$Parameter == "Nitrogen ammonia total (as N)_mg_L", "NH4_mgL",
                          ifelse(wwtf$Parameter == "Nitrite plus nitrate total 1 det. (as N)_mg_L", "NO3_NO2_mgL",
@@ -119,14 +118,10 @@ ggplot(wwtf_piv, aes(Monitoring.Period.Date, NH4_mgL)) +
 ggplot(subset(wwtf_piv, WWTF != "Newfields"), aes(Monitoring.Period.Date, `BOD 5-day 20 deg. C_mg_L`)) +
 geom_point(aes(color=WWTF)) + geom_line(aes(color=WWTF)) #yes, believeable
 
-
 ggplot(wwtf_piv, 
        aes((`Nitrogen Kjeldahl total (as N)_mg_L` + NO3_NO2_mgL), `TN_mgL`, color=WWTF)) + 
   geom_point() +
   geom_abline(intercept=0, slope=1) #so yes there is PN in the TKN if unfiltered.... bc it matches TN...
-
-ggplot(wwtf_piv, aes(WWTF, NO3_NO2_mgL)) + geom_point()
-ggplot(wwtf_piv, aes(WWTF, NH4_mgL)) + geom_point()
 
 ggplot(wwtf_piv, aes(Monitoring.Period.Date, NH4_mgL, color=WWTF)) + 
   geom_point() +
@@ -134,8 +129,7 @@ ggplot(wwtf_piv, aes(Monitoring.Period.Date, NH4_mgL, color=WWTF)) +
   scale_x_date(date_breaks = "2 year", date_labels = "%Y") 
 
 ggplot(wwtf_piv, aes(Monitoring.Period.Date, NO3_NO2_mgL)) +   geom_point() + geom_line() +
-  scale_x_date(date_breaks = "2 year", date_labels = "%Y") +
-  facet_wrap(~WWTF, nrow=3)
+  facet_wrap(~WWTF, nrow=3, scales="free_x")
 
 # Use pounds per day load to calculate the monthly concentration of TN
 galtoliter <- 3.78541  #1 gallon = 3.78541 L
@@ -159,9 +153,6 @@ compplot <- ggplot(wwtf_piv, aes(`TN_mgL`, TN_mgL_calc)) +
   geom_point(aes(color=WWTF, text=Monitoring.Period.Date)) 
 plotly::ggplotly(compplot)
 
-ggplot(subset(wwtf_piv, WWTF == "Newfields" & year == 2023), 
-       aes(Monitoring.Period.Date, Flow_MGD)) + geom_point(aes(color=WWTF))
-
 mismatch <- wwtf_piv %>%
   filter(abs(TN_mgL - TN_mgL_calc) > 1)
 
@@ -171,6 +162,15 @@ ggplot(mismatch, aes(`TN_mgL`, TN_mgL_calc)) +
   ylab("TN (mg/L) calculated from lb_day") +
   xlab("TN (mg/L) reported") +
   ggtitle("TN reported is more than 1mg/L different from calculated concentration")
+
+
+ggplot(subset(wwtf_piv, WWTF == "Exeter"), aes(Monitoring.Period.Date, TN_mgL)) + geom_point() +
+  ylab("Nitrogen total (as N) (Mo Avg, mg N/L)") +
+  scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
+  theme_bw()
+  
+
+
 
 #replace the three Exeter mismatched values that are all 9 mg/L
 wwtf_piv$TN_mgL <- ifelse(wwtf_piv$WWTF == "Exeter" & wwtf_piv$Monitoring.Period.Date == as.Date("2013-11-30"),
@@ -199,6 +199,13 @@ wwtf_piv$period <- ifelse(wwtf_piv$WWTF == "Newfields", "no upgrades", wwtf_piv$
 ggplot(wwtf_piv, aes(year, Final_TN_mgL, color=period)) + geom_point() +
   scale_x_continuous(limits=c(2007.5, 2023.5), breaks=seq(from=2008,to=2023,by=3)) +
   facet_wrap(~WWTF)
+
+flow <- wwtf_piv %>%
+  select(WWTF, Flow_MGD) %>%
+  group_by(WWTF) %>%
+  summarize(mean = mean(Flow_MGD, na.rm = T),
+            n= sum(!is.na(Flow_MGD)),
+            sd = sd(Flow_MGD, na.rm=T))
 
 wwtf_avg_overall <-  wwtf_piv %>%
   select(WWTF,period, TSS_mgL, NH4_mgL, NO3_NO2_mgL, Final_TN_mgL) %>%
@@ -342,12 +349,10 @@ df_annual_2008 <- df_summary %>%
 
 #patch in missing 2008 months as average of months we have 
 
-df_summary$TN_kgmonth <- ifelse(df_summary$year == 2008 & df_summary$WWTF == "Exeter" & is.na(df_summary$TN_kgmonth),
-                                3174, df_summary$TN_kgmonth)
+df_summary$TN_kgmonth <- ifelse(df_summary$year == 2008 & df_summary$WWTF == "Exeter" & is.na(df_summary$TN_kgmonth),  3174, df_summary$TN_kgmonth)
 
 
-df_summary$TN_kgmonth <- ifelse(df_summary$year == 2008 & df_summary$WWTF == "Newmarket" & is.na(df_summary$TN_kgmonth),
-                                2215, df_summary$TN_kgmonth)
+df_summary$TN_kgmonth <- ifelse(df_summary$year == 2008 & df_summary$WWTF == "Newmarket" & is.na(df_summary$TN_kgmonth),  2215, df_summary$TN_kgmonth)
 
 
 
@@ -386,9 +391,6 @@ ggplot(wwtf_annual, aes(year, DIN_kgyr, color=WWTF)) + geom_point() +
 
 
 #ESTIMATE DOC and PO4 Loads based on molar ratios
-#Ratio of TDN to TN
-Lit_WWTF$TDN_TN <- Lit_WWTF$TDN_MGL / Lit_WWTF$TN_MGL
-
 #Calculate molar concentrations
 Lit_WWTF$DOC_gL <- conv_unit(Lit_WWTF$DOC_MGL, "mg", "g")
 Lit_WWTF$DOC_molL <- Lit_WWTF$DOC_gL / 12.0107
@@ -402,6 +404,13 @@ summary(Lit_WWTF)
 
 mean(Lit_WWTF$PO4_UGL/1000,na.rm=T)
 sd(Lit_WWTF$PO4_UGL/1000,na.rm=T)
+
+
+#Ratio of TDN to TN
+Lit_WWTF$TN_molL <- conv_unit(Lit_WWTF$TN_MGL, "mg", "g") / 14.01
+
+Lit_WWTF$CN_mol_est <- Lit_WWTF$DOC_molL / Lit_WWTF$TN_molL
+
 #molar ratio
 Lit_WWTF$CN_mol <- Lit_WWTF$DOC_molL / Lit_WWTF$TDN_molL
 
@@ -418,14 +427,14 @@ Lit_WWTF$NP <-Lit_WWTF$TDN_MGL / (conv_unit(Lit_WWTF$PO4_gL, "g", "mg"))
 Lit_WWTF$NP_g <- Lit_WWTF$TDN_gL / Lit_WWTF$PO4_gL
 #summarize by wastewater treatment plant
 WWTF_molar_ratios <- Lit_WWTF %>%
-  select(WWTF, CN_mol, NP_mol) %>% 
+  select(WWTF, CN_mol, CN_mol_est, NP_mol) %>% 
   group_by(WWTF) %>%
-  summarize(across(CN_mol:NP_mol, mean, na.rm =T))
+  summarize(across(CN_mol:NP_mol, \(x) mean(x, na.rm =T)))
 
 WWTF_conc_ratios <- Lit_WWTF %>%
   select(WWTF, CN, NP) %>% 
   group_by(WWTF) %>%
-  summarize(across(CN:NP, mean, na.rm =T))
+  summarize(across(CN:NP,\(x) mean(x, na.rm =T)))
 
 meanCN <- mean(Lit_WWTF$CN, na.rm = T)
 
@@ -454,6 +463,34 @@ write.csv(wwtf_annual, "results/main_wwtf_loads/redone/wwtf_annual_loads.csv")
 monthly_load_summary <- df_summary %>%
   select(WWTF, year, month, day, Final_TN_mgL, TN_kgL, TSS_kgL, TN_kgmonth, TSS_kgmonth, FLOW_lday)
 
+monthly_missing <- monthly_load_summary %>%
+  filter(is.na(TN_kgmonth))
+
+monthly_gapfill <- annual %>%
+  mutate(
+    TN_kgmonth = TN_kgyr.x / 12,
+    DIN_kgmonth = DIN_kgyr / 12
+  ) %>%
+  expand(WWTF, year, month = 1:12) %>%
+  left_join(annual, by = c("WWTF", "year")) %>%
+  mutate(
+    TN_kgmonth = signif(TN_kgyr.x / 12, 4),
+    DIN_kgmonth = signif(DIN_kgyr / 12,4)) %>%
+  select(WWTF, year, month, TN_kgmonth, DIN_kgmonth)
+
+monthly_load_summary$DIN_kgmonth <- NA
+
+# Fill NAs in monthly_load_summary with values from monthly_gapfill
+monthly_load_summary<- monthly_load_summary %>%
+  left_join(monthly_gapfill, by = c("WWTF", "year", "month")) %>%
+  mutate(
+    TN_kgmonth = ifelse(is.na(TN_kgmonth.x), TN_kgmonth.y, TN_kgmonth.x),
+    DIN_kgmonth = ifelse(is.na(DIN_kgmonth.x), DIN_kgmonth.y, DIN_kgmonth.x)
+  ) %>%
+  select(-TN_kgmonth.x, -TN_kgmonth.y, -DIN_kgmonth.x, -DIN_kgmonth.y)
+
+
+
 monthly_load_summary$DIN_kgmonth <- ifelse(monthly_load_summary$year < 2012, monthly_load_summary$TN_kgmonth*0.785,
                                ifelse(monthly_load_summary$year >= 2012, monthly_load_summary$TN_kgmonth*0.841, NA))
 
@@ -467,19 +504,4 @@ monthly_load_summary <- monthly_load_summary %>%
   select(WWTF, year, month, TN_kgmonth, DIN_kgmonth, TSS_kgmonth, DOC_kgmonth, PO4_kgmonth)
 
 write.csv(monthly_load_summary, "results/main_wwtf_loads/redone/monthlyloads.csv")
-
-
-exeterwwtf <- ggplot(subset(wwtf_annual, WWTF == "Exeter"), aes(year, TN_kgyr)) +
-  geom_point(size=4) + geom_line(linewidth=1) +
-  geom_vline(xintercept = 2019.5, linetype="dashed") +
-  scale_x_continuous(limits=c(2009,2023), breaks=seq(from=2009, to=2023, by =1)) +
-  scale_y_continuous(limits=c(0,65000), breaks=seq(from=0, to=65000, by =10000)) +
-  theme_bw() +
-  ylab("Total Nitrogen Load (kg-N/yr)") +
-  theme(axis.title.x = element_blank(),
-        axis.text.x = element_text(angle=45, hjust=1),
-        axis.text = element_text(size=16),
-        axis.title = element_text(size=20))
-
-exeterwwtf
 
