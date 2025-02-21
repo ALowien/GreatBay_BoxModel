@@ -1,7 +1,7 @@
 #main_estuarine_load_calc.R
 
 #Author: Anna Mikulis, University of New Hampshire
-#Last Updated 9/28/2024
+#Last Updated 2/13/2025
 
 #Purpose: Calculates high and low tide flux of solutes based on river input of freshwater and known tidal prism
 
@@ -89,7 +89,6 @@ Q_daily <- Q %>%
   summarise(m3_day = sum(m3_day_fm)) #sum of flow multiplied daily Q , went from 18993 obs to 6331 
 
 #summing flow
-
 write.csv(Q_daily, "results/main_estuarine_load_calc/total_q_day.csv")
 
 #Join salinity data with summed river freshwater input as m3/day
@@ -134,8 +133,6 @@ LT_lm <- lm(SALINITY_PSS ~ log10(m3_day), Daily_Sal_lowtide)
 summary(LT_lm)
 ncvTest(LT_lm) #suggests homoskedasticity p < 0.05
 
-#plot(LT_lm)
-
 #Plot Low Tide Adams Point Solute Concentrations Against Freshwater Input
 AP_Solutes <- AP %>%
   select(Site = STATION_ID, START_DATE:TSS_MGL, TN_MGL)
@@ -146,10 +143,8 @@ AP_All_LT <- AP_All %>%
   filter(Site == "GRBAPL")
 
 AP_All_LT_long <- AP_All_LT %>%
-  pivot_longer(cols=PO4_MGL:TN_MGL, values_to = "Concentration", names_to = "Solute") %>%
-  filter(Solute != "NO3_NO2_MGL" & Solute != "NH4_MGL") #%>%
-  #filter(Solute != "DON_MGL") %>%
-  #filter(Solute != "TDN_MGL") 
+  pivot_longer(cols=PO4_MGL:TSS_MGL, values_to = "Concentration", names_to = "Solute") %>%
+  filter(Solute != "NO3_NO2_MGL" & Solute != "NH4_MGL") 
 
 #LOW TIDE Solutes
 
@@ -165,14 +160,15 @@ AP_LT_wide <- AP_All_LT_long %>%
   pivot_wider(names_from="Solute",
               values_from="Concentration")
 
-#check normality...DON is the worst it seems
+psych::describe(AP_LT_wide)
+
 stats_AP_LT <- describe(AP_LT_wide[,3:ncol(AP_LT_wide)])
 stats_AP_LT
 
 cor(AP_LT_wide[,3:10], use="na.or.complete")
 
-solute_vars <- c("DIN_MGL", "DOC_MGL", "DON_MGL", "TDN_MGL", "TN_MGL", 
-                 "PN_MGL", "TSS_MGL", "PO4_MGL")
+solute_vars <- c("DIN_MGL", "DOC_MGL",  "PN_MGL", "TN_MGL", 
+                 "TSS_MGL", "PO4_MGL")
 
 # Initialize a list to store results
 results <- data.frame(Solute = character(),
@@ -210,6 +206,7 @@ cq_results <- data.frame(Solute = character(),
                       Slope = numeric(),
                       Intercept = numeric(),
                       R2 = numeric(),
+                      AdjR2 = numeric(),
                       P_value = numeric(),
                       stringsAsFactors = FALSE)
 
@@ -228,6 +225,7 @@ for (solute in solute_vars) {
          slope <- coef(model)[["m3_day_log"]]
          intercept <- coef(model)[["(Intercept)"]]
          r2 <- round(summary(model)$r.squared, 2)
+         adj_r2 <- round(summary(model)$adj.r.squared, 2)
          p_value <- formatC(summary(model)$coefficients[2, 4], format = "f", digits = 4)
          ncv_test_pvalue <- formatC(ncv_result$p, format = "f", digits = 4)
          
@@ -236,6 +234,7 @@ for (solute in solute_vars) {
                                                       Slope = slope,
                                                       Intercept = intercept,
                                                       R2 = r2,
+                                                      AdjR2 = adj_r2,
                                                       P_value = p_value,
                                                       ncv_pvalue=ncv_test_pvalue,
                                                       stringsAsFactors = FALSE))
@@ -271,17 +270,22 @@ summary(doc_lm)
 #plot(doc_lm)
 
 #plot inspired by godsey et al 2009
-ggplot(cq_results, aes(Solute, Slope)) + geom_point(aes(shape=signif_mod), size=3) + theme_bw() +
+cq_slopes <- ggplot(cq_results, aes(Solute, Slope)) + geom_point(aes(shape=signif_mod), size=3) + theme_bw() +
   geom_abline(slope=0, intercept=0, color="grey") +
   scale_shape_manual(values=c(1, 16)) +
   ylab("CQ log-log slope") +
   theme(legend.position = "none")
+cq_slopes
 
- CQ_LT <- ggplot(AP_All_LT_long, aes(m3_day, Concentration)) + geom_point() +
+
+adj_r2_values <- data.frame(
+  Solute = c("DIN", "DOC", "TN", "PO4"),
+  AdjR2 = c(0.24, 0.33, 0.31, 0.17))  # From cq_results
+
+CQ_LT <- ggplot(subset(AP_All_LT_long, Solute != "DON" & Solute != "TDN"), 
+                 aes(m3_day, Concentration)) + geom_point() +
   geom_smooth(data=subset(AP_All_LT_long, Solute == "DIN"), method="lm", se=T, colour = "red") +
   geom_smooth(data=subset(AP_All_LT_long, Solute == "DOC"), method="lm", se=T, colour = "red") +
-  geom_smooth(data=subset(AP_All_LT_long, Solute == "DON"), method="lm", se=T, colour = "red") +
-  geom_smooth(data=subset(AP_All_LT_long, Solute == "TDN"), method="lm", se=T, colour = "red") +
   geom_smooth(data=subset(AP_All_LT_long, Solute == "TN"), method="lm", se=T, colour = "red") +
   geom_smooth(data=subset(AP_All_LT_long, Solute == "PO4"), method="lm", se=T, colour = "blue") +
   scale_x_log10(labels =scales::math_format(format=log10)) +
@@ -289,13 +293,17 @@ ggplot(cq_results, aes(Solute, Slope)) + geom_point(aes(shape=signif_mod), size=
   ylab(expression('Low Tide Estuarine Concentration mg L'^{-1})) +
   xlab(expression('Total River Discharge m'^{3}~day^{-1})) +
   annotation_logticks() +
-  facet_wrap(~Solute, scales = "free", ncol=4) +
-  theme_cowplot()
+  facet_wrap(~Solute, scales = "free", ncol=3) +
+  geom_text(data = adj_r2_values, aes(label = paste("Adj R² =", round(AdjR2, 2))),
+            x = Inf, y = Inf, hjust = 1.95, vjust = 18, size = 4, inherit.aes = FALSE) +
+  theme_bw() +
+  theme(axis.text = element_text(size=12),
+        axis.title = element_text(size=14))
+
 CQ_LT
 
-ggsave(CQ_LT, file=paste0("results/manuscript_figures/lowtide_cq.png"),
+ggsave(CQ_LT, file=paste0("results/manuscript_figures/Figure3.png"),
        width=8, height=6, dpi=300, units="in", bg="white")
-
 
 
 #____________________________________________
