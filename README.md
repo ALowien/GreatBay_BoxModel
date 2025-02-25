@@ -10,7 +10,7 @@
 
 ## Background
 
-Purpose: A repository of data and scripts necessary to create a box-model for solute loading to Great Bay Estuary, NH/ME. This repository is associated with the M.S. Thesis titled, "Biogeochemical Stressors and Ecological Response in Great Bay Estuary, NH/ME" & the related paper in preparation for submission. Data was sourced from the UNH Water Quality Analysis Lab, the NH Department of Environmental Services, the U.S. Geological Survey, the Piscataqua Region Estuaries Partnership, and the Great Bay National Estuarine Research Reserve. 
+Purpose: A repository of data and scripts necessary to create a box-model for solute loading to Great Bay Estuary, NH/ME. This repository is associated with the submitted paper "Biogeochemical Stressors and Ecological Response in a Nitrogen-Impaired New England Estuary". Data was sourced from the UNH Water Quality Analysis Lab, the NH Department of Environmental Services, the U.S. Geological Survey, the U.S. EPA Enforcement and Compliance History Online Database, the Piscataqua Region Estuaries Partnership, and the Great Bay National Estuarine Research Reserve. 
  
 ## Install
 
@@ -32,13 +32,15 @@ This repository is organized into three main folders, with appropriate sub-folde
 
 ### **data**
 
-The data folder contain raw data products used to build the box model & manuscript figures.
+The data folder contains the cleaned data resources used to build the box model (solute budgets) & manuscript figures.
 
 #### emd
-##### Contains water quality data for the head of tide river stations (05-LMP, 09-EXT, 02-WNC, GRBAP). Includes all site metadata, along with sample date, time, water quality data for each station. Each row is one water quality solute measured on a given day and site (long data). These data files were downloaded via request from the NH Environmental Monitoring Database (DES.EMD@des.nh.gov). The only modifications were to make the column names the first row of the spreadsheet and to delete the database query from the bottom of the spreadsheet. These files currently are up-to-date through the 2021 and/or 2022 calendar year. 
+##### Contains raw water quality data (2401213_GrabSample_PhysChem_GreatBay.xlsx) for the head of tide river stations (05-LMP, 09-EXT, 02-WNC) and the estuary site (GRBAP). Includes all site metadata, along with sample date, time, water quality data for each station. Each row is one water quality solute measured on a given day and site (long data). These data were downloaded upon request from the NH Environmental Monitoring Database (DES.EMD@des.nh.gov). The only modifications were to make the column names the first row of the spreadsheet and to delete the database query notes from the bottom of the spreadsheet, making it readable in R. These files currently are up-to-date through the 2021 and/or 2022 calendar year, depending on the site. 
+
+##### The cleaned dataset (surfacewaterchemistry_conc.csv) has been filtered for solutes of interest, corrected for values below detection limit (set to 1/2 of method detection limit), cleaned for invalid data values and is the processed datafile used for the solute budgets. 
 
 #### discharge
-##### The daily mean discharge for the three rivers the drain to Great Bay. The csv files contain the site id, date, and mean daily discharge (units: cfs). The **text_files** subfolder has the .txt version of the .csv files. Tributary discharge data are available from the USGS National Water Information System (https://waterdata.usgs.gov). 
+##### The daily mean discharge for the three rivers the drain to Great Bay. The csv files contain the site id, date, and mean daily discharge (units: cfs). The **text_files** subfolder has the .txt version of the .csv files. Tributary discharge data are available from the USGS National Water Information System (https://waterdata.usgs.gov). Date of download: May 22, 2024. 
 
 #### precipitation
 ##### The precipitation chemistry and rainfall volumes are located here. Hourly precipitation was downloaded from the NCDC U.S. Climate Reference Network for the Durham, NH SSW station. Gaps were filled using UNH weather statistics. 
