@@ -38,15 +38,15 @@ The data folder contains the cleaned data resources used to build the box model 
 ##### Contains *eelgrass_acres* file with annual coverage of *Zostera marina* seagrass in Great Bay and Great Bay Estuary obtained from monitoring reports by the Piscataqua Region Estuaries Partnership. 
 
 #### emd
-##### Contains raw water quality data (2401213_GrabSample_PhysChem_GreatBay.xlsx) for the head of tide river stations (05-LMP, 09-EXT, 02-WNC) and the estuary site (GRBAP). Includes all site metadata, along with sample date, time, water quality data for each station. Each row is one water quality solute measured on a given day and site (long data). These data were downloaded upon request from the NH Environmental Monitoring Database (DES.EMD@des.nh.gov). The only modifications were to make the column names the first row of the spreadsheet and to delete the database query notes from the bottom of the spreadsheet, making it readable in R. These files currently are up-to-date through the 2021 and/or 2022 calendar year, depending on the site. 
+##### Contains raw water quality data (250213_GrabSample_PhysChem_GreatBay.xlsx) for the head of tide river stations (05-LMP, 09-EXT, 02-WNC) and the estuary site (GRBAP). Includes all site metadata, along with sample date, time, water quality data for each station. Each row is one water quality solute measured on a given day and site (long data). These data were downloaded upon request from the NH Environmental Monitoring Database (DES.EMD@des.nh.gov). The only modifications were to make the column names the first row of the spreadsheet and to delete the database query notes from the bottom of the spreadsheet, making it readable in R. These files currently are up-to-date through the 2021 and/or 2022 calendar year, depending on the site. Date of download: February 13, 2025.
 
-##### The cleaned dataset (surfacewaterchemistry_conc.csv) has been filtered for solutes of interest, corrected for values below detection limit (set to 1/2 of method detection limit), cleaned for invalid data values, and is the processed datafile used for the solute budgets. Date of download: February 13, 2025.
+##### The cleaned dataset (surfacewaterchemistry_conc.csv) has been filtered for solutes of interest, corrected for values below detection limit (set to 1/2 of method detection limit), cleaned for invalid data values, and is the processed datafile used for the solute budgets.
 
 #### discharge
 ##### The daily mean discharge for the three rivers the drain to Great Bay (Lamprey (LR), Squamscott (SQR), and Winnicut (WNC). The csv files contain the site id, date, and mean daily discharge (units: cfs). The *text_files* subfolder has the .txt version of the .csv files. Tributary discharge data are available from the USGS National Water Information System (https://waterdata.usgs.gov). Date of download: May 22, 2024. 
 
 #### precipitation
-##### The precipitation chemistry and rainfall volumes are located here. Hourly precipitation was downloaded from the NCDC U.S. Climate Reference Network for the Durham, NH SSW station. Gaps were filled using UNH weather statistics. 
+##### The precipitation chemistry and rainfall volumes are located here. Hourly precipitation was downloaded from the NCDC U.S. Climate Reference Network for the Durham, NH SSW station, and summed based on weekly wet deposition sample collection times. Gaps were filled using the UNH weather station. 
 
 #### npdes_wwtf
 ##### Monitoring data from U.S. Environmental Protection Agency ECHO for each wastewater treatment facility. Data files are identified by town name where the wastewater treatemnt facility is located. The files within the *generalpermit* subfolder contain monitoring data following implementation of the 2020 General Nitrogen Permit, which provided different NPDES IDs for each wastewater treatment facilty. Date of download: July 2024
@@ -96,8 +96,7 @@ The src folder contains all R scripts needed to complete the box model for Great
 * "runoff_estimate_kgyr.csv" - dataframe of runoff fluxes
 
 #### main_wwtf_format.R
-##### Purpose: Combines wastewater treatment facility water flux with concentration data for TN, DIN, and TSS into wastewater treatment loads for facilities downstream of the tidal tributary monitoring stations. C and P fluxes were estimated using C:N:P ratios for the epping wastewater treatment facility.
-
+##### Purpose: Combines wastewater treatment facility water flux with concentration data for TN, DIN, and TSS into wastewater treatment loads for facilities downstream of the tidal tributary monitoring stations. C and P fluxes were estimated using C:N:P ratios from Wastewater Effluent Chemistry Literature Values. 
 
 ###### Key final products:
 * "wwtf_annual_loads.csv" - wastewater treatment estimated loads
@@ -118,7 +117,6 @@ The src folder contains all R scripts needed to complete the box model for Great
 
 #### main_plot_annual_budgets.R
 ##### Purpose: Plot annual solute budget inputs, outputs, and delta storage terms using the dataframes built in main_compile_inputs
-
 
 ### **results**
 
