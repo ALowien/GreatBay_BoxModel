@@ -34,6 +34,9 @@ This repository is organized into three main folders, with appropriate sub-folde
 
 The data folder contains the cleaned data resources used to build the box model (solute budgets) & manuscript figures.
 
+#### ecological_response
+##### Contains *eelgrass_acres* file with annual coverage of *Zostera marina* seagrass in Great Bay and Great Bay Estuary obtained from monitoring reports by the Piscataqua Region Estuaries Partnership. 
+
 #### emd
 ##### Contains raw water quality data (2401213_GrabSample_PhysChem_GreatBay.xlsx) for the head of tide river stations (05-LMP, 09-EXT, 02-WNC) and the estuary site (GRBAP). Includes all site metadata, along with sample date, time, water quality data for each station. Each row is one water quality solute measured on a given day and site (long data). These data were downloaded upon request from the NH Environmental Monitoring Database (DES.EMD@des.nh.gov). The only modifications were to make the column names the first row of the spreadsheet and to delete the database query notes from the bottom of the spreadsheet, making it readable in R. These files currently are up-to-date through the 2021 and/or 2022 calendar year, depending on the site. 
 
@@ -49,12 +52,11 @@ The data folder contains the cleaned data resources used to build the box model 
 ##### Monitoring data from U.S. Environmental Protection Agency ECHO for each wastewater treatment facility. Data files are identified by town name where the wastewater treatemnt facility is located. The files within the *generalpermit* subfolder contain monitoring data following implementation of the 2020 General Nitrogen Permit, which provided different NPDES IDs for each wastewater treatment facilty.
 
 #### wwtf
-##### Data sourced from published reports, including annual loads or measured concentrations. A cleaned, compiled version **wwtf_concentrations** of the data maintained in the npdes_wwtf folder is provided here and can be used directly for the solute budget. 
+##### Data sourced from published reports, including annual loads or measured concentrations. A cleaned, compiled version *wwtf_concentrations.csv* of the data maintained in the npdes_wwtf folder is provided here and can be used directly for the solute budget. 
 
 * wwtf_annualloads - contains the annual loads from 2008 - 2013 sourced from the literature
 * literature_wwtf_concentrations - contains concentrations of DOC, PO4, and TN in wastewater effluent from the literature. 
 * exeter_monthlyTN_2012_2013 - contains the monthly average concentration of TN reported by the Town of Exeter for the Exeter WWTF in 2012 and 2013. Data not available in ECHO. 
-
 
 
 ### **src**
