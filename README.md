@@ -64,19 +64,20 @@ The data folder contains the cleaned data resources used to build the box model 
 The src folder contains all R scripts needed to complete the box model for Great Bay. They are described in the order that they should be run.
 
 #### main_dataformat.R
-##### Purpose: Read in, process, and clean up water quality concentration data for tidal tributaries to Great Bay and for estuarine monitoring stations in Great Bay. 
+##### Purpose: Read in the processed water quality concentration data for tidal tributaries to Great Bay and for estuarine monitoring stations in Great Bay.
 ###### Key results from main_dataformat.R saved in /results/main_dataformat 
-* "df_conc.csv" - data frame of organized solute concentrations by date and site, corrected for method detection limits
 * "Q_tidal_tribs" - combined discharge dataframe for Lamprey, Squamscott, and Winnicut Rivers
+* Table S1, Supplemental Information, Average Concentrations by Site
+* Figure S1 Salinity at the Squamscott River pre- and post-dam removal
 
 #### main_load_calc.R
-##### Purpose: Calculate flow-weighted annual (calendar year) and monthly solute loads for the three tidal tributaries of Great Bay (Lamprey, Squamscott, & Winnicut). This script relies on csv files created by the main_dataformat.R script, including (df_conc.csv) and (Q_tidal_Tribs.csv).
+##### Purpose: Calculate flow-weighted annual (calendar year) and monthly solute loads for the three tidal tributaries of Great Bay (Lamprey, Squamscott, & Winnicut). This script relies on csv files (surfacewaterchemistry_conc.csv) and (Q_tidal_Tribs.csv).
 ###### Key final products: 
 * Calendar year loads for each tributary saved in results/main_load_calc/FW_loads
 * Flow weighted concentrations are saved in results/main_load_calc/FWC
 
 #### main_estuarine_load_calc.R
-##### Purpose: Calculates high and low tide flux of solutes based on river input of freshwater and known tidal prism. This script uses the saved output from the main_dataformat.R script (df_conc.csv). Products created in this script are saved in results/main_estuarine_load_calc
+##### Purpose: Calculates high and low tide flux of solutes based on river input of freshwater and known tidal prism. This script uses (surfacewaterchemistry_conc.csv). Products created in this script are saved in results/main_estuarine_load_calc
 
 ###### Key final products: 
 * "AP_Flux_kgyr.csv" - dataframe of high and low tide estuarine fluxes
