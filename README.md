@@ -49,7 +49,7 @@ The data folder contains the cleaned data resources used to build the box model 
 ##### The precipitation chemistry and rainfall volumes are located here. Hourly precipitation was downloaded from the NCDC U.S. Climate Reference Network for the Durham, NH SSW station. Gaps were filled using UNH weather statistics. 
 
 #### npdes_wwtf
-##### Monitoring data from U.S. Environmental Protection Agency ECHO for each wastewater treatment facility. Data files are identified by town name where the wastewater treatemnt facility is located. The files within the *generalpermit* subfolder contain monitoring data following implementation of the 2020 General Nitrogen Permit, which provided different NPDES IDs for each wastewater treatment facilty.
+##### Monitoring data from U.S. Environmental Protection Agency ECHO for each wastewater treatment facility. Data files are identified by town name where the wastewater treatemnt facility is located. The files within the *generalpermit* subfolder contain monitoring data following implementation of the 2020 General Nitrogen Permit, which provided different NPDES IDs for each wastewater treatment facilty. Date of download: July 2024
 
 #### wwtf
 ##### Data sourced from published reports, including annual loads or measured concentrations. A cleaned, compiled version *wwtf_concentrations.csv* of the data maintained in the npdes_wwtf folder is provided here and can be used directly for the solute budget. 
@@ -142,6 +142,7 @@ For questions or issues please contact Anna Mikulis: anna.mikulis@unh.edu
 
 
 ## License
+#### GNU General Public License v3.0
 
 
 
