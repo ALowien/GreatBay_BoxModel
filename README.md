@@ -40,19 +40,20 @@ The data folder contains the cleaned data resources used to build the box model 
 ##### The cleaned dataset (surfacewaterchemistry_conc.csv) has been filtered for solutes of interest, corrected for values below detection limit (set to 1/2 of method detection limit), cleaned for invalid data values, and is the processed datafile used for the solute budgets. Date of download: February 13, 2025.
 
 #### discharge
-##### The daily mean discharge for the three rivers the drain to Great Bay (Lamprey (LR), Squamscott (SQR), and Winnicut (WNC). The csv files contain the site id, date, and mean daily discharge (units: cfs). The **text_files** subfolder has the .txt version of the .csv files. Tributary discharge data are available from the USGS National Water Information System (https://waterdata.usgs.gov). Date of download: May 22, 2024. 
+##### The daily mean discharge for the three rivers the drain to Great Bay (Lamprey (LR), Squamscott (SQR), and Winnicut (WNC). The csv files contain the site id, date, and mean daily discharge (units: cfs). The *text_files* subfolder has the .txt version of the .csv files. Tributary discharge data are available from the USGS National Water Information System (https://waterdata.usgs.gov). Date of download: May 22, 2024. 
 
 #### precipitation
 ##### The precipitation chemistry and rainfall volumes are located here. Hourly precipitation was downloaded from the NCDC U.S. Climate Reference Network for the Durham, NH SSW station. Gaps were filled using UNH weather statistics. 
 
 #### npdes_wwtf
-##### Monitoring data from U.S. Environmental Protection Agency ECHO for each wastewater treatment facility. Data files are identified by town name where the wastewater treatemnt facility is located. The files within the **generalpermit** subfolder contain monitoring data following implementation of the 2020 General Nitrogen Permit, which provided different NPDES IDs for each wastewater treatment facilty.
+##### Monitoring data from U.S. Environmental Protection Agency ECHO for each wastewater treatment facility. Data files are identified by town name where the wastewater treatemnt facility is located. The files within the *generalpermit* subfolder contain monitoring data following implementation of the 2020 General Nitrogen Permit, which provided different NPDES IDs for each wastewater treatment facilty.
 
 #### wwtf
 ##### Data sourced from published reports, including annual loads or measured concentrations. A cleaned, compiled version **wwtf_concentrations** of the data maintained in the npdes_wwtf folder is provided here and can be used directly for the solute budget. 
-**wwtf_annualloads** contains the annual loads from 2008 - 2013 sourced from the literature
-**literature_wwtf_concentrations** contains concentrations of DOC, PO4, and TN in wastewater effluent from the literature. 
-**exeter_monthlyTN_2012_2013** contains the monthly average concentration of TN reported by the Town of Exeter for the Exeter WWTF in 2012 and 2013. Data not available in ECHO. 
+
+* wwtf_annualloads - contains the annual loads from 2008 - 2013 sourced from the literature
+* literature_wwtf_concentrations - contains concentrations of DOC, PO4, and TN in wastewater effluent from the literature. 
+* exeter_monthlyTN_2012_2013 - contains the monthly average concentration of TN reported by the Town of Exeter for the Exeter WWTF in 2012 and 2013. Data not available in ECHO. 
 
 
 
