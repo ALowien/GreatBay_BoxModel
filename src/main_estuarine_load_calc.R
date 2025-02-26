@@ -6,7 +6,7 @@
 #Purpose: Calculates high and low tide flux of solutes based on river input of freshwater and known tidal prism
 
 Packages <- c("readr", "dplyr", "lubridate", "ggplot2", "cowplot", 
-              "tidyr","viridis",  "plotly", "measurements", "zoo", "car", "agricolae", "psych")
+              "viridis",  "plotly", "measurements", "zoo", "car", "agricolae", "psych")
 
 lapply(Packages, library, character.only = TRUE)
 
@@ -27,8 +27,8 @@ tidalprism_m3day <- 178*10^6
 GB_Prism_m3day <- tidalprism_m3day*round(scalar_ratio,2)
 GB_Prism_m3_year <- GB_Prism_m3day * 365
 
-#Load formatted data frame "df6" and filter for Adams Point Stations
-AP <- read.csv("results/main_dataformat/df_conc.csv") %>%
+#Load formatted data frame and filter for Adams Point Station
+AP <- read.csv("data/emd/surfacewaterchemistry_conc.csv") %>%
   select(-X, -SPC_UMHO_CM) %>% #
   filter(STATION_ID == "GRBAPH" | STATION_ID == "GRBAPL")
 #Tide Stage was used to rename GRBAP to High or Low Tide
@@ -36,8 +36,8 @@ AP$START_DATE <- as.POSIXct(AP$START_DATE)
 
 #plot concentrations over time
 AP_piv <- AP %>%
-  select(STATION_ID:TSS_MGL, TN_MGL, CHLA_corr_pheo_UGL) %>%
-  pivot_longer(cols=c(PO4_MGL:CHLA_corr_pheo_UGL), names_to = "Solute", values_to = "Measure") 
+  select(STATION_ID:TSS_MGL, CHLA_corr_pheo_UGL) %>%
+  tidyr::pivot_longer(cols=c(PO4_MGL:CHLA_corr_pheo_UGL), names_to = "Solute", values_to = "Measure") 
 
 ggplot(AP_piv, aes(START_DATE, Measure, color=STATION_ID)) + geom_point() +
   geom_line() +
@@ -47,8 +47,8 @@ AP_summary <- AP
 AP_summary$year <- year(AP$START_DATE)
 
 AP_summary <- AP_summary %>%
-  select(STATION_ID, year, PO4_MGL:TSS_MGL, TN_MGL)%>%
-  pivot_longer(cols= PO4_MGL:TN_MGL, names_to = "Solute", values_to="Concentration") %>%
+  select(STATION_ID, year, PO4_MGL:TSS_MGL)%>%
+  tidyr::pivot_longer(cols= c(PO4_MGL:TSS_MGL), names_to = "Solute", values_to="Concentration") %>%
   group_by(STATION_ID, Solute) %>%
   summarize(mean= mean(Concentration, na.rm=T),
             sd = sd(Concentration, na.rm=T))
@@ -61,11 +61,7 @@ AP_summary <- AP_summary %>%
 #Average freshwater input during the day is 4.26x10^6 m3;
 #ratio of FW input to Tidal Prism Exchange is 2.4%
 #______________________________________________
-#Let's plot salinity against River Discharge
 Q <- read_csv("results/main_dataformat/Q_tidal_tribs.csv") #flow column units are m3/s
-
-AP_salinity <- AP %>%
-  select(START_DATE, SALINITY_PSS, Site = STATION_ID)
 
 Q <- Q[,2:7]
 Q$m3s <- Q$flow #flow column units are m3/s
@@ -91,51 +87,9 @@ Q_daily <- Q %>%
 #summing flow
 write.csv(Q_daily, "results/main_estuarine_load_calc/total_q_day.csv")
 
-#Join salinity data with summed river freshwater input as m3/day
-Daily_Sal <- full_join(AP_salinity, Q_daily) #has the flow multiplied Q
-
-#Plot Freshwater Discharge against Salinity
-Daily_Sal_hightide <- Daily_Sal %>%
-  select(m3_day, SALINITY_PSS, Site) %>%
-  filter(Site == "GRBAPH")
-
-Daily_Sal_lowtide <- Daily_Sal %>%
-  select(m3_day, SALINITY_PSS, Site) %>%
-  filter(Site == "GRBAPL") %>%
-  filter(!is.na(SALINITY_PSS))
-
-SalvsQ_HT <- ggplot(Daily_Sal_hightide, aes(m3_day, SALINITY_PSS)) + geom_point(color="darkblue", size=2) +
-  #geom_smooth(method="lm", se=T) +
-  stat_smooth(method="lm", formula=y~log(x), se=T) +
-  scale_x_log10() + ylab("High Tide Salinity (pss)") + xlab("Total Freshwater Input"~m^3~day^-1)+ #corrected for Flow multiplier
-  theme_cowplot()
-SalvsQ_HT
-
-SalvsQ_LT <- ggplot(Daily_Sal_lowtide, aes(m3_day, SALINITY_PSS)) + geom_point(color="black", size=2) +
-  stat_smooth(method="lm", formula=y~(x), color="black") +
-  #geom_abline(slope=  -7.5562, intercept= 66.1782  ) + log-linear regression line matches what we plot using log scale and simple linear regression
-  scale_x_log10() + 
-  ylab("Low Tide Salinity (PSS)") +xlab("Total River Discharge"~m^3~day^-1) +
-  theme_cowplot() +
-  annotation_logticks(sides="b")
-SalvsQ_LT
-
-#Save freshwater discharge vs low tide salinity plot
-ggsave(SalvsQ_LT, file=paste0("results/figures/lowtide_salvsdischarge.png"),
-       width=8, height=6, units="in", dpi=300, bg="white")
-
-describe(Daily_Sal_lowtide)
-
-skewness(log10(Daily_Sal_lowtide$m3_day))
-kurtosis(log10(Daily_Sal_lowtide$m3_day))
-
-LT_lm <- lm(SALINITY_PSS ~ log10(m3_day), Daily_Sal_lowtide)
-summary(LT_lm)
-ncvTest(LT_lm) #suggests homoskedasticity p < 0.05
-
 #Plot Low Tide Adams Point Solute Concentrations Against Freshwater Input
 AP_Solutes <- AP %>%
-  select(Site = STATION_ID, START_DATE:TSS_MGL, TN_MGL)
+  select(Site = STATION_ID, START_DATE:TSS_MGL)
 
 AP_All <- full_join(AP_Solutes, Q_daily)
 
@@ -143,7 +97,7 @@ AP_All_LT <- AP_All %>%
   filter(Site == "GRBAPL")
 
 AP_All_LT_long <- AP_All_LT %>%
-  pivot_longer(cols=PO4_MGL:TSS_MGL, values_to = "Concentration", names_to = "Solute") %>%
+  tidyr::pivot_longer(cols=PO4_MGL:TSS_MGL, values_to = "Concentration", names_to = "Solute") %>%
   filter(Solute != "NO3_NO2_MGL" & Solute != "NH4_MGL") 
 
 #LOW TIDE Solutes
@@ -157,7 +111,7 @@ remove_MGL_suffix <- function(solute_column) {
 AP_All_LT_long$Solute <- remove_MGL_suffix(AP_All_LT_long$Solute)
 
 AP_LT_wide <- AP_All_LT_long %>%
-  pivot_wider(names_from="Solute",
+  tidyr::pivot_wider(names_from="Solute",
               values_from="Concentration")
 
 psych::describe(AP_LT_wide)
@@ -165,7 +119,7 @@ psych::describe(AP_LT_wide)
 stats_AP_LT <- describe(AP_LT_wide[,3:ncol(AP_LT_wide)])
 stats_AP_LT
 
-cor(AP_LT_wide[,3:10], use="na.or.complete")
+cor(AP_LT_wide[,3:11], use="na.or.complete")
 
 solute_vars <- c("DIN_MGL", "DOC_MGL",  "PN_MGL", "TN_MGL", 
                  "TSS_MGL", "PO4_MGL")
@@ -280,7 +234,9 @@ cq_slopes
 
 adj_r2_values <- data.frame(
   Solute = c("DIN", "DOC", "TN", "PO4"),
-  AdjR2 = c(0.24, 0.33, 0.31, 0.17))  # From cq_results
+  AdjR2 = c(0.24, 0.33, 0.31, 0.17), # From cq_results
+  m3_day = c(10000,10000,10000,10000),   #for plotting
+  Concentration = c(0.006,1.05,0.1,0.001))
 
 CQ_LT <- ggplot(subset(AP_All_LT_long, Solute != "DON" & Solute != "TDN"), 
                  aes(m3_day, Concentration)) + geom_point() +
@@ -293,9 +249,13 @@ CQ_LT <- ggplot(subset(AP_All_LT_long, Solute != "DON" & Solute != "TDN"),
   ylab(expression('Low Tide Estuarine Concentration mg L'^{-1})) +
   xlab(expression('Total River Discharge m'^{3}~day^{-1})) +
   annotation_logticks() +
+  geom_text(data = adj_r2_values, 
+            aes(x = m3_day, y = Concentration, 
+                label = paste("Adj R² =", round(AdjR2, 2))), 
+            hjust = 0, vjust = 0, size = 4, inherit.aes = FALSE) +
+  #geom_text(data = adj_r2_values, aes(label = paste("Adj R² =", round(AdjR2, 2))),
+          #  x = Inf, y = Inf, hjust = 1.95, vjust = 18, size = 4, inherit.aes = FALSE) +
   facet_wrap(~Solute, scales = "free", ncol=3) +
-  geom_text(data = adj_r2_values, aes(label = paste("Adj R² =", round(AdjR2, 2))),
-            x = Inf, y = Inf, hjust = 1.95, vjust = 18, size = 4, inherit.aes = FALSE) +
   theme_bw() +
   theme(axis.text = element_text(size=12),
         axis.title = element_text(size=14))
@@ -304,7 +264,6 @@ CQ_LT
 
 ggsave(CQ_LT, file=paste0("results/manuscript_figures/Figure3.png"),
        width=8, height=6, dpi=300, units="in", bg="white")
-
 
 #____________________________________________
 #Monthly Discharge Estimate
