@@ -1,0 +1,577 @@
+WWTF,Monitoring.Period.Date,TSS_mgL,TSS_lbday,TN_lbday,TN_mgL,NH4_mgL,Flow_MGD,Nitrogen Kjeldahl total (as N)_mg_L,NO3_NO2_mgL,TN_mgL_calc,month,year,Final_TN_mgL,period,Final_TN_mgL_method
+Exeter,2014-05-31,10,150,208,NA,NA,1.7,NA,NA,14.7,5,2014,14.7,pre-upgrade,Calculated
+Exeter,2016-11-30,10,120,337,29,NA,1.4,NA,NA,28.9,11,2016,29,pre-upgrade,Average
+Exeter,2015-05-31,11,141,244,NA,NA,1.6,NA,NA,18.3,5,2015,18.3,pre-upgrade,Calculated
+Exeter,2018-03-31,11,196,405,22,NA,2.3,NA,NA,21.1,3,2018,22,pre-upgrade,Average
+Exeter,2008-02-29,12,313,NA,NA,15.2,2.9,NA,NA,NA,2,2008,NA,pre-upgrade,NA
+Exeter,2008-03-31,12,331,NA,NA,11.3,3.2,NA,NA,NA,3,2008,NA,pre-upgrade,NA
+Exeter,2008-10-31,12,191,NA,NA,3.1,1.7,NA,NA,NA,10,2008,NA,pre-upgrade,NA
+Exeter,2011-05-31,12,213,NA,NA,17,2.3,NA,NA,NA,5,2011,NA,pre-upgrade,NA
+Exeter,2012-05-31,12,209,NA,NA,22.4,1.8,NA,NA,NA,5,2012,NA,pre-upgrade,NA
+Exeter,2018-12-31,12,207,312,16,NA,2.3,NA,NA,16.3,12,2018,16,pre-upgrade,Average
+Exeter,2014-12-31,13,270,507,26,NA,2.5,NA,NA,24.4,12,2014,26,pre-upgrade,Average
+Exeter,2018-02-28,13,210,440,25,NA,2,NA,NA,26.4,2,2018,25,pre-upgrade,Average
+Exeter,2008-01-31,14,212,NA,NA,21.6,1.9,NA,NA,NA,1,2008,NA,pre-upgrade,NA
+Exeter,2008-12-31,14,278,NA,NA,14.4,2.4,NA,NA,NA,12,2008,NA,pre-upgrade,NA
+Exeter,2009-05-31,14,195,NA,NA,17.3,1.5,NA,NA,NA,5,2009,NA,pre-upgrade,NA
+Exeter,2009-11-30,14,188,NA,NA,15,1.6,NA,NA,NA,11,2009,NA,pre-upgrade,NA
+Exeter,2009-12-31,14,244,NA,NA,17.2,2.2,NA,NA,NA,12,2009,NA,pre-upgrade,NA
+Exeter,2013-01-31,14,198,NA,NA,22.2,1.7,NA,NA,NA,1,2013,NA,pre-upgrade,NA
+Exeter,2013-02-28,14,185,NA,NA,20.8,1.7,NA,NA,NA,2,2013,NA,pre-upgrade,NA
+Exeter,2013-09-30,14,194,130,NA,NA,1.5,NA,NA,10.4,9,2013,10.4,pre-upgrade,Calculated
+Exeter,2016-12-31,14,186,458,36,NA,1.6,NA,NA,34.4,12,2016,36,pre-upgrade,Average
+Exeter,2017-05-31,14,296,412,NA,NA,2.6,NA,NA,19,5,2017,19,pre-upgrade,Calculated
+Exeter,2017-06-30,14,229,383,NA,NA,2,NA,NA,23,6,2017,23,pre-upgrade,Calculated
+Exeter,2010-02-28,15,299,NA,NA,19,2.1,NA,NA,NA,2,2010,NA,pre-upgrade,NA
+Exeter,2014-11-30,15,184,368,30,NA,1.4,NA,NA,31.6,11,2014,30,pre-upgrade,Average
+Exeter,2018-11-30,15,403,396,15,NA,3.3,NA,NA,14.4,11,2018,15,pre-upgrade,Average
+Exeter,2019-06-30,15,226,344,NA,NA,1.6,NA,NA,25.8,6,2019,25.8,upgrade period,Calculated
+Exeter,2008-04-30,16,213,NA,NA,10.4,2,NA,NA,NA,4,2008,NA,pre-upgrade,NA
+Exeter,2009-02-28,16,213,NA,NA,17,1.7,NA,NA,NA,2,2009,NA,pre-upgrade,NA
+Exeter,2009-03-31,16,307,NA,NA,14,2.4,NA,NA,NA,3,2009,NA,pre-upgrade,NA
+Exeter,2009-06-30,16,201,NA,NA,25.3,1.5,NA,NA,NA,6,2009,NA,pre-upgrade,NA
+Exeter,2009-10-31,16,139,NA,NA,3.6,1.2,NA,NA,NA,10,2009,NA,pre-upgrade,NA
+Exeter,2010-04-30,16,372,NA,NA,7,2.8,NA,NA,NA,4,2010,NA,pre-upgrade,NA
+Exeter,2012-11-30,16,181,NA,NA,17.3,1.4,NA,NA,NA,11,2012,NA,pre-upgrade,NA
+Exeter,2012-12-31,16,228,NA,NA,25.5,1.8,NA,NA,NA,12,2012,NA,pre-upgrade,NA
+Exeter,2013-11-30,16,179,315,25.4,NA,1.2,NA,NA,31.5,11,2013,25.4,pre-upgrade,Average
+Exeter,2014-03-31,16,279,327,21,NA,2,NA,NA,19.6,3,2014,21,pre-upgrade,Average
+Exeter,2015-01-31,16,218,348,24,NA,1.7,NA,NA,24.6,1,2015,24,pre-upgrade,Average
+Exeter,2018-01-31,16,224,496,35,NA,1.7,NA,NA,35,1,2018,35,pre-upgrade,Average
+Exeter,2010-10-31,17,210,NA,NA,0.3,1.7,NA,NA,NA,10,2010,NA,pre-upgrade,NA
+Exeter,2013-12-31,17,208,407,31.6,NA,1.5,NA,NA,32.6,12,2013,31.6,pre-upgrade,Average
+Exeter,2015-02-28,17,187,310,27,NA,1.4,NA,NA,26.6,2,2015,27,pre-upgrade,Average
+Exeter,2017-01-31,17,274,490,32,NA,1.9,NA,NA,31,1,2017,32,pre-upgrade,Average
+Exeter,2009-01-31,18,244,NA,NA,14,1.7,NA,NA,NA,1,2009,NA,pre-upgrade,NA
+Exeter,2009-07-31,18,286,NA,NA,12.1,2,NA,NA,NA,7,2009,NA,pre-upgrade,NA
+Exeter,2010-11-30,18,294,NA,NA,6.8,1.7,NA,NA,NA,11,2010,NA,pre-upgrade,NA
+Exeter,2012-01-31,18,279,NA,NA,16.3,1.9,NA,NA,NA,1,2012,NA,pre-upgrade,NA
+Exeter,2014-01-31,18,281,376,23.5,NA,1.8,NA,NA,25.1,1,2014,23.5,pre-upgrade,Average
+Exeter,2014-10-31,18,210,191,NA,NA,1.4,NA,NA,16.4,10,2014,16.4,pre-upgrade,Calculated
+Exeter,2018-05-31,18,269,288,NA,NA,1.7,NA,NA,20.3,5,2018,20.3,pre-upgrade,Calculated
+Exeter,2019-01-31,18,289,349,22,NA,1.9,NA,NA,22.1,1,2019,22,upgrade period,Average
+Exeter,2008-05-31,19,286,NA,NA,15.5,1.7,NA,NA,NA,5,2008,NA,pre-upgrade,NA
+Exeter,2008-08-31,19,235,NA,NA,0.7,1.7,NA,NA,NA,8,2008,NA,pre-upgrade,NA
+Exeter,2011-02-28,19,246,NA,NA,24.3,1.6,NA,NA,NA,2,2011,NA,pre-upgrade,NA
+Exeter,2016-10-31,19,202,198,NA,NA,1.4,NA,NA,17,10,2016,17,pre-upgrade,Calculated
+Exeter,2018-06-30,19,222,340,NA,NA,1.3,NA,NA,31.4,6,2018,31.4,pre-upgrade,Calculated
+Exeter,2019-02-28,19,301,416,28,NA,1.9,NA,NA,26.3,2,2019,28,upgrade period,Average
+Exeter,2019-07-31,2,25,109,NA,NA,1.3,NA,NA,10.1,7,2019,10.1,upgrade period,Calculated
+Exeter,2020-04-30,2,45,126.2,NA,NA,2.3,NA,NA,6.6,4,2020,6.6,upgrade period,Calculated
+Exeter,2022-08-31,2,20,33,NA,NA,1.1,NA,NA,3.6,8,2022,3.6,post-upgrade,Calculated
+Exeter,2022-09-30,2,26,36,NA,NA,1.2,NA,NA,3.6,9,2022,3.6,post-upgrade,Calculated
+Exeter,2008-06-30,20,214,NA,NA,21.8,1.3,NA,NA,NA,6,2008,NA,pre-upgrade,NA
+Exeter,2010-03-31,20,493,NA,NA,9.9,4,NA,NA,NA,3,2010,NA,pre-upgrade,NA
+Exeter,2013-06-30,20,352,NA,NA,NA,2.2,NA,NA,NA,6,2013,NA,pre-upgrade,NA
+Exeter,2014-02-28,20,269,319,24,NA,1.7,NA,NA,22.5,2,2014,24,pre-upgrade,Average
+Exeter,2015-11-30,20,220,212,20,NA,1.4,NA,NA,18.2,11,2015,20,pre-upgrade,Average
+Exeter,2015-12-31,20,248,292,25,NA,1.5,NA,NA,23.4,12,2015,25,pre-upgrade,Average
+Exeter,2016-04-30,20,308,295,NA,NA,1.8,NA,NA,19.7,4,2016,19.7,pre-upgrade,Calculated
+Exeter,2017-12-31,20,211,352,34,NA,1.2,NA,NA,35.2,12,2017,34,pre-upgrade,Average
+Exeter,2019-05-31,20,311,394,NA,NA,1.8,NA,NA,26.3,5,2019,26.3,upgrade period,Calculated
+Exeter,2012-02-29,21,298,NA,NA,18.8,1.7,NA,NA,NA,2,2012,NA,pre-upgrade,NA
+Exeter,2013-03-31,21,447,NA,NA,NA,2.6,NA,NA,NA,3,2013,NA,pre-upgrade,NA
+Exeter,2014-08-31,21,226,250,NA,NA,1.3,NA,NA,23.1,8,2014,23.1,pre-upgrade,Calculated
+Exeter,2015-10-31,21,250,201,NA,NA,1.3,NA,NA,18.6,10,2015,18.6,pre-upgrade,Calculated
+Exeter,2018-10-31,21,319,265,NA,NA,1.8,NA,NA,17.7,10,2018,17.7,pre-upgrade,Calculated
+Exeter,2009-04-30,22,381,NA,NA,11.6,2.2,NA,NA,NA,4,2009,NA,pre-upgrade,NA
+Exeter,2009-09-30,22,266,NA,NA,0.3,1.6,NA,NA,NA,9,2009,NA,pre-upgrade,NA
+Exeter,2010-01-31,22,321,NA,NA,17,1.9,NA,NA,NA,1,2010,NA,pre-upgrade,NA
+Exeter,2011-03-31,22,519,NA,NA,14.8,3.1,NA,NA,NA,3,2011,NA,pre-upgrade,NA
+Exeter,2011-10-31,22,448,NA,NA,16,2.3,NA,NA,NA,10,2011,NA,pre-upgrade,NA
+Exeter,2013-07-31,22,362,367,NA,NA,1.8,NA,NA,24.5,7,2013,24.5,pre-upgrade,Calculated
+Exeter,2017-07-31,22,313,380,NA,NA,1.6,NA,NA,28.5,7,2017,28.5,pre-upgrade,Calculated
+Exeter,2013-08-31,23,235,227,NA,NA,1.3,NA,NA,21,8,2013,21,pre-upgrade,Calculated
+Exeter,2015-03-31,23,362,436,29,NA,1.8,NA,NA,29.1,3,2015,29,pre-upgrade,Average
+Exeter,2015-04-30,23,530,396,NA,NA,2.9,NA,NA,16.4,4,2015,16.4,pre-upgrade,Calculated
+Exeter,2016-09-30,23,211,98,NA,NA,1.1,NA,NA,10.7,9,2016,10.7,pre-upgrade,Calculated
+Exeter,2018-04-30,23,566,450,NA,NA,2.5,NA,NA,21.6,4,2018,21.6,pre-upgrade,Calculated
+Exeter,2009-08-31,24,247,NA,NA,0.2,1.3,NA,NA,NA,8,2009,NA,pre-upgrade,NA
+Exeter,2012-10-31,24,315,NA,NA,15.1,1.5,NA,NA,NA,10,2012,NA,pre-upgrade,NA
+Exeter,2015-06-30,24,340,394,NA,NA,1.7,NA,NA,27.8,6,2015,27.8,pre-upgrade,Calculated
+Exeter,2010-09-30,25,354,NA,NA,0.2,1.4,NA,NA,NA,9,2010,NA,pre-upgrade,NA
+Exeter,2016-05-31,25,284,274,NA,NA,1.3,NA,NA,25.3,5,2016,25.3,pre-upgrade,Calculated
+Exeter,2010-08-31,26,332,NA,NA,1.3,1.4,NA,NA,NA,8,2010,NA,pre-upgrade,NA
+Exeter,2011-06-30,26,356,NA,NA,17,1.8,NA,NA,NA,6,2011,NA,pre-upgrade,NA
+Exeter,2011-09-30,26,417,NA,NA,13.4,1.8,NA,NA,NA,9,2011,NA,pre-upgrade,NA
+Exeter,2012-03-31,26,419,NA,NA,17.9,1.9,NA,NA,NA,3,2012,NA,pre-upgrade,NA
+Exeter,2017-02-28,26,418,438,26,NA,1.9,NA,NA,27.7,2,2017,26,pre-upgrade,Average
+Exeter,2017-08-31,26,306,306,NA,NA,1.5,NA,NA,24.5,8,2017,24.5,pre-upgrade,Calculated
+Exeter,2017-11-30,26,270,392,34,NA,1.2,NA,NA,39.2,11,2017,34,pre-upgrade,Average
+Exeter,2019-03-31,26,504,443,26,NA,2.2,NA,NA,24.2,3,2019,26,upgrade period,Average
+Exeter,2008-09-30,27,362,NA,NA,0,1.9,NA,NA,NA,9,2008,NA,pre-upgrade,NA
+Exeter,2011-12-31,27,533,NA,NA,14.8,2.2,NA,NA,NA,12,2011,NA,pre-upgrade,NA
+Exeter,2012-06-30,27,402,NA,NA,14.2,1.9,NA,NA,NA,6,2012,NA,pre-upgrade,NA
+Exeter,2015-08-31,27,282,302,NA,NA,1.2,NA,NA,30.2,8,2015,30.2,pre-upgrade,Calculated
+Exeter,2016-06-30,27,264,216,NA,NA,1.1,NA,NA,23.6,6,2016,23.6,pre-upgrade,Calculated
+Exeter,2017-03-31,27,479,380,22,NA,2.1,NA,NA,21.7,3,2017,22,pre-upgrade,Average
+Exeter,2010-07-31,28,356,NA,NA,0.5,1.3,NA,NA,NA,7,2010,NA,pre-upgrade,NA
+Exeter,2011-11-30,28,513,NA,NA,17,2.1,NA,NA,NA,11,2011,NA,pre-upgrade,NA
+Exeter,2012-07-31,28,300,NA,NA,3.5,1.3,NA,NA,NA,7,2012,NA,pre-upgrade,NA
+Exeter,2015-07-31,28,383,362,NA,NA,1.5,NA,NA,29,7,2015,29,pre-upgrade,Calculated
+Exeter,2016-01-31,28,441,385,24,NA,1.8,NA,NA,25.7,1,2016,24,pre-upgrade,Average
+Exeter,2008-07-31,29,390,NA,NA,4.4,1.5,NA,NA,NA,7,2008,NA,pre-upgrade,NA
+Exeter,2012-04-30,29,370,NA,NA,19,1.6,NA,NA,NA,4,2012,NA,pre-upgrade,NA
+Exeter,2019-08-31,3,38,54,NA,NA,1.2,NA,NA,5.4,8,2019,5.4,upgrade period,Calculated
+Exeter,2019-12-31,3,56,145.8,7.6,NA,2,NA,NA,8.8,12,2019,7.6,upgrade period,Average
+Exeter,2020-02-29,3,57,109.8,5.6,NA,2.2,NA,NA,6,2,2020,5.6,upgrade period,Average
+Exeter,2020-03-31,3,43,116,7.2,NA,1.8,NA,NA,7.7,3,2020,7.2,upgrade period,Average
+Exeter,2020-06-30,3,29,42,NA,NA,1.1,NA,NA,4.6,6,2020,4.6,upgrade period,Calculated
+Exeter,2020-07-31,3,25,48,NA,NA,1.1,NA,NA,5.2,7,2020,5.2,upgrade period,Calculated
+Exeter,2020-08-31,3,27,38,NA,NA,1,NA,NA,4.6,8,2020,4.6,upgrade period,Calculated
+Exeter,2020-09-30,3,27,40,NA,NA,1,NA,NA,4.8,9,2020,4.8,upgrade period,Calculated
+Exeter,2020-10-31,3,24,36,NA,NA,1,NA,NA,4.3,10,2020,4.3,upgrade period,Calculated
+Exeter,2020-11-30,3,29,65,5.3,NA,0.9,NA,NA,8.7,11,2020,5.3,upgrade period,Average
+Exeter,2022-06-30,3,36,30,NA,NA,1.3,NA,NA,2.8,6,2022,2.8,post-upgrade,Calculated
+Exeter,2022-07-31,3,33,34,NA,NA,1.2,NA,NA,3.4,7,2022,3.4,post-upgrade,Calculated
+Exeter,2022-10-31,3,36,43,NA,NA,1.4,NA,NA,3.7,10,2022,3.7,post-upgrade,Calculated
+Exeter,2022-11-30,3,40,62,5.3,NA,1.4,1.6,3.7,5.3,11,2022,5.3,post-upgrade,Average
+Exeter,2023-05-31,3,71,51,2.8,NA,2.2,1.1,1.6,2.8,5,2023,2.8,post-upgrade,Average
+Exeter,2023-06-30,3,46,37,2.6,NA,1.7,1.3,1.2,2.6,6,2023,2.6,post-upgrade,Average
+Exeter,2023-09-30,3,53,48,3,NA,1.9,1.2,1.8,3,9,2023,3,post-upgrade,Average
+Exeter,2023-10-31,3,39,31,2.3,NA,1.6,1.3,1,2.3,10,2023,2.3,post-upgrade,Average
+Exeter,2011-04-30,30,635,NA,NA,11.5,2.6,NA,NA,NA,4,2011,NA,pre-upgrade,NA
+Exeter,2014-04-30,30,656,226,NA,NA,2.7,NA,NA,10.1,4,2014,10.1,pre-upgrade,Calculated
+Exeter,2014-07-31,30,338,230,NA,NA,1.3,NA,NA,21.2,7,2014,21.2,pre-upgrade,Calculated
+Exeter,2012-08-31,31,381,NA,NA,5.5,1.3,NA,NA,NA,8,2012,NA,pre-upgrade,NA
+Exeter,2017-04-30,31,800,477,NA,NA,3.1,NA,NA,18.5,4,2017,18.5,pre-upgrade,Calculated
+Exeter,2018-07-31,31,383,344,NA,NA,1.4,NA,NA,29.5,7,2018,29.5,pre-upgrade,Calculated
+Exeter,2010-12-31,32,428,NA,NA,18,1.7,NA,NA,NA,12,2010,NA,pre-upgrade,NA
+Exeter,2015-09-30,32,307,216,NA,NA,1.2,NA,NA,21.6,9,2015,21.6,pre-upgrade,Calculated
+Exeter,2016-02-29,33,524,375,25,NA,1.9,NA,NA,23.7,2,2016,25,pre-upgrade,Average
+Exeter,2011-07-31,34,431,NA,NA,2.9,1.4,NA,NA,NA,7,2011,NA,pre-upgrade,NA
+Exeter,2014-09-30,34,326,151,NA,NA,1.1,NA,NA,16.5,9,2014,16.5,pre-upgrade,Calculated
+Exeter,2011-01-31,35,400,NA,NA,21.8,1.5,NA,NA,NA,1,2011,NA,pre-upgrade,NA
+Exeter,2017-10-31,35,322,321,NA,NA,1,NA,NA,38.5,10,2017,38.5,pre-upgrade,Calculated
+Exeter,2018-08-31,35,529,185,NA,NA,1.9,NA,NA,11.7,8,2018,11.7,pre-upgrade,Calculated
+Exeter,2018-09-30,35,540,196,NA,NA,1.7,NA,NA,13.8,9,2018,13.8,pre-upgrade,Calculated
+Exeter,2016-07-31,36,306,280,NA,NA,1,NA,NA,33.6,7,2016,33.6,pre-upgrade,Calculated
+Exeter,2017-09-30,36,448,316,NA,NA,1.4,NA,NA,27.1,9,2017,27.1,pre-upgrade,Calculated
+Exeter,2019-04-30,38,526,454,NA,NA,1.7,NA,NA,32.1,4,2019,32.1,upgrade period,Calculated
+Exeter,2019-09-30,4,49,63,NA,NA,1.2,NA,NA,6.3,9,2019,6.3,upgrade period,Calculated
+Exeter,2019-11-30,4,43,60,5.2,NA,1.4,NA,NA,5.1,11,2019,5.2,upgrade period,Average
+Exeter,2020-01-31,4,59,118.8,7.8,NA,1.9,NA,NA,7.5,1,2020,7.8,upgrade period,Average
+Exeter,2020-05-31,4,67,84.8,NA,NA,1.8,NA,NA,5.7,5,2020,5.7,upgrade period,Calculated
+Exeter,2021-01-31,4,66,112,7.4,NA,1.7,NA,NA,7.9,1,2021,7.4,post-upgrade,Average
+Exeter,2021-02-28,4,64,110,7.9,NA,1.6,NA,NA,8.3,2,2021,7.9,post-upgrade,Average
+Exeter,2021-03-31,4,67,98,5.8,NA,1.8,NA,NA,6.5,3,2021,5.8,post-upgrade,Average
+Exeter,2021-04-30,4,53,38,NA,NA,1.8,NA,NA,2.5,4,2021,2.5,post-upgrade,Calculated
+Exeter,2021-05-31,4,63,50,NA,NA,1.7,NA,NA,3.5,5,2021,3.5,post-upgrade,Calculated
+Exeter,2021-06-30,4,41,35,NA,NA,1.3,NA,NA,3.2,6,2021,3.2,post-upgrade,Calculated
+Exeter,2021-11-30,4,81,90,4.6,NA,2.1,NA,NA,5.1,11,2021,4.6,post-upgrade,Average
+Exeter,2021-12-31,4,56,56,3.8,NA,1.7,NA,NA,4,12,2021,3.8,post-upgrade,Average
+Exeter,2022-03-31,4,80,64.4,3.3,NA,2.1,NA,NA,3.7,3,2022,3.3,post-upgrade,Average
+Exeter,2022-12-31,4,72,88,5.3,NA,2,1.6,3.6,5.3,12,2022,5.3,post-upgrade,Average
+Exeter,2023-03-31,4,88,85.6,3.8,NA,2.7,1.1,2.7,3.8,3,2023,3.8,post-upgrade,Average
+Exeter,2023-04-30,4,70,40,2.4,NA,2,1.2,1.2,2.4,4,2023,2.4,post-upgrade,Average
+Exeter,2023-07-31,4,65,51,2.9,NA,2.1,1.2,1.7,2.9,7,2023,2.9,post-upgrade,Average
+Exeter,2023-11-30,4,52,22,1.8,NA,1.5,1.1,0.7,1.8,11,2023,1.8,post-upgrade,Average
+Exeter,2011-08-31,40,585,NA,NA,8.5,1.7,NA,NA,NA,8,2011,NA,pre-upgrade,NA
+Exeter,2012-09-30,41,448,NA,NA,6.5,1.3,NA,NA,NA,9,2012,NA,pre-upgrade,NA
+Exeter,2013-04-30,41,715,NA,NA,NA,2,NA,NA,NA,4,2013,NA,pre-upgrade,NA
+Exeter,2016-08-31,41,363,204,NA,NA,1.1,NA,NA,22.3,8,2016,22.3,pre-upgrade,Calculated
+Exeter,2016-03-31,44,773,371,21,NA,2.1,NA,NA,21.2,3,2016,21,pre-upgrade,Average
+Exeter,2019-10-31,5,54,69,NA,NA,1.3,NA,NA,6.4,10,2019,6.4,upgrade period,Calculated
+Exeter,2020-12-31,5,69,98,6.2,NA,1.9,NA,NA,6.2,12,2020,6.2,upgrade period,Average
+Exeter,2021-08-31,5,64,45,NA,NA,1.7,NA,NA,3.2,8,2021,3.2,post-upgrade,Calculated
+Exeter,2021-09-30,5,71,53,NA,NA,1.8,NA,NA,3.5,9,2021,3.5,post-upgrade,Calculated
+Exeter,2021-10-31,5,62,56,NA,NA,1.6,NA,NA,4.2,10,2021,4.2,post-upgrade,Calculated
+Exeter,2022-01-31,5,81,77,4.9,NA,1.7,NA,NA,5.4,1,2022,4.9,post-upgrade,Average
+Exeter,2022-05-31,5,71,45,NA,NA,1.7,NA,NA,3.2,5,2022,3.2,post-upgrade,Calculated
+Exeter,2023-02-28,5,84,66.8,4,NA,2,1.4,2.5,4,2,2023,4,post-upgrade,Average
+Exeter,2023-08-31,5,75,44,2.8,NA,1.9,1.2,1.6,2.8,8,2023,2.8,post-upgrade,Average
+Exeter,2023-12-31,5,110,84,4.4,NA,2.3,1.2,3.2,4.4,12,2023,4.4,post-upgrade,Average
+Exeter,2021-07-31,6,113,98,NA,NA,2.1,NA,NA,5.6,7,2021,5.6,post-upgrade,Calculated
+Exeter,2022-02-28,6,99,86,5,NA,2.1,NA,NA,4.9,2,2022,5,post-upgrade,Average
+Exeter,2022-04-30,6,117,67,NA,NA,2.2,NA,NA,3.7,4,2022,3.7,post-upgrade,Calculated
+Exeter,2023-01-31,6,104,92.1,4.8,NA,2.3,1.1,3.7,4.8,1,2023,4.8,post-upgrade,Average
+Exeter,2010-05-31,7,113,NA,NA,16,1.8,NA,NA,NA,5,2010,NA,pre-upgrade,NA
+Exeter,2010-06-30,8,101,NA,NA,25,1.5,NA,NA,NA,6,2010,NA,pre-upgrade,NA
+Exeter,2014-06-30,8,90,231,NA,NA,1.3,NA,NA,21.3,6,2014,21.3,pre-upgrade,Calculated
+Exeter,2008-11-30,9,134,NA,NA,16.8,1.6,NA,NA,NA,11,2008,NA,pre-upgrade,NA
+Exeter,2013-05-31,9,129,NA,NA,NA,1.6,NA,NA,NA,5,2013,NA,pre-upgrade,NA
+Exeter,2013-10-31,9,94,166,NA,NA,1.2,NA,NA,16.6,10,2013,16.6,pre-upgrade,Calculated
+Newfields,2008-05-31,0,0,NA,NA,NA,0.095,NA,NA,NA,5,2008,21.5,no upgrades,NA
+Newfields,2008-06-30,0,0,NA,NA,NA,0.088,NA,NA,NA,6,2008,21.5,no upgrades,NA
+Newfields,2008-07-31,0,0,NA,NA,NA,0.096,NA,NA,NA,7,2008,21.5,no upgrades,NA
+Newfields,2008-08-31,0,0,NA,NA,NA,0.092,NA,NA,NA,8,2008,21.5,no upgrades,NA
+Newfields,2008-09-30,0,0,NA,NA,NA,0.101,NA,NA,NA,9,2008,21.5,no upgrades,NA
+Newfields,2008-10-31,0,0,NA,NA,NA,0.094,NA,NA,NA,10,2008,21.5,no upgrades,NA
+Newfields,2008-11-30,0,0,NA,NA,NA,0.082,NA,NA,NA,11,2008,21.5,no upgrades,NA
+Newfields,2009-07-31,0,0,NA,NA,NA,0.097,NA,NA,NA,7,2009,21.5,no upgrades,NA
+Newfields,2009-08-31,0,0,NA,NA,NA,0.089,NA,NA,NA,8,2009,21.5,no upgrades,NA
+Newfields,2009-10-31,0,0,NA,NA,NA,0.08,NA,NA,NA,10,2009,21.5,no upgrades,NA
+Newfields,2009-11-30,0,0,NA,NA,NA,0.09,NA,NA,NA,11,2009,21.5,no upgrades,NA
+Newfields,2010-05-31,0,0,NA,NA,NA,0.079,NA,NA,NA,5,2010,21.5,no upgrades,NA
+Newfields,2010-06-30,0,0,NA,NA,NA,0.087,NA,NA,NA,6,2010,21.5,no upgrades,NA
+Newfields,2010-07-31,0,0,NA,NA,NA,0.088,NA,NA,NA,7,2010,21.5,no upgrades,NA
+Newfields,2010-08-31,0,0,NA,NA,NA,0.084,NA,NA,NA,8,2010,21.5,no upgrades,NA
+Newfields,2010-09-30,0,0,NA,NA,NA,0.081,NA,NA,NA,9,2010,21.5,no upgrades,NA
+Newfields,2010-10-31,0,0,NA,NA,NA,0.079,NA,NA,NA,10,2010,21.5,no upgrades,NA
+Newfields,2010-11-30,0,0,NA,NA,NA,0.088,NA,NA,NA,11,2010,21.5,no upgrades,NA
+Newfields,2011-07-31,0,0,NA,NA,NA,0.087,NA,NA,NA,7,2011,21.5,no upgrades,NA
+Newfields,2012-07-31,0,0,NA,NA,NA,0.083,NA,NA,NA,7,2012,21.5,no upgrades,NA
+Newfields,2012-10-31,0,0,NA,NA,NA,0.036,NA,NA,NA,10,2012,21.5,no upgrades,NA
+Newfields,2012-11-30,0,0,NA,NA,NA,0.081,NA,NA,NA,11,2012,21.5,no upgrades,NA
+Newfields,2013-05-31,0,0,NA,NA,NA,0.088,NA,NA,NA,5,2013,21.5,no upgrades,NA
+Newfields,2013-07-31,0,0,NA,NA,NA,0.099,NA,NA,NA,7,2013,21.5,no upgrades,NA
+Newfields,2013-08-31,0,0,NA,NA,NA,0.087,NA,NA,NA,8,2013,21.5,no upgrades,NA
+Newfields,2013-09-30,0,0,NA,NA,NA,0.095,NA,NA,NA,9,2013,21.5,no upgrades,NA
+Newfields,2013-10-31,0,0,NA,NA,NA,0.083,NA,NA,NA,10,2013,21.5,no upgrades,NA
+Newfields,2013-11-30,0,0,NA,NA,NA,0.083,NA,NA,NA,11,2013,21.5,no upgrades,NA
+Newfields,2014-06-30,0,0,NA,NA,NA,0.085,NA,NA,NA,6,2014,21.5,no upgrades,NA
+Newfields,2014-07-31,0,0,NA,NA,NA,0.086,NA,NA,NA,7,2014,21.5,no upgrades,NA
+Newfields,2014-08-31,0,0,NA,NA,NA,0.087,NA,NA,NA,8,2014,21.5,no upgrades,NA
+Newfields,2014-09-30,0,0,NA,NA,NA,0.084,NA,NA,NA,9,2014,21.5,no upgrades,NA
+Newfields,2014-10-31,0,0,NA,NA,NA,0.075,NA,NA,NA,10,2014,21.5,no upgrades,NA
+Newfields,2014-11-30,0,0,NA,NA,NA,0.093,NA,NA,NA,11,2014,21.5,no upgrades,NA
+Newfields,2014-12-31,0,0,NA,NA,NA,0.101,NA,NA,NA,12,2014,21.5,no upgrades,NA
+Newfields,2015-06-30,0,0,NA,NA,NA,0.098,NA,NA,NA,6,2015,21.5,no upgrades,NA
+Newfields,2015-08-31,0,0,NA,NA,NA,0.084,NA,NA,NA,8,2015,21.5,no upgrades,NA
+Newfields,2015-09-30,0,0,NA,NA,NA,0.084,NA,NA,NA,9,2015,21.5,no upgrades,NA
+Newfields,2015-10-31,0,0,NA,NA,NA,0.081,NA,NA,NA,10,2015,21.5,no upgrades,NA
+Newfields,2016-04-30,0,0,NA,NA,NA,0.095,NA,NA,NA,4,2016,21.5,no upgrades,NA
+Newfields,2016-05-31,0,0,NA,NA,NA,0.089,NA,NA,NA,5,2016,21.5,no upgrades,NA
+Newfields,2016-06-30,0,0,NA,NA,NA,0.086,NA,NA,NA,6,2016,21.5,no upgrades,NA
+Newfields,2016-08-31,0,0,NA,NA,NA,0.074,NA,NA,NA,8,2016,21.5,no upgrades,NA
+Newfields,2016-09-30,0,0,NA,NA,NA,0.073,NA,NA,NA,9,2016,21.5,no upgrades,NA
+Newfields,2016-10-31,0,0,NA,NA,NA,0.084,NA,NA,NA,10,2016,21.5,no upgrades,NA
+Newfields,2017-07-31,0,0,NA,NA,NA,0.088,NA,NA,NA,7,2017,20,no upgrades,NA
+Newfields,2017-10-31,0,0,NA,NA,NA,0.09,NA,NA,NA,10,2017,20,no upgrades,NA
+Newfields,2017-12-31,0,0,NA,NA,NA,0.085,NA,NA,NA,12,2017,20,no upgrades,NA
+Newfields,2018-07-31,0,0,NA,NA,NA,0.084,NA,NA,NA,7,2018,20,no upgrades,NA
+Newfields,2018-10-31,0,0,NA,NA,NA,0.093,NA,NA,NA,10,2018,20,no upgrades,NA
+Newfields,2018-11-30,0,0,NA,NA,NA,0.105,NA,NA,NA,11,2018,20,no upgrades,NA
+Newfields,2019-05-31,0,0,NA,NA,NA,0.093,NA,NA,NA,5,2019,20,no upgrades,NA
+Newfields,2019-07-31,0,0,NA,NA,NA,0.082,NA,NA,NA,7,2019,20,no upgrades,NA
+Newfields,2019-08-31,0,0,NA,NA,NA,0.082,NA,NA,NA,8,2019,20,no upgrades,NA
+Newfields,2019-09-30,0,0,NA,NA,NA,0.073,NA,NA,NA,9,2019,20,no upgrades,NA
+Newfields,2019-10-31,0,0,NA,NA,NA,0.08,NA,NA,NA,10,2019,20,no upgrades,NA
+Newfields,2019-11-30,0,0,NA,NA,NA,0.083,NA,NA,NA,11,2019,20,no upgrades,NA
+Newfields,2020-04-30,0,0,NA,NA,NA,0.1,NA,NA,NA,4,2020,20,no upgrades,NA
+Newfields,2020-06-30,0,0,NA,NA,NA,0.084,NA,NA,NA,6,2020,20,no upgrades,NA
+Newfields,2020-10-31,0,0,NA,NA,NA,0.073,NA,NA,NA,10,2020,20,no upgrades,NA
+Newfields,2020-11-30,0,0,NA,NA,NA,0.079,NA,NA,NA,11,2020,20,no upgrades,NA
+Newfields,2021-10-31,0,0,5.5,19.5,NA,0.087,18.3,1.3,7.6,10,2021,19.5,no upgrades,Average
+Newfields,2021-11-30,0,0,11.4,22.9,NA,0.099,18.4,4.3,13.8,11,2021,22.9,no upgrades,Average
+Newfields,2018-05-31,0,1,NA,NA,NA,0.09,NA,NA,NA,5,2018,20,no upgrades,NA
+Newfields,2011-09-30,0,1.2,NA,NA,NA,0.092,NA,NA,NA,9,2011,21.5,no upgrades,NA
+Newfields,2014-05-31,0,1.2,NA,NA,NA,0.092,NA,NA,NA,5,2014,21.5,no upgrades,NA
+Newfields,2018-08-31,0,1.2,NA,NA,NA,0.094,NA,NA,NA,8,2018,20,no upgrades,NA
+Newfields,2020-05-31,0,1.2,NA,NA,NA,0.085,NA,NA,NA,5,2020,20,no upgrades,NA
+Newfields,2020-07-31,0,1.2,NA,NA,NA,0.076,NA,NA,NA,7,2020,20,no upgrades,NA
+Newfields,2018-12-31,0,1.25,NA,NA,NA,0.094,NA,NA,NA,12,2018,20,no upgrades,NA
+Newfields,2013-06-30,0,1.3,NA,NA,NA,0.1,NA,NA,NA,6,2013,21.5,no upgrades,NA
+Newfields,2015-11-30,0,1.3,NA,NA,NA,0.085,NA,NA,NA,11,2015,21.5,no upgrades,NA
+Newfields,2016-07-31,0,1.3,NA,NA,NA,0.077,NA,NA,NA,7,2016,21.5,no upgrades,NA
+Newfields,2016-11-30,0,1.34,NA,NA,NA,0.091,NA,NA,NA,11,2016,21.5,no upgrades,NA
+Newfields,2015-05-31,0,1.5,NA,NA,NA,0.087,NA,NA,NA,5,2015,21.5,no upgrades,NA
+Newfields,2015-07-31,0,1.5,NA,NA,NA,0.086,NA,NA,NA,7,2015,21.5,no upgrades,NA
+Newfields,2017-11-30,0,1.5,NA,NA,NA,0.09,NA,NA,NA,11,2017,20,no upgrades,NA
+Newfields,2021-04-30,0,1.5,NA,NA,NA,0.039,NA,NA,NA,4,2021,20,no upgrades,NA
+Newfields,2011-08-31,0,1.8,NA,NA,NA,0.097,NA,NA,NA,8,2011,21.5,no upgrades,NA
+Newfields,2018-06-30,0,1.9,NA,NA,NA,0.083,NA,NA,NA,6,2018,20,no upgrades,NA
+Newfields,2011-12-31,10.8,10,NA,NA,NA,0.097,NA,NA,NA,12,2011,21.5,no upgrades,NA
+Newfields,2014-02-28,13,10.6,NA,NA,NA,0.092,NA,NA,NA,2,2014,21.5,no upgrades,NA
+Newfields,2018-02-28,9,10.7,NA,NA,NA,0.102,NA,NA,NA,2,2018,20,no upgrades,NA
+Newfields,2008-01-31,11,11,NA,NA,NA,0.106,NA,NA,NA,1,2008,21.5,no upgrades,NA
+Newfields,2009-03-31,12,11,NA,NA,NA,0.099,NA,NA,NA,3,2009,21.5,no upgrades,NA
+Newfields,2015-04-30,11,11,NA,NA,NA,0.11,NA,NA,NA,4,2015,21.5,no upgrades,NA
+Newfields,2013-02-28,11,11.1,NA,NA,NA,0.094,NA,NA,NA,2,2013,21.5,no upgrades,NA
+Newfields,2012-12-31,11,11.2,NA,NA,NA,0.094,NA,NA,NA,12,2012,21.5,no upgrades,NA
+Newfields,2014-03-31,13,11.2,NA,NA,NA,0.095,NA,NA,NA,3,2014,21.5,no upgrades,NA
+Newfields,2014-04-30,10.8,11.5,NA,NA,NA,0.107,NA,NA,NA,4,2014,21.5,no upgrades,NA
+Newfields,2011-02-28,13,11.6,NA,NA,NA,0.092,NA,NA,NA,2,2011,21.5,no upgrades,NA
+Newfields,2017-01-31,12,12,NA,NA,NA,0.097,NA,NA,NA,1,2017,20,no upgrades,NA
+Newfields,2021-06-30,15,12.5,11.7,33.6,NA,0.042,33.4,0.2,33.5,6,2021,33.6,no upgrades,Average
+Newfields,2021-12-31,11.8,12.5,8.8,23.4,NA,0.094,19.5,3.9,11.2,12,2021,23.4,no upgrades,Average
+Newfields,2014-01-31,15,12.7,NA,NA,NA,0.093,NA,NA,NA,1,2014,21.5,no upgrades,NA
+Newfields,2009-06-30,16,12.8,NA,NA,NA,0.091,NA,NA,NA,6,2009,21.5,no upgrades,NA
+Newfields,2008-03-31,14,12.9,NA,NA,NA,0.104,NA,NA,NA,3,2008,21.5,no upgrades,NA
+Newfields,2013-03-31,13,13.2,NA,NA,NA,0.095,NA,NA,NA,3,2013,21.5,no upgrades,NA
+Newfields,2009-01-31,14,13.4,NA,NA,NA,0.093,NA,NA,NA,1,2009,21.5,no upgrades,NA
+Newfields,2010-02-28,20,13.8,NA,NA,NA,0.094,NA,NA,NA,2,2010,21.5,no upgrades,NA
+Newfields,2019-04-30,14,14.6,NA,NA,NA,0.097,NA,NA,NA,4,2019,20,no upgrades,NA
+Newfields,2009-02-28,16.5,14.7,NA,NA,NA,0.093,NA,NA,NA,2,2009,21.5,no upgrades,NA
+Newfields,2018-03-31,15,15.6,NA,NA,NA,0.093,NA,NA,NA,3,2018,20,no upgrades,NA
+Newfields,2008-02-29,16,16,NA,NA,NA,0.108,NA,NA,NA,2,2008,21.5,no upgrades,NA
+Newfields,2011-01-31,16,16,NA,NA,NA,0.089,NA,NA,NA,1,2011,21.5,no upgrades,NA
+Newfields,2016-01-31,17,16,NA,NA,NA,0.039,NA,NA,NA,1,2016,21.5,no upgrades,NA
+Newfields,2021-01-31,17,16,NA,NA,NA,0.039,NA,NA,NA,1,2021,20,no upgrades,NA
+Newfields,2020-01-31,16,16.2,NA,NA,NA,0.093,NA,NA,NA,1,2020,20,no upgrades,NA
+Newfields,2017-02-28,18,17.7,NA,NA,NA,0.096,NA,NA,NA,2,2017,20,no upgrades,NA
+Newfields,2011-03-31,17,18.4,NA,NA,NA,0.104,NA,NA,NA,3,2011,21.5,no upgrades,NA
+Newfields,2021-02-28,24,18.4,NA,NA,NA,0.041,NA,NA,NA,2,2021,20,no upgrades,NA
+Newfields,2022-03-31,18,19.2,11.8,25.2,NA,0.097,24,1.2,14.6,3,2022,25.2,no upgrades,Average
+Newfields,2016-03-31,18,19.8,NA,NA,NA,0.1,NA,NA,NA,3,2016,21.5,no upgrades,NA
+Newfields,2011-11-30,2,2,NA,NA,NA,0.102,NA,NA,NA,11,2011,21.5,no upgrades,NA
+Newfields,2009-09-30,0,2.1,NA,NA,NA,0.086,NA,NA,NA,9,2009,21.5,no upgrades,NA
+Newfields,2011-06-30,3,2.1,NA,NA,NA,0.098,NA,NA,NA,6,2011,21.5,no upgrades,NA
+Newfields,2016-12-31,0,2.1,NA,NA,NA,0.094,NA,NA,NA,12,2016,21.5,no upgrades,NA
+Newfields,2017-08-31,0,2.1,NA,NA,NA,0.09,NA,NA,NA,8,2017,20,no upgrades,NA
+Newfields,2011-10-31,0,2.6,NA,NA,NA,0.101,NA,NA,NA,10,2011,21.5,no upgrades,NA
+Newfields,2018-09-30,0,2.6,NA,NA,NA,0.09,NA,NA,NA,9,2018,20,no upgrades,NA
+Newfields,2010-04-30,2.3,2.7,NA,NA,NA,0.11,NA,NA,NA,4,2010,21.5,no upgrades,NA
+Newfields,2020-09-30,0,2.7,NA,NA,NA,0.075,NA,NA,NA,9,2020,20,no upgrades,NA
+Newfields,2012-04-30,21,21.1,NA,NA,NA,0.093,NA,NA,NA,4,2012,21.5,no upgrades,NA
+Newfields,2010-01-31,24,22.3,NA,NA,NA,0.091,NA,NA,NA,1,2010,21.5,no upgrades,NA
+Newfields,2016-02-29,22,22.5,NA,NA,NA,0.098,NA,NA,NA,2,2016,21.5,no upgrades,NA
+Newfields,2013-04-30,24.5,23.4,NA,NA,NA,0.092,NA,NA,NA,4,2013,21.5,no upgrades,NA
+Newfields,2010-03-31,26,24.1,NA,NA,NA,0.113,NA,NA,NA,3,2010,21.5,no upgrades,NA
+Newfields,2012-01-31,24,24.4,NA,NA,NA,0.096,NA,NA,NA,1,2012,21.5,no upgrades,NA
+Newfields,2009-04-30,26,24.5,NA,NA,NA,0.096,NA,NA,NA,4,2009,21.5,no upgrades,NA
+Newfields,2022-01-31,26,26.2,11.8,29.7,NA,0.092,26.5,3.2,15.4,1,2022,29.7,no upgrades,Average
+Newfields,2022-02-28,26,26.3,13.7,28.8,NA,0.088,27.3,1.6,18.7,2,2022,28.8,no upgrades,Average
+Newfields,2021-03-31,28,27.4,NA,NA,NA,0.044,NA,NA,NA,3,2021,20,no upgrades,NA
+Newfields,2020-02-29,29,29.4,NA,NA,NA,0.095,NA,NA,NA,2,2020,20,no upgrades,NA
+Newfields,2008-04-30,33,29.9,NA,NA,NA,0.098,NA,NA,NA,4,2008,21.5,no upgrades,NA
+Newfields,2017-05-31,0,3,NA,NA,NA,0.109,NA,NA,NA,5,2017,20,no upgrades,NA
+Newfields,2017-09-30,0,3,NA,NA,NA,0.035,NA,NA,NA,9,2017,20,no upgrades,NA
+Newfields,2017-06-30,0,3.15,NA,NA,NA,0.101,NA,NA,NA,6,2017,20,no upgrades,NA
+Newfields,2020-12-31,0,3.18,NA,NA,NA,0.094,NA,NA,NA,12,2020,20,no upgrades,NA
+Newfields,2008-12-31,3,3.2,NA,NA,NA,0.101,NA,NA,NA,12,2008,21.5,no upgrades,NA
+Newfields,2021-09-30,0,3.2,8,21.4,NA,0.09,20.8,0.6,10.7,9,2021,21.4,no upgrades,Average
+Newfields,2015-01-31,0,3.3,NA,NA,NA,0.094,NA,NA,NA,1,2015,21.5,no upgrades,NA
+Newfields,2019-12-31,0,3.4,NA,NA,NA,0.1,NA,NA,NA,12,2019,20,no upgrades,NA
+Newfields,2021-08-31,0,3.4,13.3,31.2,NA,0.051,29.2,0.2,31.3,8,2021,31.2,no upgrades,Average
+Newfields,2012-09-30,8,3.7,NA,NA,NA,0.085,NA,NA,NA,9,2012,21.5,no upgrades,NA
+Newfields,2012-02-29,37,32.3,NA,NA,NA,0.096,NA,NA,NA,2,2012,21.5,no upgrades,NA
+Newfields,2020-03-31,36,36,NA,NA,NA,0.092,NA,NA,NA,3,2020,20,no upgrades,NA
+Newfields,2017-03-31,32,37,NA,NA,NA,0.106,NA,NA,NA,3,2017,20,no upgrades,NA
+Newfields,2015-12-31,4,4.1,NA,NA,NA,0.095,NA,NA,NA,12,2015,21.5,no upgrades,NA
+Newfields,2018-01-31,0,4.2,NA,NA,NA,0.088,NA,NA,NA,1,2018,20,no upgrades,NA
+Newfields,2020-08-31,5,4.2,NA,NA,NA,0.069,NA,NA,NA,8,2020,20,no upgrades,NA
+Newfields,2012-05-31,5,4.3,NA,NA,NA,0.1,NA,NA,NA,5,2012,21.5,no upgrades,NA
+Newfields,2019-06-30,0,4.4,NA,NA,NA,0.088,NA,NA,NA,6,2019,20,no upgrades,NA
+Newfields,2012-06-30,5,4.5,NA,NA,NA,0.088,NA,NA,NA,6,2012,21.5,no upgrades,NA
+Newfields,2018-04-30,43,44.1,NA,NA,NA,0.098,NA,NA,NA,4,2018,20,no upgrades,NA
+Newfields,2017-04-30,46,44.9,NA,NA,NA,0.107,NA,NA,NA,4,2017,20,no upgrades,NA
+Newfields,2012-03-31,54,49.4,NA,NA,NA,0.097,NA,NA,NA,3,2012,21.5,no upgrades,NA
+Newfields,2012-08-31,9,5.3,NA,NA,NA,0.088,NA,NA,NA,8,2012,21.5,no upgrades,NA
+Newfields,2021-05-31,7,6.4,11.8,33,NA,0.043,32.8,0.3,33,5,2021,33,no upgrades,Average
+Newfields,2011-04-30,60,62.3,NA,NA,NA,0.102,NA,NA,NA,4,2011,21.5,no upgrades,NA
+Newfields,2019-01-31,7,7.1,NA,NA,NA,0.101,NA,NA,NA,1,2019,20,no upgrades,NA
+Newfields,2013-01-31,9,7.7,NA,NA,NA,0.092,NA,NA,NA,1,2013,21.5,no upgrades,NA
+Newfields,2019-02-28,8,7.8,NA,NA,NA,0.093,NA,NA,NA,2,2019,20,no upgrades,NA
+Newfields,2015-02-28,9,7.9,NA,NA,NA,0.088,NA,NA,NA,2,2015,21.5,no upgrades,NA
+Newfields,2013-12-31,9,8.3,NA,NA,NA,0.092,NA,NA,NA,12,2013,21.5,no upgrades,NA
+Newfields,2015-03-31,8.8,8.5,NA,NA,NA,0.091,NA,NA,NA,3,2015,21.5,no upgrades,NA
+Newfields,2019-03-31,8,8.7,NA,NA,NA,0.098,NA,NA,NA,3,2019,20,no upgrades,NA
+Newfields,2021-07-31,9,9,13,31.9,NA,0.049,31.3,0.6,31.9,7,2021,31.9,no upgrades,Average
+Newfields,2009-05-31,11,9.5,NA,NA,NA,0.095,NA,NA,NA,5,2009,21.5,no upgrades,NA
+Newfields,2009-12-31,10,9.6,NA,NA,NA,0.096,NA,NA,NA,12,2009,21.5,no upgrades,NA
+Newfields,2011-05-31,9.8,9.6,NA,NA,NA,0.098,NA,NA,NA,5,2011,21.5,no upgrades,NA
+Newfields,2010-12-31,12,9.9,NA,NA,NA,0.089,NA,NA,NA,12,2010,21.5,no upgrades,NA
+Newmarket,2018-04-30,1.7,10.1,12,NA,NA,0.6115,NA,NA,2.4,4,2018,2.4,post-upgrade,Calculated
+Newmarket,2019-08-31,3.4,10.1,17.9,NA,NA,0.3521,NA,NA,6.1,8,2019,6.1,post-upgrade,Calculated
+Newmarket,2022-01-31,2.5,10.1,12.4,3,NA,0.482,NA,NA,3.1,1,2022,3,post-upgrade,Average
+Newmarket,2020-06-30,2.9,10.9,10.8,NA,NA,0.3697,NA,NA,3.5,6,2020,3.5,post-upgrade,Calculated
+Newmarket,2014-03-31,19.7,100,183,35.6,NA,0.6912,NA,NA,31.8,3,2014,35.6,pre-upgrade,Average
+Newmarket,2011-01-31,25.8,100.2,NA,NA,NA,0.47,NA,NA,NA,1,2011,NA,pre-upgrade,NA
+Newmarket,2014-06-30,27.2,100.5,153.9,41.6,NA,0.4633,NA,NA,39.9,6,2014,41.6,pre-upgrade,Average
+Newmarket,2016-11-30,25,100.6,166.7,41,NA,0.4696,NA,NA,42.6,11,2016,41,pre-upgrade,Average
+Newmarket,2016-05-31,23.9,102.8,172.6,40.1,NA,0.5094,NA,NA,40.7,5,2016,40.1,pre-upgrade,Average
+Newmarket,2008-10-31,16,103.5,NA,NA,NA,0.5992,NA,NA,NA,10,2008,NA,pre-upgrade,NA
+Newmarket,2015-03-31,24.9,104.9,152.4,36.6,NA,0.5763,NA,NA,31.8,3,2015,36.6,pre-upgrade,Average
+Newmarket,2016-12-31,25.9,105.3,151.7,37.3,NA,0.5105,NA,NA,35.7,12,2016,37.3,pre-upgrade,Average
+Newmarket,2011-03-31,14.8,105.4,NA,NA,NA,0.93,NA,NA,NA,3,2011,NA,pre-upgrade,NA
+Newmarket,2015-06-30,25,105.7,151,35.5,NA,0.4804,NA,NA,37.7,6,2015,35.5,pre-upgrade,Average
+Newmarket,2009-12-31,18.8,106.1,NA,NA,NA,0.6982,NA,NA,NA,12,2009,NA,pre-upgrade,NA
+Newmarket,2008-03-31,13.2,107,NA,NA,NA,1.055,NA,NA,NA,3,2008,NA,pre-upgrade,NA
+Newmarket,2015-02-28,33.4,107.5,150.8,47,NA,0.4048,NA,NA,44.7,2,2015,47,pre-upgrade,Average
+Newmarket,2008-04-30,15.8,108,NA,NA,NA,0.7765,NA,NA,NA,4,2008,NA,pre-upgrade,NA
+Newmarket,2014-09-30,27.4,108.8,148.7,37.3,NA,0.4707,NA,NA,37.9,9,2014,37.3,pre-upgrade,Average
+Newmarket,2016-04-30,21.6,109.4,175,34.8,NA,0.655,NA,NA,32.1,4,2016,34.8,pre-upgrade,Average
+Newmarket,2021-03-31,2.7,11.2,16.3,3.9,NA,0.5005,NA,NA,3.9,3,2021,3.9,post-upgrade,Average
+Newmarket,2021-01-31,2.8,11.6,12.1,2.9,NA,0.5047,NA,NA,2.9,1,2021,2.9,post-upgrade,Average
+Newmarket,2017-06-30,31.2,110.5,131.5,36.2,NA,0.3976,NA,NA,39.7,6,2017,36.2,upgrade period,Average
+Newmarket,2008-11-30,21.8,111.8,NA,NA,NA,0.6312,NA,NA,NA,11,2008,NA,pre-upgrade,NA
+Newmarket,2009-01-31,26,112.3,NA,NA,NA,0.5459,NA,NA,NA,1,2009,NA,pre-upgrade,NA
+Newmarket,2015-01-31,29.7,112.6,133.9,35.2,NA,0.4724,NA,NA,34,1,2015,35.2,pre-upgrade,Average
+Newmarket,2010-01-31,23.1,113.9,NA,NA,NA,0.5826,NA,NA,NA,1,2010,NA,pre-upgrade,NA
+Newmarket,2015-04-30,17.7,114.4,194.2,29.9,NA,0.741,NA,NA,31.5,4,2015,29.9,pre-upgrade,Average
+Newmarket,2014-08-31,28.1,115,160.1,39.6,NA,0.4879,NA,NA,39.4,8,2014,39.6,pre-upgrade,Average
+Newmarket,2015-12-31,25.3,117,204,44.4,NA,0.5646,NA,NA,43.4,12,2015,44.4,pre-upgrade,Average
+Newmarket,2016-09-30,29.9,117,165,42.8,NA,0.549,NA,NA,36.1,9,2016,42.8,pre-upgrade,Average
+Newmarket,2019-10-31,3.7,12,19.6,NA,NA,0.371,NA,NA,6.3,10,2019,6.3,post-upgrade,Calculated
+Newmarket,2021-12-31,3.1,12.1,10.7,2.8,NA,0.4669,NA,NA,2.8,12,2021,2.8,post-upgrade,Average
+Newmarket,2017-10-31,3.8,12.4,14,4.1,NA,0.3337,NA,NA,5,10,2017,4.1,upgrade period,Average
+Newmarket,2019-03-31,3.1,12.4,45.2,11,NA,0.4982,NA,NA,10.9,3,2019,11,post-upgrade,Average
+Newmarket,2020-08-31,4.6,12.9,11.5,NA,NA,0.365,NA,NA,3.8,8,2020,3.8,post-upgrade,Calculated
+Newmarket,2011-04-30,19.5,120.3,NA,NA,NA,0.74,NA,NA,NA,4,2011,NA,pre-upgrade,NA
+Newmarket,2011-05-31,22.7,124.3,NA,NA,NA,0.6477,NA,NA,NA,5,2011,NA,pre-upgrade,NA
+Newmarket,2014-12-31,23.9,126.1,180.6,34.6,NA,0.6366,NA,NA,34.1,12,2014,34.6,pre-upgrade,Average
+Newmarket,2008-02-29,15.9,127,NA,NA,NA,0.8975,NA,NA,NA,2,2008,NA,pre-upgrade,NA
+Newmarket,2016-01-31,25.9,127.3,241.3,49.4,NA,0.6135,NA,NA,47.2,1,2016,49.4,pre-upgrade,Average
+Newmarket,2017-05-31,26.8,127.8,164.8,35.7,NA,0.5699,NA,NA,34.7,5,2017,35.7,upgrade period,Average
+Newmarket,2014-02-28,30.8,128.7,180.4,43.5,NA,0.529,NA,NA,41,2,2014,43.5,pre-upgrade,Average
+Newmarket,2021-02-28,3.4,13.1,12.5,3.2,NA,0.4445,NA,NA,3.4,2,2021,3.2,post-upgrade,Average
+Newmarket,2021-11-30,3,13.3,12.8,2.9,NA,0.5205,NA,NA,3,11,2021,2.9,post-upgrade,Average
+Newmarket,2018-05-31,3.7,13.4,7.9,NA,NA,0.4188,NA,NA,2.3,5,2018,2.3,post-upgrade,Calculated
+Newmarket,2020-04-30,2.4,13.4,16.3,NA,NA,0.6643,NA,NA,2.9,4,2020,2.9,post-upgrade,Calculated
+Newmarket,2018-07-31,4.2,13.7,7.8,NA,NA,0.3585,NA,NA,2.6,7,2018,2.6,post-upgrade,Calculated
+Newmarket,2014-04-30,20.7,132.2,231.9,39.6,NA,0.7751,NA,NA,35.9,4,2014,39.6,pre-upgrade,Average
+Newmarket,2014-07-31,34.4,132.4,146.6,38.3,NA,0.4628,NA,NA,38,7,2014,38.3,pre-upgrade,Average
+Newmarket,2014-05-31,31.3,133.2,181.2,42.5,NA,0.5281,NA,NA,41.2,5,2014,42.5,pre-upgrade,Average
+Newmarket,2009-02-28,27.9,134.8,NA,NA,NA,0.6347,NA,NA,NA,2,2009,NA,pre-upgrade,NA
+Newmarket,2017-02-28,28.3,137.3,174.5,37.4,NA,0.5662,NA,NA,37,2,2017,37.4,upgrade period,Average
+Newmarket,2011-12-31,31,139,NA,NA,NA,0.5894,NA,NA,NA,12,2011,NA,pre-upgrade,NA
+Newmarket,2022-03-31,3.1,14.2,10.7,2.4,NA,0.5508,NA,NA,2.3,3,2022,2.4,post-upgrade,Average
+Newmarket,2019-02-28,3.6,14.7,41.2,10,NA,0.4863,NA,NA,10.2,2,2019,10,post-upgrade,Average
+Newmarket,2019-11-30,4.2,14.9,9.3,2.7,NA,0.4116,NA,NA,2.7,11,2019,2.7,post-upgrade,Average
+Newmarket,2011-11-30,23.1,143.5,NA,NA,NA,0.7634,NA,NA,NA,11,2011,NA,pre-upgrade,NA
+Newmarket,2009-03-31,20.7,143.7,NA,NA,NA,0.8482,NA,NA,NA,3,2009,NA,pre-upgrade,NA
+Newmarket,2008-12-31,21.2,145.7,NA,NA,NA,0.8616,NA,NA,NA,12,2008,NA,pre-upgrade,NA
+Newmarket,2021-04-30,3.8,15.5,11,NA,NA,0.5021,NA,NA,2.6,4,2021,2.6,post-upgrade,Calculated
+Newmarket,2010-04-30,21.7,151.7,NA,NA,NA,0.8092,NA,NA,NA,4,2010,NA,pre-upgrade,NA
+Newmarket,2009-04-30,23.1,152.5,NA,NA,NA,0.7835,NA,NA,NA,4,2009,NA,pre-upgrade,NA
+Newmarket,2018-08-31,4.8,16.6,15.5,NA,NA,0.4014,NA,NA,4.6,8,2018,4.6,post-upgrade,Calculated
+Newmarket,2022-02-28,3.6,16.9,14,3.1,NA,0.5491,NA,NA,3.1,2,2022,3.1,post-upgrade,Average
+Newmarket,2016-02-29,26.1,160.6,215,36,NA,0.6948,NA,NA,37.2,2,2016,36,pre-upgrade,Average
+Newmarket,2017-01-31,32.9,162.2,177.1,36.4,NA,0.5719,NA,NA,37.2,1,2017,36.4,upgrade period,Average
+Newmarket,2011-10-31,27.5,164.6,NA,NA,NA,0.7032,NA,NA,NA,10,2011,NA,pre-upgrade,NA
+Newmarket,2010-02-28,21.8,165.7,NA,NA,NA,0.7205,NA,NA,NA,2,2010,NA,pre-upgrade,NA
+Newmarket,2014-01-31,31.6,174,249.7,47.3,NA,0.6408,NA,NA,46.8,1,2014,47.3,pre-upgrade,Average
+Newmarket,2018-03-31,3.9,18.2,15.7,3.3,NA,0.5648,NA,NA,3.3,3,2018,3.3,post-upgrade,Average
+Newmarket,2021-07-31,3.8,18.5,30,NA,NA,0.5521,NA,NA,6.5,7,2021,6.5,post-upgrade,Calculated
+Newmarket,2018-01-31,5.3,18.6,21.6,6,NA,0.4381,NA,NA,5.9,1,2018,6,post-upgrade,Average
+Newmarket,2020-01-31,4.1,18.9,18.7,4.1,NA,0.5846,NA,NA,3.8,1,2020,4.1,post-upgrade,Average
+Newmarket,2016-03-31,27.1,181.8,215.4,33.1,NA,0.7355,NA,NA,35.2,3,2016,33.1,pre-upgrade,Average
+Newmarket,2017-03-31,34.5,184.1,193,37.4,NA,0.6145,NA,NA,37.7,3,2017,37.4,upgrade period,Average
+Newmarket,2020-12-31,4,19,14.5,3,NA,0.5804,NA,NA,3,12,2020,3,post-upgrade,Average
+Newmarket,2018-10-31,5.4,19.6,24.8,NA,NA,0.4407,NA,NA,6.8,10,2018,6.8,post-upgrade,Calculated
+Newmarket,2010-03-31,18.9,199.5,NA,NA,NA,1.37,NA,NA,NA,3,2010,NA,pre-upgrade,NA
+Newmarket,2017-09-30,7.8,20.3,11.6,4.6,NA,0.3218,NA,NA,4.3,9,2017,4.6,upgrade period,Average
+Newmarket,2020-03-31,4.4,20.7,39.1,8.6,NA,0.704,NA,NA,6.7,3,2020,8.6,post-upgrade,Average
+Newmarket,2017-04-30,30.5,207.1,200.6,30.6,NA,0.8078,NA,NA,29.8,4,2017,30.6,upgrade period,Average
+Newmarket,2018-02-28,4.4,21.4,25.9,5.3,NA,0.5441,NA,NA,5.7,2,2018,5.3,post-upgrade,Average
+Newmarket,2019-01-31,5.7,23.2,23.5,5.9,NA,0.5038,NA,NA,5.6,1,2019,5.9,post-upgrade,Average
+Newmarket,2021-09-30,5.5,23.3,17.9,NA,NA,0.4534,NA,NA,4.7,9,2021,4.7,post-upgrade,Calculated
+Newmarket,2019-12-31,4.8,24.5,13.4,2.5,NA,0.62,NA,NA,2.6,12,2019,2.5,post-upgrade,Average
+Newmarket,2020-02-29,6.4,27.3,20.4,4.8,NA,0.5224,NA,NA,4.7,2,2020,4.8,post-upgrade,Average
+Newmarket,2018-12-31,6.2,29.3,25.4,5.3,NA,0.5756,NA,NA,5.3,12,2018,5.3,post-upgrade,Average
+Newmarket,2017-08-31,11.1,31.3,23.8,8.7,NA,0.3364,NA,NA,8.5,8,2017,8.7,upgrade period,Average
+Newmarket,2015-09-30,11.8,35,110.7,37.1,NA,0.3804,NA,NA,34.9,9,2015,37.1,pre-upgrade,Average
+Newmarket,2010-09-30,10.7,37.2,NA,NA,NA,0.4177,NA,NA,NA,9,2010,NA,pre-upgrade,NA
+Newmarket,2021-06-30,1.3,4.2,5.9,NA,NA,0.3879,NA,NA,1.8,6,2021,1.8,post-upgrade,Calculated
+Newmarket,2018-09-30,6.6,40.8,21.5,NA,NA,0.42,NA,NA,6.1,9,2018,6.1,post-upgrade,Calculated
+Newmarket,2008-08-31,10.5,41,NA,NA,NA,0.5685,NA,NA,NA,8,2008,NA,pre-upgrade,NA
+Newmarket,2009-09-30,10.96,42.4,NA,NA,NA,0.4684,NA,NA,NA,9,2009,NA,pre-upgrade,NA
+Newmarket,2018-11-30,5.2,48.1,53.8,6.7,NA,0.8477,NA,NA,7.6,11,2018,6.7,post-upgrade,Average
+Newmarket,2015-11-30,14.2,48.8,151,44.3,NA,0.478,NA,NA,37.9,11,2015,44.3,pre-upgrade,Average
+Newmarket,2010-08-31,13.9,49.5,NA,NA,NA,0.4385,NA,NA,NA,8,2010,NA,pre-upgrade,NA
+Newmarket,2020-10-31,1.6,5.2,17.2,NA,NA,0.3737,NA,NA,5.5,10,2020,5.5,post-upgrade,Calculated
+Newmarket,2015-10-31,15.4,50,132.9,41.1,NA,0.3946,NA,NA,40.4,10,2015,41.1,pre-upgrade,Average
+Newmarket,2009-08-31,11.6,50.4,NA,NA,NA,0.5353,NA,NA,NA,8,2009,NA,pre-upgrade,NA
+Newmarket,2009-10-31,12.6,51.9,NA,NA,NA,0.5104,NA,NA,NA,10,2009,NA,pre-upgrade,NA
+Newmarket,2008-09-30,12.6,54,NA,NA,NA,0.6189,NA,NA,NA,9,2008,NA,pre-upgrade,NA
+Newmarket,2010-07-31,14.9,55,NA,NA,NA,0.4451,NA,NA,NA,7,2010,NA,pre-upgrade,NA
+Newmarket,2015-08-31,17.4,59.4,129.7,38.4,NA,0.4171,NA,NA,37.3,8,2015,38.4,pre-upgrade,Average
+Newmarket,2019-07-31,1.9,6.1,14.9,NA,NA,0.3592,NA,NA,5,7,2019,5,post-upgrade,Calculated
+Newmarket,2019-06-30,1.7,6.2,18.5,NA,NA,0.4473,NA,NA,5,6,2019,5,post-upgrade,Calculated
+Newmarket,2019-05-31,1.6,6.3,27.5,NA,NA,0.4788,NA,NA,6.9,5,2019,6.9,post-upgrade,Calculated
+Newmarket,2020-07-31,2.2,6.5,9,NA,NA,0.3413,NA,NA,3.2,7,2020,3.2,post-upgrade,Calculated
+Newmarket,2016-08-31,18.1,60.3,155.4,46.5,NA,0.4016,NA,NA,46.5,8,2016,46.5,pre-upgrade,Average
+Newmarket,2008-07-31,15.5,62,NA,NA,NA,0.5537,NA,NA,NA,7,2008,NA,pre-upgrade,NA
+Newmarket,2009-11-30,15,64.4,NA,NA,NA,0.573,NA,NA,NA,11,2009,NA,pre-upgrade,NA
+Newmarket,2010-10-31,15.9,64.9,NA,NA,NA,0.49,NA,NA,NA,10,2010,NA,pre-upgrade,NA
+Newmarket,2015-07-31,18.8,65.8,127.8,36.9,NA,0.4172,NA,NA,36.8,7,2015,36.9,pre-upgrade,Average
+Newmarket,2011-07-31,17.7,66.8,NA,NA,NA,0.4462,NA,NA,NA,7,2011,NA,pre-upgrade,NA
+Newmarket,2016-06-30,18.3,66.9,121.7,33.4,NA,0.4428,NA,NA,33,6,2016,33.4,pre-upgrade,Average
+Newmarket,2014-11-30,18.3,68.8,167,44.5,NA,0.443,NA,NA,45.3,11,2014,44.5,pre-upgrade,Average
+Newmarket,2010-06-30,17.3,69,NA,NA,NA,0.4875,NA,NA,NA,6,2010,NA,pre-upgrade,NA
+Newmarket,2011-08-31,18.3,69.5,NA,NA,NA,0.4887,NA,NA,NA,8,2011,NA,pre-upgrade,NA
+Newmarket,2020-11-30,1.9,7.5,9.8,2.7,NA,0.4104,NA,NA,2.9,11,2020,2.7,post-upgrade,Average
+Newmarket,2021-10-31,2.3,7.7,14.8,NA,NA,0.413,NA,NA,4.3,10,2021,4.3,post-upgrade,Calculated
+Newmarket,2020-05-31,1.9,7.8,9.2,NA,NA,0.4648,NA,NA,2.4,5,2020,2.4,post-upgrade,Calculated
+Newmarket,2017-07-31,23.3,71.5,76.3,25.1,NA,0.3414,NA,NA,26.8,7,2017,25.1,upgrade period,Average
+Newmarket,2009-07-31,15.3,74.2,NA,NA,NA,0.6158,NA,NA,NA,7,2009,NA,pre-upgrade,NA
+Newmarket,2021-05-31,2,8.1,11.1,NA,NA,0.4758,NA,NA,2.8,5,2021,2.8,post-upgrade,Calculated
+Newmarket,2020-09-30,3,8.5,12.6,NA,NA,0.3237,NA,NA,4.7,9,2020,4.7,post-upgrade,Calculated
+Newmarket,2011-09-30,20.6,80.8,NA,NA,NA,0.5056,NA,NA,NA,9,2011,NA,pre-upgrade,NA
+Newmarket,2008-06-30,20.6,81,NA,NA,NA,0.4605,NA,NA,NA,6,2008,NA,pre-upgrade,NA
+Newmarket,2010-12-31,19.2,84,NA,NA,NA,0.5172,NA,NA,NA,12,2010,NA,pre-upgrade,NA
+Newmarket,2016-07-31,24,84.4,149.4,43,NA,0.4011,NA,NA,44.7,7,2016,43,pre-upgrade,Average
+Newmarket,2010-11-30,17.6,85,NA,NA,NA,0.54,NA,NA,NA,11,2010,NA,pre-upgrade,NA
+Newmarket,2014-10-31,20.6,85.6,171.4,41.8,NA,0.4988,NA,NA,41.3,10,2014,41.8,pre-upgrade,Average
+Newmarket,2008-01-31,17.6,87,NA,NA,NA,0.6657,NA,NA,NA,1,2008,NA,pre-upgrade,NA
+Newmarket,2009-05-31,18.9,89.9,NA,NA,NA,0.5657,NA,NA,NA,5,2009,NA,pre-upgrade,NA
+Newmarket,2021-08-31,2.4,9,5.2,NA,NA,0.4348,NA,NA,1.4,8,2021,1.4,post-upgrade,Calculated
+Newmarket,2017-11-30,3,9.3,19.6,6.3,NA,0.3643,NA,NA,6.5,11,2017,6.3,upgrade period,Average
+Newmarket,2017-12-31,3.5,9.8,15,5.2,NA,0.3397,NA,NA,5.3,12,2017,5.2,upgrade period,Average
+Newmarket,2019-04-30,2.2,9.8,39.6,NA,NA,0.5486,NA,NA,8.7,4,2019,8.7,post-upgrade,Calculated
+Newmarket,2018-06-30,3.5,9.9,6.7,NA,NA,0.3437,NA,NA,2.3,6,2018,2.3,post-upgrade,Calculated
+Newmarket,2019-09-30,3.3,9.9,18.2,NA,NA,0.3356,NA,NA,6.5,9,2019,6.5,post-upgrade,Calculated
+Newmarket,2011-02-28,22.7,92.5,NA,NA,NA,0.54,NA,NA,NA,2,2011,NA,pre-upgrade,NA
+Newmarket,2009-06-30,20.1,92.8,NA,NA,NA,0.5613,NA,NA,NA,6,2009,NA,pre-upgrade,NA
+Newmarket,2008-05-31,18.4,94,NA,NA,NA,0.5935,NA,NA,NA,5,2008,NA,pre-upgrade,NA
+Newmarket,2011-06-30,22.7,94.7,NA,NA,NA,0.5163,NA,NA,NA,6,2011,NA,pre-upgrade,NA
+Newmarket,2016-10-31,26.3,96.6,158.9,43.9,NA,0.4793,NA,NA,39.8,10,2016,43.9,pre-upgrade,Average
+Newmarket,2010-05-31,20.3,97.8,NA,NA,NA,0.5287,NA,NA,NA,5,2010,NA,pre-upgrade,NA
+Newmarket,2015-05-31,27.1,98,149.3,36.8,NA,0.4439,NA,NA,40.4,5,2015,36.8,pre-upgrade,Average
+Newmarket,2012-06-30,21.6,102.7,NA,NA,NA,0.52,NA,NA,NA,6,2012,NA,pre-upgrade,NA
+Newmarket,2012-04-30,27.6,107.7,NA,NA,NA,0.47,NA,NA,NA,4,2012,NA,pre-upgrade,NA
+Newmarket,2012-01-31,30.5,120.7,NA,NA,NA,0.52,NA,NA,NA,1,2012,NA,pre-upgrade,NA
+Newmarket,2012-03-31,24.9,121.3,NA,NA,NA,0.58,NA,NA,NA,3,2012,NA,pre-upgrade,NA
+Newmarket,2013-06-30,21.9,122.8,175.9,31.6,NA,0.638,NA,NA,33.1,6,2013,31.6,pre-upgrade,Average
+Newmarket,2013-02-28,30,130,NA,NA,NA,0.5495,NA,NA,NA,2,2013,NA,pre-upgrade,NA
+Newmarket,2012-12-31,29.7,130.4,NA,NA,NA,0.5264,NA,NA,NA,12,2012,NA,pre-upgrade,NA
+Newmarket,2013-01-31,28.7,131.9,NA,NA,NA,0.5835,NA,NA,NA,1,2013,NA,pre-upgrade,NA
+Newmarket,2012-11-30,32.4,133.8,NA,NA,NA,0.4968,NA,NA,NA,11,2012,NA,pre-upgrade,NA
+Newmarket,2013-05-31,29.5,143.9,NA,35.8,NA,0.5754,NA,NA,NA,5,2013,35.8,pre-upgrade,Average
+Newmarket,2013-04-30,30.9,157.3,NA,31.6,NA,0.6134,NA,NA,NA,4,2013,31.6,pre-upgrade,Average
+Newmarket,2013-03-31,25.9,161,NA,NA,NA,0.7505,NA,NA,NA,3,2013,NA,pre-upgrade,NA
+Newmarket,2012-07-31,12.1,39.6,NA,NA,NA,0.4,NA,NA,NA,7,2012,NA,pre-upgrade,NA
+Newmarket,2012-08-31,13.5,44.6,NA,NA,NA,0.4,NA,NA,NA,8,2012,NA,pre-upgrade,NA
+Newmarket,2012-09-30,15.4,52.3,NA,NA,NA,0.3995,NA,NA,NA,9,2012,NA,pre-upgrade,NA
+Newmarket,2013-08-31,12.5,52.7,148.3,35.1,NA,0.5067,NA,NA,35.1,8,2013,35.1,pre-upgrade,Average
+Newmarket,2012-10-31,16.5,68.4,NA,NA,NA,0.4672,NA,NA,NA,10,2012,NA,pre-upgrade,NA
+Newmarket,2013-09-30,16.6,72.4,155.9,35.5,NA,0.5658,NA,NA,33.1,9,2013,35.5,pre-upgrade,Average
+Newmarket,2013-10-31,19.8,74.8,140,37,NA,0.4655,NA,NA,36.1,10,2013,37,pre-upgrade,Average
+Newmarket,2013-07-31,18.3,88.1,154.9,33.7,NA,0.5188,NA,NA,35.9,7,2013,33.7,pre-upgrade,Average
+Newmarket,2012-05-31,21.7,94.4,NA,NA,NA,0.53,NA,NA,NA,5,2012,NA,pre-upgrade,NA
+Newmarket,2012-02-29,23.8,94.8,NA,NA,NA,0.48,NA,NA,NA,2,2012,NA,pre-upgrade,NA
+Newmarket,2013-12-31,26.1,95.6,155.4,42.6,NA,0.445,NA,NA,41.9,12,2013,42.6,pre-upgrade,Average
+Newmarket,2013-11-30,27.5,98.3,161.5,45.5,NA,0.4356,NA,NA,44.5,11,2013,45.5,pre-upgrade,Average
+Newfields,2022-05-31,0,0,10.1,26,NA,0.091,23.8,2.1,13.3,5,2022,26,no upgrades,Average
+Newfields,2022-12-31,0,0,10.7,28.6,NA,0.045,21.5,7.1,28.6,12,2022,28.6,no upgrades,Average
+Newfields,2023-02-28,0,0.6,11.8,29.8,NA,0.048,26.7,3.1,29.5,2,2023,29.8,no upgrades,Average
+Newfields,2023-03-31,17,16.3,11.9,25.6,NA,0.056,22.2,3.4,25.5,3,2023,25.6,no upgrades,Average
+Newfields,2023-01-31,0,0,12.4,31.5,NA,0.047,27,4.5,31.7,1,2023,31.5,no upgrades,Average
+Newfields,2022-04-30,0,2.1,12.6,26,NA,0.103,24.3,1.8,14.7,4,2022,26,no upgrades,Average
+Newfields,2023-08-31,0,0,19.8,19,NA,0.05,18.6,0.44,47.6,8,2023,19,no upgrades,Average
+Newfields,2023-06-30,0.5,0.4,2.45,18.6,NA,0.042,17.5,1.1,7,6,2023,18.6,no upgrades,Average
+Newfields,2022-09-30,2,1.2,4.9,20.2,NA,0.029,19,1,20.3,9,2022,20.2,no upgrades,Average
+Newfields,2022-10-31,0,0,5.2,19,NA,0.033,15.8,3.2,18.9,10,2022,19,no upgrades,Average
+Newfields,2023-09-30,1,1,5.2,18.9,NA,0.033,18.2,0.52,18.9,9,2023,18.9,no upgrades,Average
+Newfields,2022-07-31,0,0.33,5.5,21.1,NA,0.091,20.3,0.8,7.3,7,2022,21.1,no upgrades,Average
+Newfields,2023-04-30,7,7.3,5.7,16.4,NA,0.041,14,2.4,16.7,4,2023,16.4,no upgrades,Average
+Newfields,2022-11-30,0,0,5.9,20.4,NA,0.035,14,6.4,20.2,11,2022,20.4,no upgrades,Average
+Newfields,2023-05-31,0,0,7.3,17.25,NA,0.051,15,2.25,17.2,5,2023,17.25,no upgrades,Average
+Newfields,2023-07-31,0,0,7.3,20.9,NA,0.042,20.8,0.18,20.9,7,2023,20.9,no upgrades,Average
+Newfields,2023-11-30,0,0,7.4,22.2,NA,0.04,12.8,9.4,22.2,11,2023,22.2,no upgrades,Average
+Newfields,2022-08-31,0,0.67,7.6,24.6,NA,0.077,24.2,0.4,11.9,8,2022,24.6,no upgrades,Average
+Newfields,2022-06-30,0,0.48,8.2,23.4,NA,0.091,20.8,2.6,10.8,6,2022,23.4,no upgrades,Average
+Newfields,2023-12-31,0,0,8.2,24.8,NA,0.04,14.8,10,24.6,12,2023,24.8,no upgrades,Average
+Newfields,2023-10-31,0,0,9,16.9,NA,0.064,13,3.9,16.9,10,2023,16.9,no upgrades,Average
+Newmarket,2022-11-30,4.2,13.5,10.1,3.1,NA,0.3858,2.39,0.764,3.1,11,2022,3.1,post-upgrade,Average
+Newmarket,2023-08-31,2.8,10.5,10.3,2.7,NA,0.4586,0.7,2,2.7,8,2023,2.7,post-upgrade,Average
+Newmarket,2023-02-28,2.9,11.2,10.9,2.8,NA,0.4708,1.8,1,2.8,2,2023,2.8,post-upgrade,Average
+Newmarket,2023-04-30,3.8,16.1,11.6,2.8,NA,0.5049,2.5,0.3,2.8,4,2023,2.8,post-upgrade,Average
+Newmarket,2023-07-31,2.9,12.5,11.7,2.7,NA,0.516,2.2,0.5,2.7,7,2023,2.7,post-upgrade,Average
+Newmarket,2023-11-30,1.9,7,12,3.2,NA,0.4445,1.3,1.9,3.2,11,2023,3.2,post-upgrade,Average
+Newmarket,2023-09-30,2.8,11.3,12.2,3,NA,0.4879,2,1,3,9,2023,3,post-upgrade,Average
+Newmarket,2022-12-31,3.9,17.8,13.3,2.9,NA,0.5535,2.2,0.07,2.9,12,2022,2.9,post-upgrade,Average
+Newmarket,2023-03-31,4.4,24,15.1,2.8,NA,0.6506,2.2,0.6,2.8,3,2023,2.8,post-upgrade,Average
+Newmarket,2023-06-30,6.1,21,15.1,4.3,NA,0.4163,4,0.3,4.4,6,2023,4.3,post-upgrade,Average
+Newmarket,2023-05-31,4.9,22.7,16.7,3.6,NA,0.5542,3.3,0.3,3.6,5,2023,3.6,post-upgrade,Average
+Newmarket,2023-12-31,2.8,19.6,18.7,3.4,NA,0.6549,1.36,2.04,3.4,12,2023,3.4,post-upgrade,Average
+Newmarket,2023-01-31,4.8,25.5,23.2,4.4,NA,0.6364,2.1,2.3,4.4,1,2023,4.4,post-upgrade,Average
+Newmarket,2022-07-31,1.9,5.2,4.4,1.6,NA,0.3339,1.3,0.3,1.6,7,2022,1.6,post-upgrade,Average
+Newmarket,2022-06-30,1.9,6.1,5.5,1.8,NA,0.3775,1.5,0.3,1.7,6,2022,1.8,post-upgrade,Average
+Newmarket,2022-08-31,2.6,7.3,5.7,2,NA,0.3371,1.66,0.351,2,8,2022,2,post-upgrade,Average
+Newmarket,2022-10-31,3.3,10.5,5.9,1.8,NA,0.3878,1.46,0.36,1.8,10,2022,1.8,post-upgrade,Average
+Newmarket,2022-05-31,2.1,7.4,6.3,1.8,NA,0.4265,1.6,0.2,1.8,5,2022,1.8,post-upgrade,Average
+Newmarket,2022-09-30,2.7,8.4,6.6,2.2,NA,0.3655,1.6,0.6,2.2,9,2022,2.2,post-upgrade,Average
+Newmarket,2023-10-31,3.2,11.4,9.7,2.7,NA,0.4306,2,0.7,2.7,10,2023,2.7,post-upgrade,Average
+Newmarket,2022-04-30,2.8,13.5,9.8,2.1,NA,0.5716,1.5,0.6,2.1,4,2022,2.1,post-upgrade,Average
