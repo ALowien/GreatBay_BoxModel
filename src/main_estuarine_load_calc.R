@@ -385,7 +385,7 @@ for (i in 23:32) {
 
 
 #AP Flux now in kg/year
-write.csv(AP_Flux, "results/main_estuarine_load_calc/AP_Flux_kgyr24.csv")
+write.csv(AP_Flux, "results/main_estuarine_load_calc/AP_Flux_kgyr.csv")
 
 
 #MONTHLY ADAMS POINT LOADS
