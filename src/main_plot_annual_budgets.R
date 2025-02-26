@@ -262,10 +262,6 @@ panel_fig <- ggplot(subset(full_combo, Balance=="Storage"),
         legend.title = element_text(size=18))
 panel_fig
 
-ggsave("./results/manuscript_figures/Original_Figure4.jpg", plot=panel_fig,
-       width=8, height = 6, units = "in", dpi=300)
-
-
 ##FIGURE FOR MANUSCRIPT points colored by input loads
 n_full <- full_combo %>%
   filter(Solute == "DIN" | Solute == "PN" | Solute == "TN") %>%
