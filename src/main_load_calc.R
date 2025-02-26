@@ -10,9 +10,9 @@
 Packages <- c("readxl", "dplyr", "ggplot2", "measurements", "plotly", "lubridate","cowplot", "ggpubr", "dataRetrieval", "gridExtra", "tidyr", "viridis")
 lapply(Packages, library, character.only = TRUE)
 
-#Read in cleaned up concentration data frame (df_conc.csv) from the main_dataformat.R script
+#Read in cleaned up concentration data frame (surfacewaterchemistry_conc.csv) from the main_dataformat.R script
 #the dataframe is tidal tributary solute concentrations over time and includes site id, sample collection date, solute concentrations, and water chemistry (pH, DO)
-conc <- read.csv("results/main_dataformat/df_conc.csv")
+conc <- read.csv("./data/emd/surfacewaterchemistry_conc.csv")
 
 conc$START_DATE<- as.POSIXct(conc$START_DATE) #fix class of date column
 
@@ -669,6 +669,7 @@ FY_combinedtable <- FY_combinedtable %>%
 
 colnames(FY_combinedtable)
 
+#Averages in mg/L, convert PO4 to ug/L for Table 2
 avg_river_summary <- FY_combinedtable %>%
   summarize(across(FW_PO4:FW_TSS, 
                    list(mean = ~mean(., na.rm = TRUE), 
