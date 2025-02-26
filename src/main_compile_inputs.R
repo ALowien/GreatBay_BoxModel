@@ -225,21 +225,8 @@ Budget_Components_Summary <- Budget_Components %>%
   group_by(Balance, Solute, Year) %>%
   summarize(Loadkgyr = sum(Load_kgyr, na.rm=F))
 
-Plot_Summary <- ggplot(Budget_Components_Summary, aes(Year, Loadkgyr, colour = Balance)) + geom_point() +
-  geom_line() +
-  scale_color_viridis_d() +
-  scale_x_continuous(limits=c(2008,2024),breaks=seq(from=2008, to=2023, by=2)) +
-  facet_wrap(~Solute, scales="free")+ theme_cowplot()
-
-Plot_Summary
-
 write.csv(Budget_Components, "results/main_compile_inputs/Budget_Components.csv")
 
-
-#Table of each input as a % of total input
-Budget_Components_Percent <- Budget_Components %>%
-  pivot_wider(names_from= "Solute",
-              values_from="Load_kgyr")
 
 Budget_Components_Summary_wide <- Budget_Components_Summary %>%
   pivot_wider(names_from = "Solute",
@@ -248,7 +235,7 @@ Budget_Components_Summary_wide <- Budget_Components_Summary %>%
   select(Balance, Year, DIN_annual_input = DIN, DOC_annual_input = DOC, NH4_annual_input = NH4, NO3_NO2_annual_input = NO3_NO2, PN_annual_input = PN, PO4_annual_input = PO4, TDN_annual_input = TDN, TN_annual_input = TN, TSS_annual_input = TSS)
 
 
-#Table of Average Freshwater Input
+#Plot of freshwater inputs
 FreshwaterInputs <- Budget_Components %>%
   filter(Balance == "Input") %>%
   filter(Type != "APH" & Type != "APL") %>%
@@ -257,80 +244,48 @@ FreshwaterInputs <- Budget_Components %>%
             sd = signif(sd(Load_kgyr, na.rm=T),2))
 
 
-#
 FreshwaterInputsPlot <- Budget_Components %>%
   filter(Balance == "Input") %>%
   filter(Type != "APH" & Type != "APL" & Type != "Groundwater" & Type != "Runoff") %>%
   filter(Solute == "DIN" | Solute == "DOC" | Solute == "PN" |
            Solute == "PO4" | Solute =="TN" | Solute == "TSS")
 
-ggplot(FreshwaterInputsPlot, aes(Year, (Load_kgyr/1700), color=Type)) +
-  geom_point(size=2) +
-  scale_x_continuous(limits=c(2008,2023), breaks = seq(from=2008,to=2023,by=2)) +
-  geom_line() +
-  scale_color_viridis_d(option="plasma", end=0.86) +
+
+
+ggplot(FreshwaterInputsPlot, aes(Year, (Load_kgyr/1700), fill=Type)) +
+  geom_bar(position="stack", stat="identity") +
+  scale_x_continuous(limits=c(2007.5,2023.5), breaks = seq(from=2008,to=2023,by=2)) +
+  scale_fill_viridis_d(option="plasma", end=0.86) +
   facet_wrap(~Solute, scales = "free_y") +
   theme_bw() +
-  ylab("Load kg/ha/yr") +
+  ylab(expression(Load~kg~ha^-1~yr^-1)) +
   theme(axis.title.x = element_blank(), 
-        axis.text=element_text(size=15, color="black"),
+        axis.text=element_text(size=10, angle = 90),
         axis.title = element_text(size=18),
         strip.background = element_blank(),
         strip.text = element_text(size=14, face="bold", hjust=0, vjust=-1),
         legend.text = element_text(size=12),
         legend.title = element_text(size=18))
 
-#
-AP_Plot <- Budget_Components %>%
-  filter(Type == "APH" | Type == "APL") %>%
-  filter(Solute == "DIN" | Solute == "DOC" | Solute == "PN" |
-           Solute == "PO4" | Solute =="TN" | Solute == "TSS")
 
-ggplot(AP_Plot , aes(Year, (Load_kgyr/1700), color=Balance)) +
-  geom_point(size=2) +
-  scale_x_continuous(limits=c(2008,2023), breaks = seq(from=2008,to=2023,by=2)) +
-  geom_line() +
-  scale_color_viridis_d(option="plasma", end=0.86, labels = c("High Tide Input", "Low Tide Output")) +
-  facet_wrap(~Solute, scales = "free_y") +
-  theme_bw() +
-  ylab("Load (kg/ha/yr)") +
-  theme(axis.title.x = element_blank(), 
-        axis.text=element_text(size=15, color="black"),
-        axis.title = element_text(size=18),
-        strip.background = element_blank(),
-        strip.text = element_text(size=14, face="bold", hjust=0, vjust=-1),
-        legend.text = element_text(size=12),
-        legend.title = element_blank())
+#Table of each input as a % of total Freshwater input
+Budget_Components_Percent <- Budget_Components %>%
+  pivot_wider(names_from= "Solute",
+              values_from="Load_kgyr") %>% 
+  filter(Balance == "Input") %>%
+  filter(Type != "APH")
 
-result <- AP_Plot %>%
-  group_by(Year, Solute) %>%
-  summarize(
-    Input = sum(Load_kgyr[Balance == "Input"], na.rm = F),
-    Output = sum(Load_kgyr[Balance == "Output"], na.rm = F),
-    Difference = (Input - Output)/1700
-  ) %>%
-  ungroup()
+Inputs <- Budget_Components_Percent %>%
+  group_by(Type) %>%
+  summarize(across(DIN:TSS, ~ mean(.x, na.rm=T)))
 
-# View the result
-print(result)
 
-result$Net <- ifelse(result$Difference < 0, "Net Export", "Net Retention")
+Inputs_Total <- Inputs %>%
+  summarize(across(DIN:TSS, ~ sum(.x, na.rm=T))) 
 
-result <- result %>%
-  filter(!is.na(Net))
+Inputs_Percent <- Inputs %>%
+  mutate(across(DIN:TSS, ~ .x / Inputs_Total[[cur_column()]] * 100))
 
-ggplot(result, aes(Year, Difference)) + geom_point(aes(color=Net),size=2.5) +
-  geom_line(size=0.5, alpha=0.75) +
-  geom_hline(yintercept = 0, linetype="dashed") +
-  scale_x_continuous(limits=c(2008,2023), breaks = seq(from=2008,to=2023,by=2)) +
-  ylab("Net Difference Tidal Input - Tidal Output (kg/ha/yr)") +
-  theme_bw() +
-  facet_wrap(~Solute, scales = "free_y") +
-  theme(axis.title.x = element_blank(), 
-        axis.text=element_text(size=15, color="black"),
-        axis.title = element_text(size=16),
-        strip.background = element_blank(),
-        strip.text = element_text(size=14, face="bold", hjust=0, vjust=-1),
-        legend.text = element_text(size=12),
-        legend.title = element_blank())
+sum(Inputs_Percent[1:4, 9]) #TN
 
+sum(Inputs_Percent[1:4, 2]) #DIN
