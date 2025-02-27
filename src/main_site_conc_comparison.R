@@ -9,7 +9,7 @@
 
 #Load required packages.
 Packages <- c("readxl", "dplyr", "lubridate", "moments", "measurements", "stats", "ggplot2", 
-              "cowplot", "tidyr")
+              "cowplot", "tidyr", "car")
 
 lapply(Packages, library, character.only = TRUE)
 
@@ -218,11 +218,11 @@ flex_table <- flextable(combined_data)
 flex_table %>% autofit()
 
 
-#split wwtf into pre and post ugrades, put split 1t 2017
+#split wwtf into pre and post ugrades
 wwtf_summary2$upgrade <- ifelse(wwtf_summary2$CY < 2020, "pre",  "post")
 
-#Table 1 WWTF pre/post
-wwtf_table1_split <- wwtf_summary2 %>%
+#Table 2 WWTF pre/post
+wwtf_table2_split <- wwtf_summary2 %>%
   pivot_longer(cols=c(TN_MGL:PO4_MGL),
                names_to = "solute",
                values_to = "concentration") %>%
@@ -232,22 +232,21 @@ wwtf_table1_split <- wwtf_summary2 %>%
     sd = sd(concentration, na.rm = TRUE),
     n = sum(!is.na(concentration)),
     .groups = "drop") %>%
-  mutate(summary = paste0(round(mean, 2), " ± ", round(sd, 2), " (n=", n, ")")) %>% # Combine mean, sd, and n into a single summary column
+  mutate(summary = paste0(signif(mean, 2), " ± ", signif(sd, 2), " (n=", n, ")")) %>% # Combine mean, sd, and n into a single summary column
   pivot_wider(names_from = upgrade, values_from = summary) %>%   # Pivot wider to create columns for each upgrade (post, pre)
   ungroup() %>%
    select(solute, pre, post)
 
-wwtf_table1_final <- wwtf_table1_split %>%
-  # Group by solute to handle duplicates
-  group_by(solute) %>%
-  # Fill NA values in the pre and post columns using the non-NA values
-  summarize(
-    pre = coalesce(pre[!is.na(pre)], pre[is.na(pre)]),
-    post = coalesce(post[!is.na(post)], post[is.na(post)]),
-    .groups = "drop"
-  )  
 
-write.csv(wwtf_table1_final, file = "./results/manuscript_figures/tables/wwtf_split_conc.csv")
+wwtf_table2_final <- wwtf_table2_split %>%
+  group_by(solute) %>%
+  summarize(
+    pre = first(na.omit(pre)), 
+    post = first(na.omit(post)), 
+    .groups = "drop")
+
+
+write.csv(wwtf_table2_final, file = "./results/manuscript_figures/tables/wwtf_split_conc.csv")
 
 #Statistics by Source and Solute
 library(agricolae) # For skewness and kurtosis
@@ -269,7 +268,6 @@ normality
 #Adams Point - high vs low tide
 #everything but PN looks pretty good for normality 
 #TDN and PN failed shapiro wilk
-
 #_____________________________________________________
 lapply(ap_conc[,4:13], skewness)
 lapply(ap_conc[,4:13], kurtosis)
@@ -277,17 +275,18 @@ lapply(ap_conc[,4:13], shapiro.test)
 
 ap_conc$PN_MGL_log <- log(ap_conc$PN_MGL)
 lapply(ap_conc[,4:14], shapiro.test)
-lapply(ap_conc[,4:14], skewness) #0.94 to 0.36 skewness PN
-lapply(ap_conc[,4:14], kurtosis) #3.43 to 2.67 kurtosis PN
+lapply(ap_conc[,4:14], skewness) 
+lapply(ap_conc[,4:14], kurtosis)
 
 ap_conc$STATION_ID <- as.factor(ap_conc$STATION_ID)
 
 leveneTest(PN_MGL_log ~ STATION_ID, data=ap_conc)
-lapply(ap_conc[,14], skewness) #0.94 to 0.36 skewness PN
+lapply(ap_conc[,14], skewness) 
 lapply(ap_conc[,14], kurtosis)
 
 leveneTest(DOC_MGL ~ STATION_ID, data=ap_conc)
 leveneTest(TSS_MGL ~ STATION_ID, data=ap_conc)
+leveneTest(TN_MGL ~ STATION_ID, data=ap_conc)
 
 t <- t.test(ap_conc$DOC_MGL[ap_conc$STATION_ID == "GRBAPH"], 
             ap_conc$DOC_MGL[ap_conc$STATION_ID == "GRBAPL"], 
@@ -295,16 +294,15 @@ t <- t.test(ap_conc$DOC_MGL[ap_conc$STATION_ID == "GRBAPH"],
 t
 
 
-solute_columns <- colnames(ap_conc)[c(4:11, 12,13, 14)]
+solute_columns <- colnames(ap_conc)[c(4:14)]
 
-# Apply paired t-test for each column
+# Apply paired t-test for each solute
 pt_test_results <- lapply(solute_columns, function(column_name) {
-  # Perform the paired t-test
+  #Paired t-test
   t_result <- t.test(
     ap_conc[[column_name]][ap_conc$STATION_ID == "GRBAPH"], 
     ap_conc[[column_name]][ap_conc$STATION_ID == "GRBAPL"], 
-    paired = TRUE
-  )
+    paired = TRUE)
   
   # Extract key results
   list(
@@ -313,9 +311,8 @@ pt_test_results <- lapply(solute_columns, function(column_name) {
     df = t_result$parameter,  # Degrees of freedom
     p_value = t_result$p.value,
     mean_diff = t_result$estimate[1], # Difference in means
-    conf_int_lower = t_result$conf.int[1],  # Lower bound of the confidence interval
-    conf_int_upper = t_result$conf.int[2]  # Upper bound of the confidence interval
-  )
+    conf_int_lower = t_result$conf.int[1],  
+    conf_int_upper = t_result$conf.int[2])
 })
 
 # Check the results
@@ -328,8 +325,7 @@ pt_test_summary <- do.call(rbind, lapply(pt_test_results, function(result) {
     P_Value = result$p_value,
     Mean_Difference = result$mean_diff,
     Conf_Int_Lower = result$conf_int_lower,
-    Conf_Int_Upper = result$conf_int_upper
-  )
+    Conf_Int_Upper = result$conf_int_upper)
 }))
 
 # Print the summary table
@@ -337,49 +333,11 @@ print(pt_test_summary)
 
 #calculate % diff bt/ high and low tide
 summary_mean_piv
-per <- summary_mean_piv %>%
+percent_tidaldiff <- summary_mean_piv %>%
+  select(Parameter, GRBAPH, GRBAPL) %>%
   mutate(Percent_Diff = ((GRBAPL - GRBAPH) / GRBAPL) * 100)
 
-
-ggplot(ap_conc, aes(STATION_ID, TSS_MGL)) + 
-  geom_boxplot() +
-  geom_point()
-
-
-
-
-wilcox.test(ap_conc$TN_MGL ~ ap_conc$STATION_ID)
-
-ggplot(ap_conc, aes(STATION_ID, TN_MGL)) + geom_boxplot() + theme_cowplot() +
-  stat_summary(fun=mean, geom="point", shape=20, size=6, color="blue") +
-  theme(axis.title.x = element_blank())
-
-wilcox.test(ap_conc$DIN_MGL ~ ap_conc$STATION_ID)
-
-wilcox.test(ap_conc$PN_MGL ~ ap_conc$STATION_ID)
-
-wilcox.test(ap_conc$TSS_MGL ~ ap_conc$STATION_ID)
-
-wilcox.test(ap_conc$DOC_MGL ~ ap_conc$STATION_ID)
-
-wilcox.test(ap_conc$PO4_MGL ~ ap_conc$STATION_ID)
-
-
-ap_conc_avg <- ap_conc %>%
-  select(STATION_ID, CY, PO4_MGL, DOC_MGL, DIN_MGL, TN_MGL, PN_MGL) %>%
-  group_by(STATION_ID, CY) %>%
-  summarize(across(PO4_MGL:PN_MGL, mean, na.rm=T))
-
-#percent difference in TN b/t high and low tide
-abs(ap_conc_avg[2,5] - ap_conc_avg[1,5]) / ap_conc_avg[1,5] * 100
-#percent difference in PN b/t high and low tide
-abs(ap_conc_avg[2,6] - ap_conc_avg[1,6]) / ap_conc_avg[1,6] * 100
-
-
-
-
-
-#Supplemental Table 1, averages by treatmentplant.
+#Supplemental Table 1, averages by treatment plant
 wwtf_conc <- wwtf %>%
   select(WWTF, Final_TN_mgL, TSS_mgL) %>%
   rename(TN_MGL = Final_TN_mgL,
