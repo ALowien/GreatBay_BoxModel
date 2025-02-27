@@ -1,6 +1,6 @@
 #main_wwtf_format.R
 #Author: Anna Mikulis, University of New Hampshire
-#Last Updated: 12/9/2024
+#Last Updated: 2/25/2025
 
 #This script calculates monthly and annual loads for waste water treatment facilities that discharge to Great Bay Estuary below the head-of-tide monitoring stations on the rivers. 
 #Data has been sourced from the EPA's ECHO (Enforcement and Compliance History) Monitoring Database, annual town reports, published reports, and effluent samples analyzed by the Water Quality Analysis Lab at the University of Hampshire. 
@@ -17,23 +17,21 @@ lapply(Packages, library, character.only = TRUE)
 
 #Read in csv files downloaded from echo.epa.gov (2008-2023 monthly average TN loads for Exeter and Newmarket WWTF, monthly flow for Newfields)
 #Files have been amended to put columns names as the first row.
-subdir <- "data/npdes_wwtf/updated"
+subdir <- "data/npdes_wwtf"
 files <- list.files(path = subdir, pattern = ".csv", full.names = T)  
 df.list <- lapply(files, read.csv)
 
 df <- bind_rows(df.list)
-colnames(df)
 df <- as.data.frame(df)
 
+#Identify treatment plants based on permit numbers
 df$WWTF <- ifelse(df$NPDES.Permit.Number == "NH0100871", "Exeter", 
                   ifelse(df$NPDES.Permit.Number == "NH0100196", "Newmarket", 
                          ifelse(df$NPDES.Permit.Number == "NH0101192", "Newfields", NA)))
 
 unique(df$Parameter.Code)
-unique(df$Parameter.Description)
-
-#parameter codes of interest
-codes <- c("00600","00610", "50050", "00530", "00310")
+#parameter codes of interest for box model (nitrogen, suspended solids, flow)
+codes <- c("00600","00610", "50050", "00530")
 
 df <- df %>% 
   filter(Monitoring.Location.Code =="1") %>%  #outfalls only
@@ -48,7 +46,7 @@ df$Monitoring.Period.Date <- as.Date(df$Monitoring.Period.Date, format="%m/%d/%Y
 df$Parameter.Code  <- as.integer(df$Parameter.Code) #to match df_recent object class
 df$Monitoring.Location.Code <- as.integer(df$Monitoring.Location.Code) #to match df_recent object class
 #data since 2020 General Permit  
-subdir <- "data/npdes_wwtf/updated/generalpermit"
+subdir <- "data/npdes_wwtf/generalpermit"
 files <- list.files(path = subdir, pattern = ".csv", full.names = T)  
 df.list <- lapply(files, read.csv)
 df_recent <- bind_rows(df.list)
@@ -68,7 +66,7 @@ df_recent$Monitoring.Period.Date <- as.Date(df_recent$Monitoring.Period.Date, fo
 
 
 #parameter codes of interest, integer class results in leading zeros being dropped
-codes <- c("600","610", "625", "630", "50050", "530", "310")
+codes <- c("600","610", "625", "630", "50050", "530")
 df_recent <- df_recent %>% 
   filter(Monitoring.Location.Code =="1") %>%  #outfalls only
   filter(Parameter.Code %in% codes)
@@ -106,38 +104,24 @@ wwtf$Parameter <- ifelse(wwtf$Parameter ==  "Nitrogen total (as N)_lb_d", "TN_lb
 
 wwtf_piv <- wwtf %>%
   select(WWTF, Monitoring.Period.Date, Parameter, DMR.Value) %>%
+  filter(Monitoring.Period.Date < "2024-01-01")%>%
   pivot_wider(names_from = Parameter,
               values_from = DMR.Value)
 
-colnames(wwtf_piv)
 
-#Is high NH4 at Exeter believable based on BOD? 
-ggplot(wwtf_piv, aes(Monitoring.Period.Date, NH4_mgL)) +
-  geom_point(aes(color=WWTF)) + geom_line(aes(color=WWTF)) 
-
-ggplot(subset(wwtf_piv, WWTF != "Newfields"), aes(Monitoring.Period.Date, `BOD 5-day 20 deg. C_mg_L`)) +
-geom_point(aes(color=WWTF)) + geom_line(aes(color=WWTF)) #yes, believeable
-
-ggplot(wwtf_piv, 
-       aes((`Nitrogen Kjeldahl total (as N)_mg_L` + NO3_NO2_mgL), `TN_mgL`, color=WWTF)) + 
-  geom_point() +
-  geom_abline(intercept=0, slope=1) #so yes there is PN in the TKN if unfiltered.... bc it matches TN...
-
-ggplot(wwtf_piv, aes(Monitoring.Period.Date, NH4_mgL, color=WWTF)) + 
-  geom_point() +
-  geom_line() +
-  scale_x_date(date_breaks = "2 year", date_labels = "%Y") 
-
-ggplot(wwtf_piv, aes(Monitoring.Period.Date, NO3_NO2_mgL)) +   geom_point() + geom_line() +
-  facet_wrap(~WWTF, nrow=3, scales="free_x")
+#Gaps where sometimes have TN concentration (mg/L) and sometimes have TN load (lb per day), use flow to get concentration from lb/day
 
 # Use pounds per day load to calculate the monthly concentration of TN
-galtoliter <- 3.78541  #1 gallon = 3.78541 L
-lbtomg <- 453592 #1lb = 453492 mg
+galtoliter <- 3.785412  #1 gallon = 3.78541 L
+conv_unit(1, "us_gal", "l")
+conv_unit(1, "lbs", "mg")
+lbtomg <- 454592.4
 
 wwtf_piv$TN_mgL_calc <- wwtf_piv$TN_lbday / (wwtf_piv$Flow_MGD * 1000000) / galtoliter * lbtomg
+
 wwtf_piv$month <- month(wwtf_piv$Monitoring.Period.Date)
 wwtf_piv$year <- year(wwtf_piv$Monitoring.Period.Date)
+wwtf_piv$Monitoring.Period.Date <- as.Date(wwtf_piv$Monitoring.Period.Date)
 
 ggplot(wwtf_piv, aes(year, TN_mgL_calc, color=as.factor(month)))+
   geom_point(size=2) +
@@ -151,28 +135,9 @@ wwtf_piv$TN_mgL_calc <- round(wwtf_piv$TN_mgL_calc, 1)
 compplot <- ggplot(wwtf_piv, aes(`TN_mgL`, TN_mgL_calc)) + 
   geom_abline(slope=1, intercept=0) +
   geom_point(aes(color=WWTF, text=Monitoring.Period.Date)) 
-plotly::ggplotly(compplot)
+plotly::ggplotly(compplot) #rounding differences most likely during the calculations
 
-mismatch <- wwtf_piv %>%
-  filter(abs(TN_mgL - TN_mgL_calc) > 1)
-
-ggplot(mismatch, aes(`TN_mgL`, TN_mgL_calc)) + 
-  geom_abline(slope=1, intercept = 0) +
-  geom_point(aes(color=WWTF)) +
-  ylab("TN (mg/L) calculated from lb_day") +
-  xlab("TN (mg/L) reported") +
-  ggtitle("TN reported is more than 1mg/L different from calculated concentration")
-
-
-ggplot(subset(wwtf_piv, WWTF == "Exeter"), aes(Monitoring.Period.Date, TN_mgL)) + geom_point() +
-  ylab("Nitrogen total (as N) (Mo Avg, mg N/L)") +
-  scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
-  theme_bw()
-  
-
-
-
-#replace the three Exeter mismatched values that are all 9 mg/L
+#replace the three Exeter mismatched values that are all 9 mg/L with the monthly concentrations published in the 2013/2014 Town Reports, which match the calculated values for TN  concentration (using the lb/day load)
 wwtf_piv$TN_mgL <- ifelse(wwtf_piv$WWTF == "Exeter" & wwtf_piv$Monitoring.Period.Date == as.Date("2013-11-30"),
                                25.4, wwtf_piv$TN_mgL)
 wwtf_piv$TN_mgL <- ifelse(wwtf_piv$WWTF == "Exeter" & wwtf_piv$Monitoring.Period.Date == as.Date("2013-12-31"),
@@ -206,6 +171,11 @@ flow <- wwtf_piv %>%
   summarize(mean = mean(Flow_MGD, na.rm = T),
             n= sum(!is.na(Flow_MGD)),
             sd = sd(Flow_MGD, na.rm=T))
+
+flow[1,]
+flow[2,]
+0.0847 / 1.75 * 100
+0.0189/ 0.485 * 100
 
 wwtf_avg_overall <-  wwtf_piv %>%
   select(WWTF,period, TSS_mgL, NH4_mgL, NO3_NO2_mgL, Final_TN_mgL) %>%
@@ -245,14 +215,12 @@ wwtf_avg_combined <- wwtf_avg_byperiod %>%
     TSS = paste0(TSS_mgL_mean, " ± ", TSS_mgL_sd, " (", TSS_n, ")"),
     NH4 = paste0(NH4_mgL_mean, " ± ", NH4_mgL_sd, " (", NH4_n, ")"),
     NO3_NO2 = paste0(NO3_NO2_mgL_mean, " ± ", NO3_NO2_mgL_sd, " (", NO3_n, ")"),
-    TN = paste0(TN_mgL_mean, " ± ", TN_mgL_sd, " (", TN_n, ")")
-  ) %>%
-  select(WWTF, period, TSS, NH4, NO3_NO2, TN) #%>% # Keep only relevant columns
-  #pivot_longer(cols = TSS:TN, names_to = "Variable",values_to = "Value") %>%
-  #pivot_wider(names_from = c(WWTF, period),values_from = Value)
+    TN = paste0(TN_mgL_mean, " ± ", TN_mgL_sd, " (", TN_n, ")")) %>%
+  select(WWTF, period, TSS, NH4, NO3_NO2, TN) 
 
 write.csv(wwtf_avg_combined, file=paste0("./results/manuscript_figures/supplemental/wwtf_pre_postupgrades.csv"))
 
+#Add in pre-monitoring average concentration for Newfields using State of our Estuary published values
 wwtf_piv$Final_TN_mgL <- ifelse(wwtf_piv$WWTF == "Newfields" & wwtf_piv$year >= 2017 &
                           is.na(wwtf_piv$Final_TN_mgL), 20.0, wwtf_piv$Final_TN_mgL)
 
@@ -262,24 +230,15 @@ wwtf_piv$Final_TN_mgL <- ifelse(wwtf_piv$WWTF == "Newfields" & wwtf_piv$year< 20
 wwtf_piv$Final_TN_mgL_method <- ifelse(is.na(wwtf_piv$TN_mgL) & !is.na(wwtf_piv$TN_mgL_calc), "Calculated",
                                     ifelse(!is.na(wwtf_piv$TN_mgL), "Average", NA))
 
-
-ggplot(wwtf_piv, aes(Monitoring.Period.Date, Final_TN_mgL, color=Final_TN_mgL_method)) +
-  geom_point() +
-  facet_wrap(~WWTF, scales="free_x", nrow=3) +
-  scale_x_date(breaks="1 year", date_labels="%Y")
-
-ggplot(wwtf_piv, aes(as.factor(year), Final_TN_mgL)) +
-  geom_boxplot() +
-  facet_wrap(~WWTF)
-
 #save this intermediary step for use in main_site_conc_comparison.R script
-write.csv(wwtf_piv, "results/main_wwtf_loads/redone/wwtf_cleandataframe.csv")
+write.csv(wwtf_piv, "results/main_wwtf_loads/wwtf_concentrations.csv")
+#write.csv(wwtf_piv, "data/wwtf/wwtf_concentrations.csv") #version uploaded to EDI
 
 #__________________________________________________________________________________
 #inconsistent monthly data before 2014, so will build up with literature and reported values outside of ECHO database
 ###Exeter and Newmarket pre-2014 data
 #Data source Exeter: Annual Town Reports Monthly Loads for 2012 and 2013
-exeter_monthly <- read_excel("./data/wwtf/exeter_monthly_12_13.xlsx")
+exeter_monthly <- read.csv("./data/wwtf/exeter_2012_2013.csv")
 
 exeter_monthly <- exeter_monthly %>%
   select(WWTF, year, month, TN_mgL, MonthlyAverageFlowmgd, Data_Source) %>%
@@ -302,14 +261,10 @@ monthlyloads$Final_TN_mgL <- ifelse(is.na(monthlyloads$Final_TN_mgL) & !is.na(mo
 monthlyloads <- monthlyloads %>%
   select(-Final_TN_mgL.ex, -Flow_MGD.ex)
 
-ggplot(monthlyloads, aes(year, Final_TN_mgL, color="month")) + geom_point() +
-  facet_wrap(~WWTF)
-
-ggplot(monthlyloads, aes(year, TSS_mgL, color="month")) + geom_point() +
-  facet_wrap(~WWTF)
 
 #Discrete samples of effluent for DOC, PO4, etc. 
-Lit_WWTF <- read_excel("data/wwtf/Literature_WWTF_Values.xlsx", sheet=2)
+Lit_WWTF <- read.csv("data/wwtf/literature_wwtf_concentrations.csv")
+Lit_WWTF$Date <- as.Date(Lit_WWTF$Date, format = "%m/%d/%Y")
 
 Lit_WWTF$year <- year(Lit_WWTF$Date)
 Lit_WWTF$month <- month(Lit_WWTF$Date)
@@ -362,10 +317,10 @@ df_annual <- df_summary %>%
             TSS_kgyr = sum(TSS_kgmonth))
 
 #Pre-2014 Annual Loads Need Exeter 2008 - 2011; Newmarket 2008 - 2013
-annual <- read.csv("./data/wwtf/WWTF_AnnualReportData.csv") 
+annual <- read.csv("./data/wwtf/wwtf_annualloads.csv") 
 annual$TN_kgyr.x <- annual$TN_tonsyr *907.185 #us tons to kg
 annual$DIN_kgyr <- annual$DIN_tonyrs * 907.185
-annual <- annual %>% select(-TN_tonsyr, - DIN_tonyrs, -URL, -Data.Source, -NPDES.Permit.Number)
+annual <- annual %>% select(-TN_tonsyr, - DIN_tonyrs)
 
 colnames(df_annual)
 colnames(annual)
@@ -374,7 +329,7 @@ wwtf_annual <- full_join(df_annual,annual)
 
 wwtf_annual$TN_kgyr <- ifelse(is.na(wwtf_annual$TN_kgyr), wwtf_annual$TN_kgyr.x, wwtf_annual$TN_kgyr)
 
-wwtf_annual$Notes <- ifelse(wwtf_annual$year > 2013, "calculated with monthly ECHO data", wwtf_annual$Notes)
+wwtf_annual$Notes <- ifelse(wwtf_annual$year > 2013, "calculated with monthly ECHO data", "Literature Value")
 
 #Estimate DIN as 78.5% for TN for years < 2012 per 2012 PREP SOOE Tech Report and as 84.1% for years > 2012 per the 2018 SOOE, 74.9% for 2017-2020...
 wwtf_annual$DIN_kgyr <- ifelse(is.na(wwtf_annual$DIN_kgyr) & wwtf_annual$year < 2012, wwtf_annual$TN_kgyr*0.785,
