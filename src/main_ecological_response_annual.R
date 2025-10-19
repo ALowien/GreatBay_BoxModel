@@ -308,6 +308,7 @@ corrplot(corr_input,
          sig.level=0.05, 
          insig='label_sig')
 
+
 # Calculate the correlation matrix and obtain p-values
 correlation_results <- Hmisc::rcorr((as.matrix(corr_input)))
 
@@ -342,6 +343,112 @@ corrplot(
   p.mat = p_values_matrix,
   cl.cex = 1.25)
 dev.off() 
+
+#reduce down to Zostera (Response) correlation with indepdent variables
+# Select columns: Zostera + independent variables
+# Use your full subset of columns
+zostera_df <- inputs_df[,]  
+
+#Collapse down into one row
+# Select independent variables (all except Zostera)
+indep_vars <- setdiff(colnames(inputs_df), "Zostera")
+
+# Compute correlations: Zostera vs other variables
+zostera_cor <- cor(x = inputs_df$Zostera, y = inputs_df[, indep_vars], use = "pairwise.complete.obs")
+
+# Convert to a 1-row matrix so corrplot can plot it
+zostera_cor <- as.matrix(zostera_cor)
+rownames(zostera_cor) <- "Zostera"
+
+# Plot
+png("results/manuscript_figures/zostera_corr_row.png", width = 1200, height = 1000, res = 120)
+corrplot(
+  zostera_cor,
+  method = 'ellipse',
+  cl.pos = "b",       # color key at bottom
+  tl.col = "black",
+  tl.srt = 45,
+  tl.cex = 1.3,
+  type = 'upper',        # shows only the upper triangle (row of ellipses)
+  addCoef.col = "black", # show correlation coefficients
+  number.cex = 1,        # size of coefficient labels
+  diag = TRUE,           # show diagonal (Zostera vs itself)
+  sig.level=0.05,  
+  insig='label_sig',  
+  p.mat = p_values_matrix
+  )
+dev.off()
+library(Hmisc)
+library(corrplot)
+#Select independent variables (all except Zostera)
+# [1] "Annual Precip" "DIN" "DOC" "PN" "PO4" "TN" "TSS"
+indep_vars <- setdiff(colnames(inputs_df), "Zostera")
+# Put Annual Precip first
+indep_vars <- c("Annual Precip", setdiff(indep_vars, "Annual Precip"))
+indep_vars
+# Compute correlations and p-values using rcorr
+cor_res <- rcorr(as.matrix(inputs_df[, c("Zostera", indep_vars)]))
+
+# Extract correlation matrix and p-values for Zostera
+zostera_cor <- cor_res$r["Zostera", indep_vars, drop = FALSE]
+zostera_p   <- cor_res$P["Zostera", indep_vars, drop = FALSE]
+
+# Convert to 1-row matrix
+zostera_cor <- as.matrix(zostera_cor)
+rownames(zostera_cor) <- "Zostera"
+
+zostera_p <- as.matrix(zostera_p)
+rownames(zostera_p) <- "Zostera"
+p_mat <- zostera_p
+
+# Plot with ellipses and stars for significance (REVISED Figure 6 FINAL, have to cut dummy rows out in ppt)
+png("results/manuscript_figures/zostera_corr_row_stars.png", width = 1200, height = 1000, res = 120)
+corrplot(
+  zostera_cor,
+  method = 'ellipse',
+  tl.col = "black",
+  tl.srt = 45,
+  tl.cex = 1.3,
+  diag = TRUE,
+  sig.level=0.05,  
+  insig='label_sig',  
+  p.mat = p_mat,
+  cl.cex = 1.25,
+  addgrid.col = "gray",
+  cl.pos = "b" 
+)
+dev.off()
+#__
+# Create a slightly larger square matrix so the color bar appears
+n <- ncol(zostera_cor)
+dummy_mat <- matrix(NA, nrow = n, ncol = n)
+colnames(dummy_mat) <- colnames(zostera_cor)
+rownames(dummy_mat) <- c("Zostera", paste0("dummy", 2:n))
+dummy_mat[1, ] <- as.numeric(zostera_cor[1, ])  # fill Zostera row
+
+# Do the same for p-values
+dummy_p <- matrix(1, nrow = n, ncol = n)
+colnames(dummy_p) <- colnames(zostera_cor)
+rownames(dummy_p) <- rownames(dummy_mat)
+dummy_p[1, ] <- as.numeric(p_mat[1, ])
+
+# Plot
+png("results/manuscript_figures/zostera_corr_row_stars_colorbar.png", width = 1200, height = 1000, res = 120)
+corrplot(
+  dummy_mat,
+  method = 'ellipse',
+  tl.col = "black",
+  tl.srt = 45,
+  tl.cex = 1.3,
+  diag = TRUE,
+  insig = 'label_sig',
+  p.mat = dummy_p,
+  cl.cex = 1.25,
+  cl.pos = "b",          # color bar at bottom
+  addgrid.col = "gray",  # optional, looks nice
+  number.cex = 1
+)
+dev.off()
 
 #Outputs
 corr_output <- cor(outputs_df[,1:8], use = "pairwise.complete.obs")
