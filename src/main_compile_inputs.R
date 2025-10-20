@@ -57,7 +57,7 @@ WWTF_long <- WWTF %>%
                values_to = "Load_kgyr")
 
 #Adams Point Estuarine Flux
-AP_Flux <- read.csv("results/main_estuarine_load_calc/AP_Flux_kgyr24.csv")
+AP_Flux <- read.csv("results/main_estuarine_load_calc/AP_Flux_kgyr.csv")
 
 AP_Flux <- AP_Flux %>%
   select(Year, Site = STATION_ID, PO4:NH4, NO3_NO2 = NO32, DIN:TSS) 
@@ -81,9 +81,17 @@ Runoff_long <- Runoff %>%
                values_to = "Load_kgyr")
 
 #Groundwater loads are in kg/year
+#Ballestero et al . 2004: 6.8 us tons/year of DIN 
+
+signif(6.8 * 907.185, 3)
+
+signif(7.5* 907.185,3)
+
+#round to 6170
+
 Groundwater <- data.frame(Site = "Groundwater",
                           Year = c(2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023),
-                          DIN = 6800)
+                          DIN =  6170)
 
 #Assume DIN = TDN = TN for groundwater
 Groundwater$TN <- Groundwater$DIN
